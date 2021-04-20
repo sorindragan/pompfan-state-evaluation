@@ -10,19 +10,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.File;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import org.junit.Before;
@@ -32,8 +32,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.EndNegotiation;
+import geniusweb.actions.FileLocation;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
 import geniusweb.bidspace.AllBidsList;
@@ -87,12 +89,17 @@ public class LearningAgentTest {
 		profile = (LinearAdditive) jackson.readValue(serialized, Profile.class);
 
 		Path tmpDirectory = Paths.get(System.getProperty("java.io.tmpdir"), "geniusweb");
-		if (Files.isDirectory(tmpDirectory)) {
-			deleteDirectoryRecursion(tmpDirectory);
+		File persistentPath = new FileLocation(UUID.fromString((String) this.parameters.get("persistentstate")))
+				.getFile();
+		File dataPath = new FileLocation(
+				UUID.fromString(((List<String>) this.parameters.get("negotiationdata")).get(0))).getFile();
+
+		if (!Files.isDirectory(tmpDirectory))
 			tmpDirectory.toFile().mkdir();
-		} else {
-			tmpDirectory.toFile().mkdir();
-		}
+		if (persistentPath.exists())
+			persistentPath.delete();
+		if (dataPath.exists())
+			dataPath.delete();
 	}
 
 	@Test
@@ -189,6 +196,7 @@ public class LearningAgentTest {
 		party.notifyChange(settingsSAOP);
 		party.notifyChange(new YourTurn());
 		Bid bid = ((Offer) connection.getActions().get(0)).getBid();
+		party.notifyChange(new ActionDone(new Accept(otherparty, bid)));
 		Agreements agreements = new Agreements(new HashMap<PartyId, Bid>() {
 			{
 				put(otherparty, bid);
@@ -239,17 +247,6 @@ public class LearningAgentTest {
 			}
 		}
 		throw new IllegalStateException("Test can not be done: there is no bad bid with utility<0.2");
-	}
-
-	private void deleteDirectoryRecursion(Path path) throws IOException {
-		if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-			try (DirectoryStream<Path> entries = Files.newDirectoryStream(path)) {
-				for (Path entry : entries) {
-					deleteDirectoryRecursion(entry);
-				}
-			}
-		}
-		Files.delete(path);
 	}
 }
 
