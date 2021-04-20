@@ -197,10 +197,9 @@ public class LearningAgent extends DefaultParty {
     private void processAction(Action action) {
         // Check if we already know who we are playing against
         if (this.opponentName == null) {
-            // Save name of the opponent
             this.opponentName = action.getActor().getName();
             // Add name of the opponent to the negotiation data
-            this.negotiationData.opponentName = this.opponentName;
+            this.negotiationData.setOpponentName(this.opponentName);
         }
         if (action instanceof Offer) {
             // If the action was an offer: Obtain the bid and add it's value to our
@@ -264,15 +263,13 @@ public class LearningAgent extends DefaultParty {
             return false;
 
         // Check if we already know the opponent
-        if (this.opponentName != null) {
+        if (this.persistentState.knownOpponent(this.opponentName)) {
             // Obtain the average of the max utility that the opponent has offered us in
             // previous negotiations.
             Double avgMaxUtility = this.persistentState.getAvgMaxUtility(this.opponentName);
 
-            // Check if we previously encountered the opponent. If so, request 5% more than
-            // the average max utility offered by the opponent.
-            if (avgMaxUtility != null)
-                return this.utilitySpace.getUtility(bid).doubleValue() > (avgMaxUtility * 1.05);
+            // Request 5% more than the average max utility offered by the opponent.
+            return this.utilitySpace.getUtility(bid).doubleValue() > (avgMaxUtility * 1.05);
         }
 
         // Check a simple business rule
@@ -305,7 +302,6 @@ public class LearningAgent extends DefaultParty {
 
         // Write the persistent state object to file
         try {
-            System.out.println(this.persistentState.avgMaxUtilityOpponent.toString());
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.persistentPath, this.persistentState);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write persistent state to disk", e);

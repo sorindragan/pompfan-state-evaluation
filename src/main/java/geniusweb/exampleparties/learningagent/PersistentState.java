@@ -3,20 +3,23 @@ package geniusweb.exampleparties.learningagent;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
 /**
  * This class can hold the persistent state of your agent. You can off course
  * also write something else to the file path that is provided to your agent,
  * but this provides an easy usable method. This object is serialized using
  * Jackson. NOTE that Jackson can serialize many default java classes, but not
- * custom classes out-of-the-box. NOTE that class variables must be public for
- * Jackson to serialize them (this can be modified)
+ * custom classes out-of-the-box.
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class PersistentState {
 
-    public Double averageUtility = 0.0;
-    public Integer negotiations = 0;
-    public Map<String, Double> avgMaxUtilityOpponent = new HashMap<String, Double>();
-    public Map<String, Integer> opponentEncounters = new HashMap<String, Integer>();
+    private Double averageUtility = 0.0;
+    private Integer negotiations = 0;
+    private Map<String, Double> avgMaxUtilityOpponent = new HashMap<String, Double>();
+    private Map<String, Integer> opponentEncounters = new HashMap<String, Integer>();
 
     /**
      * Update the persistent state with a negotiation data of a previous negotiation
@@ -26,13 +29,14 @@ public class PersistentState {
      */
     public void update(NegotiationData negotiationData) {
         // Keep track of the average utility that we obtained
-        this.averageUtility = (this.averageUtility * negotiations + negotiationData.agreementUtil) / (negotiations + 1);
+        this.averageUtility = (this.averageUtility * negotiations + negotiationData.getAgreementUtil())
+                / (negotiations + 1);
 
         // Keep track of the number of negotiations that we performed
         negotiations++;
 
         // Get the name of the opponent that we negotiated against
-        String opponent = negotiationData.opponentName;
+        String opponent = negotiationData.getOpponentName();
 
         // Check for safety
         if (opponent != null) {
@@ -43,7 +47,7 @@ public class PersistentState {
             // multiple negotiation sessions
             Double avgUtil = avgMaxUtilityOpponent.containsKey(opponent) ? avgMaxUtilityOpponent.get(opponent) : 0.0;
             avgMaxUtilityOpponent.put(opponent,
-                    (avgUtil * encounters + negotiationData.maxReceivedUtil) / (encounters + 1));
+                    (avgUtil * encounters + negotiationData.getMaxReceivedUtil()) / (encounters + 1));
         }
     }
 
@@ -59,5 +63,9 @@ public class PersistentState {
             return opponentEncounters.get(opponent);
         }
         return null;
+    }
+
+    public Boolean knownOpponent(String opponent) {
+        return opponentEncounters.containsKey(opponent);
     }
 }
