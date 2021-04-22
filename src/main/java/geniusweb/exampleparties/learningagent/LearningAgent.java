@@ -69,7 +69,7 @@ public class LearningAgent extends DefaultParty {
      * however, not hurt to read through this code to have a better understanding of
      * what is going on.
      * 
-     * @param Inform information object for agent
+     * @param info information object for agent
      */
     @Override
     public void notifyChange(Inform info) {

@@ -25,7 +25,8 @@ public class PersistentState {
      * Update the persistent state with a negotiation data of a previous negotiation
      * session
      * 
-     * @param negotiationData
+     * @param negotiationData NegotiationData class holding the negotiation data
+     *                        that is obtain during a negotiation session.
      */
     public void update(NegotiationData negotiationData) {
         // Keep track of the average utility that we obtained
