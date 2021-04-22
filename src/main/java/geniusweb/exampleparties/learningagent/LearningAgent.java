@@ -92,9 +92,10 @@ public class LearningAgent extends DefaultParty {
                 this.parameters = settings.getParameters();
 
                 // The PersistentState is loaded here (see 'PersistenData,java')
-                this.persistentPath = new FileLocation(UUID.fromString((String) this.parameters.get("persistentstate")))
-                        .getFile();
-                if (this.persistentPath.exists()) {
+                if (this.parameters.containsKey("persistentstate"))
+                    this.persistentPath = new FileLocation(
+                            UUID.fromString((String) this.parameters.get("persistentstate"))).getFile();
+                if (this.persistentPath != null && this.persistentPath.exists()) {
                     ObjectMapper objectMapper = new ObjectMapper();
                     this.persistentState = objectMapper.readValue(this.persistentPath, PersistentState.class);
                 } else {
@@ -104,11 +105,12 @@ public class LearningAgent extends DefaultParty {
                 // The negotiation data paths are converted here from List<String> to List<File>
                 // for improved usage. For safety reasons, this is more comprehensive than
                 // normally.
-                List<String> dataPaths_raw = (List<String>) this.parameters.get("negotiationdata");
-                this.dataPaths = new ArrayList<>();
-                for (String path : dataPaths_raw)
-                    this.dataPaths.add(new FileLocation(UUID.fromString(path)).getFile());
-
+                if (this.parameters.containsKey("negotiationdata")) {
+                    List<String> dataPaths_raw = (List<String>) this.parameters.get("negotiationdata");
+                    this.dataPaths = new ArrayList<>();
+                    for (String path : dataPaths_raw)
+                        this.dataPaths.add(new FileLocation(UUID.fromString(path)).getFile());
+                }
                 if ("Learn".equals(protocol)) {
                     // We are in the learning step: We execute the learning and notify when we are
                     // done. REMEMBER that there is a deadline of 60 seconds for this step.
@@ -144,12 +146,14 @@ public class LearningAgent extends DefaultParty {
                 processAgreements(agreements);
 
                 // Write the negotiation data that we collected to the path provided.
-                try {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.dataPaths.get(0),
-                            this.negotiationData);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to write negotiation data to disk", e);
+                if (this.dataPaths != null) {
+                    try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.dataPaths.get(0),
+                                this.negotiationData);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to write negotiation data to disk", e);
+                    }
                 }
 
                 // Log the final outcome and terminate
