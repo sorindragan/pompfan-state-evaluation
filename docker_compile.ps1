@@ -1,0 +1,1 @@
+docker run -it --rm -v ${PWD}:/root -w /root adoptopenjdk/maven-openjdk8:latest mvn package
