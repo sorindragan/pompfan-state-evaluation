@@ -146,7 +146,7 @@ public class LearningAgent extends DefaultParty {
                 processAgreements(agreements);
 
                 // Write the negotiation data that we collected to the path provided.
-                if (this.dataPaths != null) {
+                if (this.dataPaths != null && this.negotiationData != null) {
                     try {
                         ObjectMapper objectMapper = new ObjectMapper();
                         objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.dataPaths.get(0),
