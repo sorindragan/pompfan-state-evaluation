@@ -11,7 +11,7 @@ There are currently two methods of developing an agent for the competition:
     2. Clone this repository.
     3. Run `mvn package` in the root directory.
 - A pure Docker based method that only relies on Docker.
-    1. Make sure you have Docker installed.
+    1. Make sure you have [Docker installed](https://docs.docker.com/get-docker/).
     2. Run "docker_compile.ps1" on Windows or "docker_compile.sh" on Linux.
 
 The first time compiling the agent will take some time as all the dependencies need to be downloaded. The compile agent is now in the "target" directory ("\<name>-\<version>-jar-with-dependencies.jar"). **If you use this agent as a basis of your agent, make sure to change the package and class names in both the Java files and the pom.xml file.**
@@ -28,7 +28,7 @@ I would not advise to use this method.
 
 ### [Docker GeniusWeb](https://github.com/brenting/ANL-2021-docker-runner)
 To use this method:
-1. Make sure that you have Docker installed, this is the only requirement.
+1. Make sure that you have [Docker installed](https://docs.docker.com/get-docker/), this is the only requirement.
 2. Clone the [ANL docker runner repo](https://github.com/brenting/ANL-2021-docker-runner).
 3. Change the "settings.yaml" file to your liking (see also instructions in the repo).
 4. Run "run.ps1" on Windows or "run.sh" on Linux
