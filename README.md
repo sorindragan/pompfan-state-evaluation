@@ -31,7 +31,7 @@ To use this method:
 1. Make sure that you have [Docker installed](https://docs.docker.com/get-docker/), this is the only requirement.
 2. Clone the [ANL docker runner repo](https://github.com/brenting/ANL-2021-docker-runner).
 3. Change the "settings.yaml" file to your liking (see also instructions in the repo).
-4. Run "run.ps1" on Windows or "run.sh" on Linux
+4. Run "run.ps1" on Windows or "run.sh" on Linux.
 
 
 This Docker image handles many operations under the hood to make this competition more easy accessible. A few key improvements:
