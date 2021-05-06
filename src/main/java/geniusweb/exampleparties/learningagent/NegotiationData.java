@@ -1,4 +1,4 @@
-package geniusweb.exampleparties.learningagent;
+package geniusweb.exampleparties.learningagent; // TODO: change name
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;

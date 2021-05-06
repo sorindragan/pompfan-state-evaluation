@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>geniusweb.exampleparties</groupId>
-	<artifactId>learningagent</artifactId>
+	<artifactId>learningagent</artifactId> <!-- TODO: change name -->
 	<version>1.6.0</version> <!-- must equal ${geniusweb.version} -->
 	<packaging>jar</packaging>
 
@@ -176,7 +176,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>geniusweb.exampleparties.learningagent.LearningAgent</mainClass>
+							<mainClass>geniusweb.exampleparties.learningagent.LearningAgent</mainClass> <!-- TODO: change name -->
 						</manifest>
 					</archive>
 				</configuration>
@@ -209,7 +209,7 @@
 						<manifest>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-							<mainClass>geniusweb.exampleparties.learningagent.LearningAgent</mainClass>
+							<mainClass>geniusweb.exampleparties.learningagent.LearningAgent</mainClass>  <!-- TODO: change name -->
 						</manifest>
 					</archive>
 				</configuration>

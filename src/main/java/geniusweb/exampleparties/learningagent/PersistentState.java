@@ -1,4 +1,4 @@
-package geniusweb.exampleparties.learningagent;
+package geniusweb.exampleparties.learningagent; // TODO: change name
 
 import java.util.HashMap;
 import java.util.Map;
