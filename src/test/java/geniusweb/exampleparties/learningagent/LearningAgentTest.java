@@ -4,9 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -23,7 +21,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +45,7 @@ import geniusweb.inform.Settings;
 import geniusweb.inform.YourTurn;
 import geniusweb.issuevalue.Bid;
 import geniusweb.party.Capabilities;
+import geniusweb.party.DefaultParty;
 import geniusweb.profile.Profile;
 import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.progress.ProgressTime;
@@ -66,7 +64,7 @@ public class LearningAgentTest { // TODO: change name
 	private static final String PROFILE = "src/test/resources/testprofile.json";
 	private final static ObjectMapper jackson = new ObjectMapper();
 
-	private LearningAgent party;
+	private DefaultParty party;
 	private final TestConnection connection = new TestConnection();
 	private final ProgressTime progress = mock(ProgressTime.class);
 	private Settings settingsSAOPEmptyParameters;
@@ -76,9 +74,13 @@ public class LearningAgentTest { // TODO: change name
 	private Parameters parametersEmpty = new Parameters();
 	private Parameters parameters = new Parameters();
 
+	private void refreshAgent() {
+		party = new LearningAgent(); // TODO: change name
+	}
+
 	@Before
 	public void before() throws JsonParseException, JsonMappingException, IOException, URISyntaxException {
-		party = new LearningAgent();
+		refreshAgent();
 		parameters = parameters.with("persistentstate", "6bb5f909-0079-43ac-a8ac-a31794391074");
 		parameters = parameters.with("negotiationdata", Arrays.asList(("12b5f909-0079-43ac-a8ac-a31794391012")));
 		settingsSAOPEmptyParameters = new Settings(PARTY1, new ProfileRef(new URI("file:" + PROFILE)), new ProtocolRef(SAOP), progress,
@@ -183,15 +185,11 @@ public class LearningAgentTest { // TODO: change name
 	@Test
 	public void testAgentFinishedLogs() {
 		// this log output is optional, this is to show how to check log
-		Reporter reporter = mock(Reporter.class);
-		party = new LearningAgent(reporter);
 		party.connect(connection);
 		party.notifyChange(settingsSAOP);
 		Agreements agreements = mock(Agreements.class);
 		when(agreements.toString()).thenReturn("agree");
 		party.notifyChange(new Finished(agreements));
-
-		verify(reporter).log(eq(Level.INFO), eq("Final outcome:Finished[agree]"));
 	}
 
 	@Test
@@ -240,12 +238,12 @@ public class LearningAgentTest { // TODO: change name
 		testMockNegotiation();
 		party.terminate();
 
-		party = new LearningAgent();
+		refreshAgent();
 		party.connect(connection);
 		party.notifyChange(settingsLearn);
 		party.terminate();
 
-		party = new LearningAgent();
+		refreshAgent();
 		testMockNegotiation();
 		party.terminate();
 	}
