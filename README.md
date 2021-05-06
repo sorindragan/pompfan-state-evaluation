@@ -7,7 +7,7 @@ This repository contains an example agent for the Automated Neagotiation League 
 ## Agent development
 There are currently two methods of developing an agent for the competition:
 - Using plain Java
-    1. Make sure you have Java 8 and Maven installed.
+    1. Make sure you have Java 8 and Maven <=3.6.3 installed.
     2. Clone this repository.
     3. Run `mvn package` in the root directory.
 - A pure Docker based method that only relies on Docker.
