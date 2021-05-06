@@ -22,9 +22,7 @@ There are also two methods of testing an agent:
 - A Docker image based on the [simplerunner](https://tracinsy.ewi.tudelft.nl/pubtrac/GeniusWeb#Stand-aloneRunning) that allows for much easier testing and analysing. **I would advise to use this method**. 
 
 ### [Default GeniusWeb](https://tracinsy.ewi.tudelft.nl/pubtrac/GeniusWeb)
-How to use default [GeniusWeb](https://tracinsy.ewi.tudelft.nl/pubtrac/GeniusWeb) is described in its documentation. It relies on Java 8, Tomcat and some manual installation work. Running negotiation sessions and tournaments is GUI based and can be a bit cumbersome. The results obtained through this method do not contain details on utility for the involved agents and are therefore difficult to analyse.
-
-I would not advise to use this method.
+How to use default [GeniusWeb](https://tracinsy.ewi.tudelft.nl/pubtrac/GeniusWeb) is described in its documentation. It relies on Java 8, Tomcat and some manual installation work. Running negotiation sessions and tournaments is GUI based and can be a bit cumbersome if you plan to run many test setups. The results obtained through this method do not contain details on utility for the involved agents.
 
 ### [Docker GeniusWeb](https://github.com/brenting/ANL-2021-docker-runner)
 To use this method:
@@ -33,9 +31,7 @@ To use this method:
 3. Change the "settings.yaml" file to your liking (see also instructions in the repo).
 4. Run "run.ps1" on Windows or "run.sh" on Linux.
 
-
 This Docker image handles many operations under the hood to make this competition more easy accessible. A few key improvements:
-- It allows using agents in jar-files.
 - You can create your own tournament/testing sequence in an intuitive yaml-file.
 - It adds agent utilities to the results file for better analysis.
 
