@@ -17,7 +17,7 @@ There are currently three methods of developing an agent for the competition:
         3. Run "docker_compile.ps1" on Windows or "docker_compile.sh" on Linux.
     - Develop your agent inside a Docker container (**Recommended method**).
         1. Make sure you have [Docker installed](https://docs.docker.com/get-docker/).
-        2. Use VSCode as your IDE ([Install if necessary](https://code.visualstudio.com
+        2. Use VSCode as your IDE ([Install if necessary](https://code.visualstudio.com)).
         3. Clone and open this repository in VSCode.
         4. Install the "Remote Development" and "Java Extension Pack" package in the marketplace of VSCode.
         5. Ctrl-Shift-P & "Remote-Containers: Reopen in Container".
