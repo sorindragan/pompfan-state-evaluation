@@ -22,7 +22,7 @@ There are currently three methods of developing an agent for the competition:
         4. Install the "Remote Development" and "Java Extension Pack" package in the marketplace of VSCode.
         5. Ctrl-Shift-P & "Remote-Containers: Reopen in Container".
 
-The first time compiling the agent will take some time as all the dependencies need to be downloaded. The compile agent is now in the "target" directory ("\<name>-\<version>-jar-with-dependencies.jar"). **If you use this agent as a basis of your agent, make sure to change the package and class names in both the Java files and the pom.xml file.**
+The first time compiling the agent will take some time as all the dependencies need to be downloaded. The compile agent is now in the "target" directory ("\<name>-\<version>-jar-with-dependencies.jar"). **If you use this agent as a basis of your agent, make sure to change the package and class names in both the Java files and the pom.xml file. (Search for the #TODO tags in the repository)**
 
 ## Agent testing
 There are also two methods of testing an agent:
