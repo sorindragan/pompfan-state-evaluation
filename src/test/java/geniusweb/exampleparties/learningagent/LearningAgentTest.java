@@ -57,10 +57,10 @@ import tudelft.utilities.listener.DefaultListenable;
 
 public class LearningAgentTest { // TODO: change name
 
-	private static final PartyId PARTY1 = new PartyId("party1");
+	private static final PartyId PARTY1 = new PartyId("party1_1");
 	private static final String SAOP = "SAOP";
 	private static final String LEARN = "Learn";
-	private static final PartyId otherparty = new PartyId("opponentAgent");
+	private static final PartyId otherparty = new PartyId("opponentAgent_2");
 	private static final String PROFILE = "src/test/resources/testprofile.json";
 	private final static ObjectMapper jackson = new ObjectMapper();
 
