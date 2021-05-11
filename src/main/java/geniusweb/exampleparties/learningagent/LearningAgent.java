@@ -243,7 +243,7 @@ public class LearningAgent extends DefaultParty { // TODO: change name
             Bid bid = null;
 
             // Iterate randomly through list of bids until we find a good bid
-            for (int attempt = 0; attempt < 30 && !isGood(bid); attempt++) {
+            for (int attempt = 0; attempt < 500 && !isGood(bid); attempt++) {
                 long i = random.nextInt(bidspace.size().intValue());
                 bid = bidspace.get(BigInteger.valueOf(i));
             }
@@ -279,7 +279,7 @@ public class LearningAgent extends DefaultParty { // TODO: change name
         // Check a simple business rule
         Boolean nearDeadline = progress.get(System.currentTimeMillis()) > 0.95;
         Boolean acceptable = this.utilitySpace.getUtility(bid).doubleValue() > 0.7;
-        Boolean good = this.utilitySpace.getUtility(bid).doubleValue() > 0.95;
+        Boolean good = this.utilitySpace.getUtility(bid).doubleValue() > 0.9;
         return (nearDeadline && acceptable) || good;
     }
 
