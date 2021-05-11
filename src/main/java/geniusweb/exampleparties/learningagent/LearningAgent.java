@@ -134,8 +134,24 @@ public class LearningAgent extends DefaultParty { // TODO: change name
                     }
                 }
             } else if (info instanceof ActionDone) {
-                // The info object is an action that is performed by the opponent.
-                processAction(((ActionDone) info).getAction());
+                // The info object is an action that is performed by an agent.
+                Action action = ((ActionDone) info).getAction();
+
+                // Check if this is not our own action
+                if (!this.me.equals(action.getActor())) {
+                    // Check if we already know who we are playing against.
+                    if (this.opponentName == null) {
+                        // The part behind the last _ is always changing, so we must cut it off.
+                        String fullOpponentName = action.getActor().getName();
+                        int index = fullOpponentName.lastIndexOf("_");
+                        this.opponentName = fullOpponentName.substring(0, index);
+
+                        // Add name of the opponent to the negotiation data
+                        this.negotiationData.setOpponentName(this.opponentName);
+                    }
+                    // Process the action of the opponent.
+                    processAction(action);
+                }
             } else if (info instanceof YourTurn) {
                 // The info notifies us that it is our turn
                 myTurn();
@@ -199,12 +215,6 @@ public class LearningAgent extends DefaultParty { // TODO: change name
      * @param action
      */
     private void processAction(Action action) {
-        // Check if we already know who we are playing against
-        if (this.opponentName == null) {
-            this.opponentName = action.getActor().getName();
-            // Add name of the opponent to the negotiation data
-            this.negotiationData.setOpponentName(this.opponentName);
-        }
         if (action instanceof Offer) {
             // If the action was an offer: Obtain the bid and add it's value to our
             // negotiation data.
