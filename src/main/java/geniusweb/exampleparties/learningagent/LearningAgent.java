@@ -34,6 +34,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.profileconnection.ProfileConnectionFactory;
 import geniusweb.profileconnection.ProfileInterface;
 import geniusweb.progress.Progress;
+import geniusweb.progress.ProgressRounds;
 import geniusweb.references.Parameters;
 import tudelft.utilities.logging.Reporter;
 
@@ -153,6 +154,11 @@ public class LearningAgent extends DefaultParty { // TODO: change name
                     processAction(action);
                 }
             } else if (info instanceof YourTurn) {
+                // Advance the round number if a round-based deadline is set.
+                if (progress instanceof ProgressRounds) {
+                    progress = ((ProgressRounds) progress).advance();
+                }
+
                 // The info notifies us that it is our turn
                 myTurn();
             } else if (info instanceof Finished) {
@@ -243,6 +249,7 @@ public class LearningAgent extends DefaultParty { // TODO: change name
      * send our next offer
      */
     private void myTurn() throws IOException {
+        System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
         Action action;
         if (isGood(lastReceivedBid)) {
             // If the last received bid is good: create Accept action
