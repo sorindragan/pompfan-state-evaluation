@@ -5,15 +5,16 @@ import java.math.BigInteger;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
+import geniusweb.custom.state.AbstractState;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 
-public class PiOpponent extends AbstractPolicy {
+public class DistributionPolicy extends AbstractPolicy {
     
 
     private static final float stubborness = 0.98f;
 
-    public PiOpponent(Domain domain) {
+    public DistributionPolicy(Domain domain) {
         super(domain, "Random");
 
     }
