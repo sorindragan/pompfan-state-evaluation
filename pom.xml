@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>geniusweb.exampleparties</groupId>
@@ -17,6 +15,7 @@
 		<passwd>${env.ARTIFACTORY_PASS}</passwd>
 		<jackson-2-version>2.9.6</jackson-2-version>
 		<geniusweb.version>1.6.0</geniusweb.version>
+		<dl4j-master.version>1.0.0-M1</dl4j-master.version>
 	</properties>
 
 	<distributionManagement>
@@ -116,7 +115,22 @@
 			<version>1.0.5</version>
 			<scope>test</scope>
 		</dependency>
+        <!-- deeplearning4j-core: contains main functionality and neural networks -->
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-core</artifactId>
+            <version>${dl4j-master.version}</version>
+        </dependency>
 
+        <!--
+        ND4J backend: every project needs one of these. The backend defines the hardware on which network training
+        will occur. "nd4j-native-platform" is for CPUs only (for running on all operating systems).
+        -->
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-native</artifactId>
+            <version>${dl4j-master.version}</version>
+        </dependency>
 	</dependencies>
 
 
@@ -128,6 +142,20 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		<!-- <repository>
+			<id>central</id>
+			<name>Maven Central</name>
+			<layout>default</layout>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+            <id>ossrh</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository> -->
 	</repositories>
 
 	<pluginRepositories>
@@ -209,7 +237,7 @@
 						<manifest>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-							<mainClass>geniusweb.exampleparties.learningagent.LearningAgent</mainClass>  <!-- TODO: change name -->
+							<mainClass>geniusweb.exampleparties.learningagent.LearningAgent</mainClass> <!-- TODO: change name -->
 						</manifest>
 					</archive>
 				</configuration>

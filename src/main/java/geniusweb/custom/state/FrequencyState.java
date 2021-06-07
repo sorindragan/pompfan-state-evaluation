@@ -2,86 +2,79 @@ package geniusweb.custom.state;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.ops.transforms.Transforms;
 
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
-import geniusweb.custom.helper.IssueValuePair;
+import geniusweb.custom.distances.CosineSimilarity;
+import geniusweb.custom.distances.L2Distance;
+import geniusweb.custom.helper.IVPair;
 import geniusweb.custom.strategies.AbstractPolicy;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
-import geniusweb.issuevalue.Value;
 
-public class FrequencyState extends AbstractState {
+public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
 
-    HashMap<IssueValuePair, Long> freq;
-    private List<IssueValuePair> allIssueValues;
+    private List<IVPair> allIssueValues;
 
     public FrequencyState(Domain domain, AbstractPolicy opponent) {
         super(domain, opponent);
         this.allIssueValues = domain.getIssues().stream()
-                .flatMap(issue -> IssueValuePair.convertValueSet(issue, domain.getValues(issue)).stream())
+                .flatMap(issue -> IVPair.convertValueSet(issue, domain.getValues(issue)).stream())
                 .collect(Collectors.toList());
-        this.freq = new HashMap<IssueValuePair, Long>();
-        for (IssueValuePair value : allIssueValues) {
-            this.freq.put(value, 0l);
+        this.init(new HashMap<IVPair, Double>());
+        for (IVPair value : allIssueValues) {
+            this.getRepresentation().put(value, 0.0);
         }
     }
 
-    public HashMap<IssueValuePair, Long> getFreq() {
-        return freq;
+    public HashMap<IVPair, Double> getFrequency() {
+        return this.getRepresentation();
     }
 
-    public void setFreq(HashMap<IssueValuePair, Long> freq) {
-        this.freq = freq;
+    public void setFrequency(HashMap<IVPair, Double> frequency) {
+        this.init(frequency);
     }
 
     @Override
     public String getStringRepresentation() {
-        return this.freq.toString();
+        return this.getRepresentation().toString();
     }
 
     @Override
-    public AbstractState updateState(Action nextAction) throws StateRepresentationException {
-        Representation representation = new Representation(this.getFreq());
+    public AbstractState<HashMap<IVPair, Double>> updateState(Action nextAction) throws StateRepresentationException {
+        HashMap<IVPair, Double> representation = new HashMap<IVPair, Double>(this.getRepresentation());
         if (nextAction instanceof Offer) {
             Bid bid = ((Offer) nextAction).getBid();
-            List<IssueValuePair> bidIssueValues = bid.getIssueValues().entrySet().stream()
-                    .map(entry -> new IssueValuePair(entry.getKey(), entry.getValue())).collect(Collectors.toList());
-            for (IssueValuePair issueValuePair : bidIssueValues) {
+            List<IVPair> bidIssueValues = bid.getIssueValues().entrySet().stream()
+                    .map(entry -> new IVPair(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+            for (IVPair issueValuePair : bidIssueValues) {
                 representation.computeIfPresent(issueValuePair, (key, val) -> val + 1);
             }
-            return new FrequencyState(this.getDomain(), this.getOpponent()).setRepresentation(representation);
+            return new FrequencyState(this.getDomain(), this.getOpponent()).init(representation);
         }
         throw new StateRepresentationException();
     }
 
     @Override
-    public AbstractState getCurrentState() {
-        return null;
+    public HashMap<IVPair, Double> getCurrentState() {
+        return this.getRepresentation();
     }
 
     @Override
-    public AbstractState setRepresentation(StateRepresentation<?> representation) {
-        Representation customRepr = (Representation) representation;
-        this.freq = customRepr.getOriginalObject();
-        return this;
-    }
+    public Double computeDistance(HashMap<IVPair, Double> otherState) {
+        HashMap<IVPair, Double> currState = this.getRepresentation();
+        double[] currVals = currState.values().stream().mapToDouble(val -> (double) val).toArray();
+        double[] otherVals = otherState.values().stream().mapToDouble(val -> (double) val).toArray();
 
-    public class Representation extends HashMap<IssueValuePair, Long>
-            implements StateRepresentation<HashMap<IssueValuePair, Long>> {
+        INDArray arr1 = Nd4j.createFromArray(currVals);
+        INDArray arr2 = Nd4j.createFromArray(otherVals);
 
-        public Representation(HashMap<IssueValuePair, Long> freq) {
-            super(freq);
-        }
-
-        @Override
-        public HashMap<IssueValuePair, Long> getOriginalObject() {
-            return this;
-        }
-
+        return this.computeL2(arr1, arr2);
     }
 
 }

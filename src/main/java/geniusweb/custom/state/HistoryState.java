@@ -9,31 +9,20 @@ import geniusweb.custom.components.Opponent;
 import geniusweb.custom.strategies.AbstractPolicy;
 import geniusweb.issuevalue.Domain;
 
-public class HistoryState extends AbstractState {
+public class HistoryState extends AbstractState<ArrayList<Action>> {
 
-    private Collection<Action> history;
+    private ArrayList<Action> history;
 
     public HistoryState(Domain domain, AbstractPolicy opponent) {
         super(domain, opponent);
     }
 
-    public HistoryState(Domain domain, AbstractPolicy opponent, HistoryState hist) {
-        super(domain, opponent);
-        this.history = new ArrayList<Action>(hist.getHistory());
+    public ArrayList<Action> getHistory() {
+        return this.getRepresentation();
     }
 
-    public HistoryState(Domain domain, AbstractPolicy opponent, HistoryState hist, Action nextAction) {
-        super(domain, opponent);
-        this.history = new ArrayList<Action>(hist.getHistory());
-        this.history.add(nextAction);
-    }
-
-    public Collection<Action> getHistory() {
-        return history;
-    }
-
-    public void setHistory(Collection<Action> history) {
-        this.history = history;
+    public void setHistory(ArrayList<Action> history) {
+        this.init(history);
     }
 
     @Override
@@ -42,36 +31,16 @@ public class HistoryState extends AbstractState {
     }
 
     @Override
-    public AbstractState updateState(Action nextAction) throws StateRepresentationException {
-        Representation representation = new Representation(this.getHistory());
+    public AbstractState<ArrayList<Action>> updateState(Action nextAction) throws StateRepresentationException {
+        ArrayList<Action> representation = new ArrayList<Action>(this.getRepresentation());
         representation.add(nextAction);
-        return this;
+        return new HistoryState(this.getDomain(), this.getOpponent()).init(representation);
     }
 
     @Override
-    public AbstractState getCurrentState() {
+    public ArrayList<Action> getCurrentState() {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public AbstractState setRepresentation(StateRepresentation<?> representation) {
-        Representation customRepr = (Representation) representation;
-        this.history = customRepr.getOriginalObject();
-        return this;
-    }
-
-
-    public class Representation extends ArrayList<Action> implements StateRepresentation<ArrayList<Action>> {
-
-        public Representation(Collection<Action> freq) {
-            super(freq);
-        }
-
-        @Override
-        public ArrayList<Action> getOriginalObject() {
-            return this;
-        }
     }
 
 }

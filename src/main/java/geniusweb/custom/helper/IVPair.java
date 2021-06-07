@@ -6,11 +6,11 @@ import java.util.List;
 import geniusweb.issuevalue.Value;
 import geniusweb.issuevalue.ValueSet;
 
-public class IssueValuePair {
+public class IVPair {
     String issue;
     Value value;
 
-    public IssueValuePair(String issue2, Value value2) {
+    public IVPair(String issue2, Value value2) {
         this.issue = issue2;
         this.value = value2;
     }
@@ -41,10 +41,10 @@ public class IssueValuePair {
         return this.toString().contentEquals(obj.toString());
     }
 
-    public static List<IssueValuePair> convertValueSet(String issue, ValueSet values) {
-        List<IssueValuePair> pairs = new ArrayList<>();
+    public static List<IVPair> convertValueSet(String issue, ValueSet values) {
+        List<IVPair> pairs = new ArrayList<>();
         for (Value value : values) {
-            pairs.add(new IssueValuePair(issue, value));
+            pairs.add(new IVPair(issue, value));
         }
         return pairs;
     }
