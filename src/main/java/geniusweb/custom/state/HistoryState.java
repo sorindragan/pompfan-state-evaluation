@@ -43,4 +43,10 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
         return null;
     }
 
+    @Override
+    public Double computeDistance(ArrayList<Action> otherState) {
+        ArrayList<Action> currState = this.getRepresentation();
+        return this.computeExactSame(currState, otherState);
+    }
+
 }

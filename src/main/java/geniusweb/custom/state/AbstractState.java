@@ -12,7 +12,8 @@ import geniusweb.custom.distances.L2Distance;
 import geniusweb.custom.strategies.AbstractPolicy;
 import geniusweb.issuevalue.Domain;
 
-public abstract class AbstractState<T> implements Comparable<AbstractState<T>>, CosineSimilarity, L2Distance, ExactSame {
+public abstract class AbstractState<T>
+        implements Comparable<AbstractState<T>>, CosineSimilarity, L2Distance, ExactSame<T> {
     private Domain domain;
     private AbstractPolicy opponent;
     private T representation;
@@ -56,7 +57,6 @@ public abstract class AbstractState<T> implements Comparable<AbstractState<T>>, 
         return this.toString().compareTo(o.toString());
     }
 
-    
     @Override
     public Double computeCosineSimiliarity(INDArray arr1, INDArray arr2) {
         // TODO Auto-generated method stub
@@ -69,9 +69,9 @@ public abstract class AbstractState<T> implements Comparable<AbstractState<T>>, 
     }
 
     @Override
-    public Double computeExactSame(INDArray arr1, INDArray arr2) {
-        // TODO Auto-generated method stub
-        return null;
+    public Double computeExactSame(T arr1, T arr2) {
+        Boolean compResult = arr1.equals(arr2);
+        return compResult ? 1.0 : 0.0;
     }
 
     public abstract String getStringRepresentation();
