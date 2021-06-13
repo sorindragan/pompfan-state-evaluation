@@ -1,5 +1,11 @@
 Repackage Jar:
 mvn clean package
 
-Run command line:
-java -cp ./simplerunner-1.6.1-jar-with-dependencies.jar:/target/learningagent-1.6.0-jar-with-dependencies.jar geniusweb.simplerunner.NegoRunner src/test/resources/settings.json 
+Old Run command line:
+java -cp ./simplerunner-1.6.1-jar-with-dependencies.jar:/target/olusorin-1.6.1-jar-with-dependencies.jar geniusweb.simplerunner.NegoRunner src/test/resources/settings.json 
+
+Run command line with compilation (2 min.):
+java -cp ./target/olusorin-1.6.1-jar-with-dependencies.jar geniusweb.simplerunner.NegoRunner src/test/resources/settings.json
+
+Run command line no compilation:
+java --class-path "./junk/simplerunner-1.6.1-jar-with-dependencies.jar;./target/classes" geniusweb.simplerunner.NegoRunner src/test/resources/settings.json 

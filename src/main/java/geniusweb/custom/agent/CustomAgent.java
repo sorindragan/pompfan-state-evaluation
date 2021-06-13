@@ -82,16 +82,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     @Override
     public void notifyChange(Inform info) {
+        System.out.println("RECEIVE INFO");
         try {
-            // Our stuff 
-            Domain domain = this.utilitySpace.getDomain();
-            List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
-            listOfOpponents.add(new RandomOpponentPolicy(domain));
-            listOfOpponents.add(new RandomOpponentPolicy(domain));
-            listOfOpponents.add(new RandomOpponentPolicy(domain));
-            RandomTestBelief belief = new RandomTestBelief(listOfOpponents);
-            RandomEvaluator evaluator = new RandomEvaluator();
-            MCTS = new Tree(domain, belief, 3, evaluator);
+
             
             if (info instanceof Settings) {
                 // info is a Settings object that is passed at the start of a negotiation
@@ -176,7 +169,15 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 if (progress instanceof ProgressRounds) {
                     progress = ((ProgressRounds) progress).advance();
                 }
-
+                // Our stuff 
+                Domain domain = this.utilitySpace.getDomain();
+                List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
+                listOfOpponents.add(new RandomOpponentPolicy(domain));
+                listOfOpponents.add(new RandomOpponentPolicy(domain));
+                listOfOpponents.add(new RandomOpponentPolicy(domain));
+                RandomTestBelief belief = new RandomTestBelief(listOfOpponents);
+                RandomEvaluator evaluator = new RandomEvaluator();
+                MCTS = new Tree(domain, belief, 3, evaluator);
                 // The info notifies us that it is our turn
                 myTurn();
             } else if (info instanceof Finished) {

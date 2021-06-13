@@ -132,6 +132,14 @@
             <artifactId>nd4j-native</artifactId>
             <version>${dl4j-master.version}</version>
         </dependency>
+
+		<!-- CUSTOM: Runner configs -->
+		<dependency>
+			<groupId>geniusweb</groupId>
+			<artifactId>simplerunner</artifactId>
+			<version>${geniusweb.version}</version>
+			<classifier>jar-with-dependencies</classifier>
+		</dependency>
 	</dependencies>
 
 
