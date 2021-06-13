@@ -23,13 +23,7 @@ public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
 
     public FrequencyState(Domain domain, AbstractPolicy opponent) {
         super(domain, opponent);
-        this.allIssueValues = domain.getIssues().stream()
-                .flatMap(issue -> IVPair.convertValueSet(issue, domain.getValues(issue)).stream())
-                .collect(Collectors.toList());
-        this.init(new HashMap<IVPair, Double>());
-        for (IVPair value : allIssueValues) {
-            this.getRepresentation().put(value, 0.0);
-        }
+        this.init(IVPair.getVectorContainer(domain));
     }
 
     public HashMap<IVPair, Double> getFrequency() {

@@ -20,6 +20,12 @@ import geniusweb.actions.LearningDone;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
 import geniusweb.bidspace.AllBidsList;
+import geniusweb.custom.beliefs.RandomTestBelief;
+import geniusweb.custom.components.Tree;
+import geniusweb.custom.evaluators.RandomEvaluator;
+import geniusweb.custom.state.StateRepresentationException;
+import geniusweb.custom.strategies.AbstractPolicy;
+import geniusweb.custom.strategies.RandomOpponentPolicy;
 import geniusweb.inform.ActionDone;
 import geniusweb.inform.Agreements;
 import geniusweb.inform.Finished;
@@ -27,6 +33,7 @@ import geniusweb.inform.Inform;
 import geniusweb.inform.Settings;
 import geniusweb.inform.YourTurn;
 import geniusweb.issuevalue.Bid;
+import geniusweb.issuevalue.Domain;
 import geniusweb.party.Capabilities;
 import geniusweb.party.DefaultParty;
 import geniusweb.profile.Profile;
@@ -55,6 +62,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private List<File> dataPaths;
     private File persistentPath;
     private String opponentName;
+    private Tree MCTS;
 
     public CustomAgent() { // TODO: change name
     }
@@ -75,6 +83,16 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     @Override
     public void notifyChange(Inform info) {
         try {
+            // Our stuff 
+            Domain domain = this.utilitySpace.getDomain();
+            List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
+            listOfOpponents.add(new RandomOpponentPolicy(domain));
+            listOfOpponents.add(new RandomOpponentPolicy(domain));
+            listOfOpponents.add(new RandomOpponentPolicy(domain));
+            RandomTestBelief belief = new RandomTestBelief(listOfOpponents);
+            RandomEvaluator evaluator = new RandomEvaluator();
+            MCTS = new Tree(domain, belief, 3, evaluator);
+            
             if (info instanceof Settings) {
                 // info is a Settings object that is passed at the start of a negotiation
                 Settings settings = (Settings) info;
@@ -247,26 +265,18 @@ public class CustomAgent extends DefaultParty { // TODO: change name
 
     /**
      * send our next offer
+     * @throws StateRepresentationException
      */
-    private void myTurn() throws IOException {
+    private void myTurn() throws IOException, StateRepresentationException {
         System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
         Action action;
         if (isGood(lastReceivedBid)) {
             // If the last received bid is good: create Accept action
             action = new Accept(me, lastReceivedBid);
         } else {
-            // Obtain ist of all bids
-            AllBidsList bidspace = new AllBidsList(this.utilitySpace.getDomain());
-            Bid bid = null;
-
-            // Iterate randomly through list of bids until we find a good bid
-            for (int attempt = 0; attempt < 500 && !isGood(bid); attempt++) {
-                long i = random.nextInt(bidspace.size().intValue());
-                bid = bidspace.get(BigInteger.valueOf(i));
-            }
-
-            // Create offer action
-            action = new Offer(me, bid);
+            // STEP: Generate offer!
+            this.MCTS.construct(10);//TODO: Must happen somewhere else. Below is a learn function.
+            action = this.MCTS.chooseBestAction();
         }
 
         // Send action

@@ -2,8 +2,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>geniusweb.exampleparties</groupId>
-	<artifactId>learningagent</artifactId> <!-- TODO: change name -->
-	<version>1.6.0</version> <!-- must equal ${geniusweb.version} -->
+	<artifactId>olusorin</artifactId> <!-- TODO: change name -->
+	<version>1.6.1</version> <!-- must equal ${geniusweb.version} -->
 	<packaging>jar</packaging>
 
 
@@ -14,8 +14,9 @@
 		<basedir>.</basedir>
 		<passwd>${env.ARTIFACTORY_PASS}</passwd>
 		<jackson-2-version>2.9.6</jackson-2-version>
-		<geniusweb.version>1.6.0</geniusweb.version>
+		<geniusweb.version>1.6.1</geniusweb.version>
 		<dl4j-master.version>1.0.0-M1</dl4j-master.version>
+		<agent.target>geniusweb.custom.agent.CustomAgent</agent.target>
 	</properties>
 
 	<distributionManagement>
@@ -204,13 +205,13 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>geniusweb.exampleparties.learningagent.LearningAgent</mainClass> <!-- TODO: change name -->
+							<mainClass>${agent.target}</mainClass> <!-- TODO: change name -->
 						</manifest>
 					</archive>
 				</configuration>
 			</plugin>
 
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.2.0</version>
@@ -222,7 +223,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -237,7 +238,7 @@
 						<manifest>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-							<mainClass>geniusweb.exampleparties.learningagent.LearningAgent</mainClass> <!-- TODO: change name -->
+							<mainClass>${agent.target}</mainClass> <!-- TODO: change name -->
 						</manifest>
 					</archive>
 				</configuration>

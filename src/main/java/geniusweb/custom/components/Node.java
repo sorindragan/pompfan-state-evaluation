@@ -22,9 +22,9 @@ public class Node {
     private ArrayList<Node> children;
     private Integer visits = 0;
     private Double value = 0d;
-    private AbstractState state;
+    private AbstractState<?> state;
 
-    public Node(Node parent, AbstractState state) {
+    public Node(Node parent, AbstractState<?> state) {
         super();
         this.id = UUID.randomUUID().toString();
         this.parent = parent;
@@ -100,21 +100,21 @@ public class Node {
         return state;
     }
 
-    public Node setState(AbstractState state) {
+    public Node setState(AbstractState<?> state) {
         this.state = state;
         return this;
     }
 
-    public static Node buildNode(NODE_TYPE type, Node parent, AbstractState newState,
-            AbstractPolicy opponent) {
-        
+    public static Node buildNode(NODE_TYPE type, Node parent, AbstractState<?> newState, AbstractPolicy opponent,
+            Action lastAction) {
+
         Node child;
         switch (type) {
             case BELIEF:
-                child = new BeliefNode(parent, newState);
+                child = new BeliefNode(parent, newState, lastAction);
                 break;
             case ACTION:
-                child = new ActionNode(parent, newState);
+                child = new ActionNode(parent, newState, lastAction);
                 break;
             default:
                 child = new Node(parent, newState);

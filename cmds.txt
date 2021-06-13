@@ -1,0 +1,5 @@
+Repackage Jar:
+mvn clean package
+
+Run command line:
+java -cp ./simplerunner-1.6.1-jar-with-dependencies.jar:/target/learningagent-1.6.0-jar-with-dependencies.jar geniusweb.simplerunner.NegoRunner src/test/resources/settings.json 

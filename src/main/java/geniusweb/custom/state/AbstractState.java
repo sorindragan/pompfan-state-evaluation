@@ -25,6 +25,8 @@ public abstract class AbstractState<T>
         this.opponent = opponent;
     }
 
+
+
     public Domain getDomain() {
         return domain;
     }
@@ -59,7 +61,6 @@ public abstract class AbstractState<T>
 
     @Override
     public Double computeCosineSimiliarity(INDArray arr1, INDArray arr2) {
-        // TODO Auto-generated method stub
         return null;
     }
 
