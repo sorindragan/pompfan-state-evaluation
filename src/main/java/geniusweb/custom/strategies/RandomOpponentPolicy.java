@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
+import geniusweb.custom.state.AbstractState;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 
@@ -40,6 +41,11 @@ public class RandomOpponentPolicy extends AbstractPolicy {
 
         return this.getRandom().nextFloat() > stubborness ? true : false;
         
+    }
+
+    @Override
+    public Action chooseAction(Bid lastAgentBid, AbstractState<?> state) {
+        return this.chooseAction();
     }
 
 

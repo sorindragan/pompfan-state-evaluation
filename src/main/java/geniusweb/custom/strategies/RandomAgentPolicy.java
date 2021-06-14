@@ -6,6 +6,7 @@ import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.bidspace.AllBidsList;
+import geniusweb.custom.state.AbstractState;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.profile.utilityspace.UtilitySpace;
@@ -40,5 +41,11 @@ public class RandomAgentPolicy extends AbstractPolicy {
         return this.getRandom().nextFloat() > stubborness ? true : false;
 
     }
+
+    @Override
+    public Action chooseAction(Bid lastAgentBid, AbstractState<?> state) {
+        return this.chooseAction();
+    }
+
 
 }

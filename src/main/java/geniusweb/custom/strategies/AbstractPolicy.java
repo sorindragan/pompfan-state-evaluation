@@ -15,6 +15,7 @@ import java.util.stream.LongStream;
 import geniusweb.actions.Action;
 import geniusweb.actions.PartyId;
 import geniusweb.bidspace.AllBidsList;
+import geniusweb.custom.state.AbstractState;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.DiscreteValue;
 import geniusweb.issuevalue.DiscreteValueSet;
@@ -130,5 +131,6 @@ public abstract class AbstractPolicy {
 
     public abstract Action chooseAction();
     public abstract Action chooseAction(Bid lastAgentBid);
+    public abstract Action chooseAction(Bid lastAgentBid, AbstractState<?> state);
 
 }
