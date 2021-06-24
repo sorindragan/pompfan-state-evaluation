@@ -71,4 +71,10 @@ public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
         return this.computeL2(arr1, arr2);
     }
 
+    @Override
+    public Double evaluate() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

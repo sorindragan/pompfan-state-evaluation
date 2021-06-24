@@ -22,6 +22,7 @@ import geniusweb.actions.PartyId;
 import geniusweb.bidspace.AllBidsList;
 import geniusweb.custom.beliefs.RandomTestBelief;
 import geniusweb.custom.components.Tree;
+import geniusweb.custom.evaluators.MeanUtilityEvaluator;
 import geniusweb.custom.evaluators.RandomEvaluator;
 import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
 import geniusweb.custom.state.StateRepresentationException;
@@ -50,7 +51,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CustomAgent extends DefaultParty { // TODO: change name
 
-    private static final boolean DEBUG = true;
+    /**
+     *
+     */
+    private static final int WIDTH = 100;
+    private static final boolean DEBUG = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
     private final Random random = new Random();
@@ -87,7 +92,6 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         System.out.println("RECEIVE INFO");
         try {
 
-            
             if (info instanceof Settings) {
                 // info is a Settings object that is passed at the start of a negotiation
                 Settings settings = (Settings) info;
@@ -143,6 +147,16 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(),
                                 getReporter());
                         this.utilitySpace = ((UtilitySpace) profileint.getProfile());
+                        // Our stuff
+                        Domain domain = this.utilitySpace.getDomain();
+                        List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
+                        listOfOpponents.add(new RandomOpponentPolicy(domain));
+                        listOfOpponents.add(new RandomOpponentPolicy(domain));
+                        listOfOpponents.add(new RandomOpponentPolicy(domain));
+                        RandomTestBelief belief = new RandomTestBelief(listOfOpponents);
+                        MeanUtilityEvaluator evaluator = new MeanUtilityEvaluator(this.utilitySpace);
+                        RandomOwnExplorerPolicy explorator = new RandomOwnExplorerPolicy(domain, this.utilitySpace, me);
+                        this.MCTS = new Tree(domain, belief, WIDTH, evaluator, explorator);
                     } catch (IOException e) {
                         throw new IllegalStateException(e);
                     }
@@ -173,16 +187,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 if (progress instanceof ProgressRounds) {
                     progress = ((ProgressRounds) progress).advance();
                 }
-                // Our stuff 
-                Domain domain = this.utilitySpace.getDomain();
-                List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
-                listOfOpponents.add(new RandomOpponentPolicy(domain));
-                listOfOpponents.add(new RandomOpponentPolicy(domain));
-                listOfOpponents.add(new RandomOpponentPolicy(domain));
-                RandomTestBelief belief = new RandomTestBelief(listOfOpponents);
-                RandomEvaluator evaluator = new RandomEvaluator();
-                RandomOwnExplorerPolicy explorator = new RandomOwnExplorerPolicy(domain, this.utilitySpace, me);
-                MCTS = new Tree(domain, belief, 3, evaluator, explorator);
+
                 // The info notifies us that it is our turn
                 myTurn();
             } else if (info instanceof Finished) {
@@ -265,25 +270,39 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         if (!agreements.getMap().isEmpty()) {
             // Get the bid that is agreed upon and add it's value to our negotiation data
             Bid agreement = agreements.getMap().values().iterator().next();
+            System.out.println("AGREEMENT!!!! -- Util="+ String.valueOf(this.utilitySpace.getUtility(agreement)) + " -- " + agreement.toString());
             this.negotiationData.addAgreementUtil(this.utilitySpace.getUtility(agreement).doubleValue());
         }
     }
 
     /**
      * send our next offer
+     * 
      * @throws StateRepresentationException
      */
     private void myTurn() throws IOException, StateRepresentationException {
-        System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
+        if (this.lastReceivedBid != null) {            
+            System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
+            System.out.println("Opponent: Util="+ this.utilitySpace.getUtility(this.lastReceivedBid) + " -- " + this.lastReceivedBid.toString());
+        }
         Action action;
-        if (isGood(lastReceivedBid)) {
+        if (isGood(this.lastReceivedBid)) {
             // If the last received bid is good: create Accept action
-            action = new Accept(me, lastReceivedBid);
+            action = new Accept(me, this.lastReceivedBid);
         } else {
             // STEP: Generate offer!
-            this.MCTS.construct(10);//TODO: Must happen somewhere else. Below is a learn function.
+            this.MCTS.construct(100);
             action = this.MCTS.chooseBestAction();
-            if (DEBUG) {                
+            if(action instanceof Offer){
+                Bid myBid = ((Offer) action).getBid();
+                System.out.println("Agent:    Util="+ String.valueOf(this.utilitySpace.getUtility(myBid)) + " -- " + myBid.toString());
+            }else if(action instanceof Accept){
+                Bid acceptedBid = ((Accept) action).getBid();
+                System.out.println("We ACCEPT: Util="+ String.valueOf(this.utilitySpace.getUtility(acceptedBid)) + " -- " + acceptedBid.toString());
+            }else{
+                System.out.println("Something HAPPENED! "+ action.toString());
+            }
+            if (DEBUG) {
                 System.out.println(this.MCTS);
                 System.out.println(action);
             }

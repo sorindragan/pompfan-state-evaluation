@@ -50,4 +50,10 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
         return this.computeExactSame(currState, otherState);
     }
 
+    @Override
+    public Double evaluate() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

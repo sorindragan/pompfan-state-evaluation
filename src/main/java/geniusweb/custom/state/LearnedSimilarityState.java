@@ -39,5 +39,11 @@ public class LearnedSimilarityState extends AbstractState<HashMap<IVPair,Double>
         return null;
     }
 
+    @Override
+    public Double evaluate() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 
 }

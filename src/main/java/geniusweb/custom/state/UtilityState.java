@@ -58,6 +58,12 @@ public class UtilityState extends AbstractState<Map<PartyId, BigDecimal>> {
         return null;
     }
 
+    @Override
+    public Double evaluate() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
   
 
 

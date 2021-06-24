@@ -81,7 +81,7 @@ public abstract class AbstractState<T>
 
     public abstract Double computeDistance(T otherState);
 
-
+    public abstract Double evaluate();
 
 
 

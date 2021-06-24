@@ -8,12 +8,13 @@ import java.util.Random;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.custom.beliefs.AbstractBelief;
-import geniusweb.custom.evaluators.AbstractEvaluationFunction;
+import geniusweb.custom.evaluators.EvaluationFunctionInterface;
 import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.HistoryState;
 import geniusweb.custom.state.StateRepresentationException;
 import geniusweb.custom.strategies.AbstractPolicy;
+import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 
 // Tree<T extends AbstractState<?>>
@@ -24,11 +25,11 @@ public class Tree {
     private AbstractBelief belief;
     private Integer maxWidth;
     private AbstractOwnExplorationPolicy ownExplorationStrategy; // The action we choose to simulate (expand new node).
-    private AbstractEvaluationFunction evaluator;
+    private EvaluationFunctionInterface evaluator;
     private static Double C = Math.sqrt(2); // TODO: Make it hyperparam
     private ActionNode lastBestActionNode;
 
-    public Tree(Domain domain, AbstractBelief belief, Integer maxWidth, AbstractEvaluationFunction evaluationFunction, AbstractOwnExplorationPolicy ownPolicy) {
+    public Tree(Domain domain, AbstractBelief belief, Integer maxWidth, EvaluationFunctionInterface evaluationFunction, AbstractOwnExplorationPolicy ownPolicy) {
         this.evaluator = evaluationFunction;
         this.belief = belief;
         this.maxWidth = maxWidth;
@@ -45,7 +46,9 @@ public class Tree {
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
             if (currRoot.getChildren().size() < this.maxWidth) {
                 currRoot = (BeliefNode) ((ActionNode) currRoot).receiveObservation();
-                Double value = this.evaluate(currRoot.getState());
+                Action opponentAction =  ((BeliefNode) currRoot).getObservation();
+                Action agentAction = ((ActionNode) currRoot.getParent()).getAction();
+                Double value = this.evaluate(currRoot.getState(), opponentAction, agentAction);
                 Tree.backpropagate(currRoot, value);
                 return;
             } else {
@@ -58,7 +61,7 @@ public class Tree {
             ActionNode actionNode = (ActionNode) ((BeliefNode) currRoot).act(ownExplorationStrategy); // What the fuck
             BeliefNode beliefNode = (BeliefNode) actionNode.receiveObservation();
             currRoot = beliefNode;
-            Double value = this.evaluate(currRoot.getState());
+            Double value = this.evaluate(currRoot.getState(), beliefNode.getObservation(), actionNode.getAction());
             Tree.backpropagate(currRoot, value);
         }
     }
@@ -73,8 +76,10 @@ public class Tree {
         node.setValue(node.getValue() + value);
     }
 
-    public Double evaluate(AbstractState<?> state) {
-        return this.evaluator.evaluate(state);
+    public Double evaluate(AbstractState<?> state, Action opponentAction, Action agentAction) {
+        Bid lastBid = ((Offer) opponentAction).getBid(); 
+        Bid secondTolastBid = ((Offer) agentAction).getBid(); 
+        return this.evaluator.evaluate(state, lastBid, secondTolastBid);
     }
 
     // public static Node selectFavoriteChild(List<Node>
