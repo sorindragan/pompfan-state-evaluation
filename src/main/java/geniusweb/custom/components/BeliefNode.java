@@ -1,6 +1,7 @@
 package geniusweb.custom.components;
 
 import geniusweb.actions.Action;
+import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.StateRepresentationException;
 import geniusweb.custom.strategies.AbstractPolicy;
@@ -26,7 +27,7 @@ public class BeliefNode extends Node {
         this.setObservation(observation);
     }
 
-    public Node act(AbstractPolicy strategy) throws StateRepresentationException{
+    public Node act(AbstractOwnExplorationPolicy strategy) throws StateRepresentationException{
         AbstractState<?> state = this.getState();
         Action agentAction = strategy.chooseAction(); 
         AbstractState<?> newState = state.updateState(agentAction); 

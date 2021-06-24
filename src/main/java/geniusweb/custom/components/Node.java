@@ -96,7 +96,7 @@ public class Node {
         return value;
     }
 
-    public AbstractState getState() {
+    public AbstractState<?> getState() {
         return state;
     }
 
@@ -105,20 +105,37 @@ public class Node {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder()
+            .append(this.id)
+            .append("[")
+            .append("children:")
+            .append(this.children.size())
+            .append(",")
+            .append("visits:")
+            .append(this.visits)
+            .append(",")
+            .append("value:")
+            .append(this.value)
+            .append("]")
+            .toString();
+    }
+
     public static Node buildNode(NODE_TYPE type, Node parent, AbstractState<?> newState, AbstractPolicy opponent,
             Action lastAction) {
 
         Node child;
         switch (type) {
-            case BELIEF:
-                child = new BeliefNode(parent, newState, lastAction);
-                break;
-            case ACTION:
-                child = new ActionNode(parent, newState, lastAction);
-                break;
-            default:
-                child = new Node(parent, newState);
-                break;
+        case BELIEF:
+            child = new BeliefNode(parent, newState, lastAction);
+            break;
+        case ACTION:
+            child = new ActionNode(parent, newState, lastAction);
+            break;
+        default:
+            child = new Node(parent, newState);
+            break;
         }
         return child;
     }

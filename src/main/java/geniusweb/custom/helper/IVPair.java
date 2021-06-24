@@ -120,7 +120,7 @@ public class IVPair {
         return container;
     }
 
-    private static IVPairMapping getIVPairMapping(Domain domain) {
+    public static IVPairMapping getIVPairMapping(Domain domain) {
         if (IVPair.ivPairMapping == null) {
             IVPair.ivPairMapping = new IVPairMapping(domain);
         }
@@ -129,8 +129,7 @@ public class IVPair {
 
     public static INDArray getVector(IVPair ivPair, Domain domain) {
         IVPairMapping mapping = IVPair.getIVPairMapping(domain);
-        Integer idx = mapping.indexOf(ivPair);
-        INDArray vector = mapping.getVector(idx);
+        INDArray vector = mapping.getVector(ivPair);
         return vector;
     }
 
@@ -148,26 +147,34 @@ public class IVPair {
         private INDArray matrixArray;
         private HashMap<String, ValueSet> issueValueSets = new HashMap<>();
         private List<String> issueList;
-        private TreeSet<IVPair> orderedIVMapping;
+        private HashSet<IVPair> allIVMapping;
         private INDArray containerVector;
+        private List<INDArray> base_vectors;
 
         public IVPairMapping(Domain domain) {
             super();
 
             this.issueList = new ArrayList<String>(domain.getIssues());
             for (String issue : issueList) {
-                this.issueValueSets.put(issue, domain.getValues(issue));
+                ValueSet values = domain.getValues(issue);
+                this.issueValueSets.put(issue, values);
+                List<IVPair> vals = IVPair.convertValueSet(issue, values);
+                vals.remove(0);
+                this.addAll(vals);
             }
 
-            this.orderedIVMapping = new TreeSet<IVPair>(domain.getIssues().stream()
+            this.allIVMapping = new HashSet<IVPair>(domain.getIssues().stream()
                     .flatMap(issue -> IVPair.convertValueSet(issue, domain.getValues(issue)).stream())
                     .collect(Collectors.toSet()));
 
             this.setMatrixArray(Nd4j.eye(this.size() - 1));
-            long length = this.getMatrixArray().shape()[0];
-            long[] shape = { length, 1l };
-            this.setContainerVector(Nd4j.zeros(length).reshape(shape));
-            this.addAll(orderedIVMapping);
+            // long length = this.size()-this.issueList.size();
+            // long[] shape = { length, 1l };
+            // this.setContainerVector(Nd4j.zeros(length).reshape(shape));
+
+            this.base_vectors = this.issueValueSets.entrySet().stream().map(ivSet -> Nd4j.zeros(ivSet.getValue().size().intValue()-1)).collect(Collectors.toList());
+            this.setContainerVector(Nd4j.toFlattened(this.base_vectors));;
+            this.addAll(allIVMapping);
         }
 
         public INDArray getMatrixArray() {
@@ -190,14 +197,13 @@ public class IVPair {
             this.containerVector = containerVector;
         }
 
-        public INDArray getVector(Integer idx) {
-            if (idx == 0) {
-                return this.getContainerVector();
+        public INDArray getVector(IVPair ivp) {
+            int idx = this.indexOf(ivp);
+            if (idx!=-1) {
+                this.containerVector.dup().put(idx, Nd4j.create(1));
             }
-            return this.getMatrixArray().getRow(idx);
+            return this.containerVector.dup();
         }
-
-
 
         public HashMap<String, ValueSet> getIssueValueSets() {
             return issueValueSets;
@@ -215,15 +221,13 @@ public class IVPair {
             this.issueList = issueList;
         }
 
-        public TreeSet<IVPair> getOrderedIVMapping() {
-            return orderedIVMapping;
+        public HashSet<IVPair> getOrderedIVMapping() {
+            return allIVMapping;
         }
 
-        public void setOrderedIVMapping(TreeSet<IVPair> orderedIVMapping) {
-            this.orderedIVMapping = orderedIVMapping;
+        public void setOrderedIVMapping(HashSet<IVPair> orderedIVMapping) {
+            this.allIVMapping = orderedIVMapping;
         };
-
-
 
     }
 
@@ -246,7 +250,8 @@ public class IVPair {
                 schemaBuilder.addColumnCategorical(ivEntry.getKey(), valueSetList);
             }
             for (Bid bid : this.generateBidspace(domain)) {
-                List<String> valString = bid.getIssueValues().entrySet().stream().map(entry -> entry.getValue().toString()).collect(Collectors.toList());
+                List<String> valString = bid.getIssueValues().entrySet().stream()
+                        .map(entry -> entry.getValue().toString()).collect(Collectors.toList());
                 bidValStrings.add(valString);
             }
             this.schema = schemaBuilder.build();
@@ -261,12 +266,13 @@ public class IVPair {
              * first line to skip and // comma seperated
              */
             RecordReader listReader = new ListStringRecordReader();
-            listReader.initialize(new ListStringSplit(bidValStrings));            
+            listReader.initialize(new ListStringSplit(bidValStrings));
             this.transformProcessRecordReader = new TransformProcessRecordReader(listReader, this.encoder);
         }
 
         public List<Writable> transformBid(Bid bid) {
-            List<String> valString = bid.getIssueValues().entrySet().stream().map(entry -> entry.getValue().toString()).collect(Collectors.toList());
+            List<String> valString = bid.getIssueValues().entrySet().stream().map(entry -> entry.getValue().toString())
+                    .collect(Collectors.toList());
             List<Writable> transformed = this.encoder.transformRawStringsToInputList(valString);
             return transformed;
         }
@@ -308,7 +314,5 @@ public class IVPair {
             return collector;
         };
     }
-
-
 
 }

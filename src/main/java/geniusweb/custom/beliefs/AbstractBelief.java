@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import geniusweb.actions.Offer;
+import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.strategies.AbstractPolicy;
 
 public abstract class AbstractBelief {
@@ -43,6 +45,6 @@ public abstract class AbstractBelief {
         return this;
     }
 
-    public abstract AbstractBelief updateBeliefs();
+    public abstract AbstractBelief updateBeliefs(Offer realObservation, Offer lastAction, AbstractState<?> state);
 
 }

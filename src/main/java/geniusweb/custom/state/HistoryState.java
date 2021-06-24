@@ -15,6 +15,7 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
 
     public HistoryState(Domain domain, AbstractPolicy opponent) {
         super(domain, opponent);
+        this.setHistory(new ArrayList<>());
     }
 
     public ArrayList<Action> getHistory() {

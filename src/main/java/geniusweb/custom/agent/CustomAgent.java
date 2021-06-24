@@ -23,6 +23,7 @@ import geniusweb.bidspace.AllBidsList;
 import geniusweb.custom.beliefs.RandomTestBelief;
 import geniusweb.custom.components.Tree;
 import geniusweb.custom.evaluators.RandomEvaluator;
+import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
 import geniusweb.custom.state.StateRepresentationException;
 import geniusweb.custom.strategies.AbstractPolicy;
 import geniusweb.custom.strategies.RandomOpponentPolicy;
@@ -49,6 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CustomAgent extends DefaultParty { // TODO: change name
 
+    private static final boolean DEBUG = true;
     private Bid lastReceivedBid = null;
     private PartyId me;
     private final Random random = new Random();
@@ -155,7 +157,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                     if (this.opponentName == null) {
                         // The part behind the last _ is always changing, so we must cut it off.
                         String fullOpponentName = action.getActor().getName();
-                        int index = fullOpponentName.lastIndexOf("_");
+                        int lastIndexOf = fullOpponentName.lastIndexOf("_");
+                        // int index = lastIndexOf == -1 ? fullOpponentName.length() : lastIndexOf;
+                        int index = lastIndexOf;
                         this.opponentName = fullOpponentName.substring(0, index);
 
                         // Add name of the opponent to the negotiation data
@@ -177,7 +181,8 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 listOfOpponents.add(new RandomOpponentPolicy(domain));
                 RandomTestBelief belief = new RandomTestBelief(listOfOpponents);
                 RandomEvaluator evaluator = new RandomEvaluator();
-                MCTS = new Tree(domain, belief, 3, evaluator);
+                RandomOwnExplorerPolicy explorator = new RandomOwnExplorerPolicy(domain, this.utilitySpace, me);
+                MCTS = new Tree(domain, belief, 3, evaluator, explorator);
                 // The info notifies us that it is our turn
                 myTurn();
             } else if (info instanceof Finished) {
@@ -278,6 +283,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             // STEP: Generate offer!
             this.MCTS.construct(10);//TODO: Must happen somewhere else. Below is a learn function.
             action = this.MCTS.chooseBestAction();
+            if (DEBUG) {                
+                System.out.println(this.MCTS);
+                System.out.println(action);
+            }
         }
 
         // Send action

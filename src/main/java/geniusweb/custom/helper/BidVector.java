@@ -63,4 +63,6 @@ public class BidVector extends Bid {
         INDArray containerMatrix = Nd4j.accumulate(containerVector, onehots);
         return containerMatrix;
     }
+
+
 }

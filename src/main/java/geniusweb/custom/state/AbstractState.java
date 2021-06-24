@@ -1,7 +1,5 @@
 package geniusweb.custom.state;
 
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 
@@ -82,5 +80,9 @@ public abstract class AbstractState<T>
     public abstract T getCurrentState();
 
     public abstract Double computeDistance(T otherState);
+
+
+
+
 
 }

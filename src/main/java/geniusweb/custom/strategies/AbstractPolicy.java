@@ -1,6 +1,7 @@
 package geniusweb.custom.strategies;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,34 +46,37 @@ public abstract class AbstractPolicy {
                 preferencePairs.getValue(), null);
         this.setBidspace(new AllBidsList(this.getDomain()));
     }
-    public AbstractPolicy(Domain domain, String name, UtilitySpace utilitySpace, AllBidsList bidspace) {
-        super();
-        this.setDomain(domain);
-        this.setName(name);
-        this.setUtilitySpace(utilitySpace);
-        this.setPartyId(new PartyId(name));
-        this.setBidspace(new AllBidsList(this.getDomain()));
-    }
 
     private Entry<HashMap<String, ValueSetUtilities>, Map<String, BigDecimal>> initRandomUtilityProfile(Domain domain,
             String name) {
         List<String> issues = new ArrayList<String>(domain.getIssues());
-        List<Integer> allInts = random.ints(issues.size()).boxed().collect(Collectors.toList()); // TODO: Bound the
+        List<Integer> allInts = random.ints(issues.size(), 0, 100).boxed().collect(Collectors.toList()); // TODO: Bound the
                                                                                                  // random generation
+        MathContext mc = new MathContext(5);
         Integer sumOfInts = allInts.stream().mapToInt(Integer::intValue).sum();
         Map<String, BigDecimal> issueWeights = IntStream.range(0, issues.size()).boxed()
-                .collect(Collectors.toMap(issues::get, index -> new BigDecimal(allInts.get(index) / sumOfInts)));
+                .collect(Collectors.toMap(issues::get, index -> new BigDecimal((double) allInts.get(index) / sumOfInts, mc)));
+        
+        // To make everything add to 1
+        Double remainder = 1-issueWeights.values().stream().mapToDouble(bigD -> bigD.doubleValue()).sum();
+        String firstKey = (String) issueWeights.keySet().toArray()[0];
+        issueWeights.computeIfPresent(firstKey, (key,value) -> value.add(new BigDecimal(remainder, mc)));
+
 
         HashMap<String, ValueSetUtilities> issueValueWeights = new HashMap<String, ValueSetUtilities>();
         for (String issueString : issues) {
 
             DiscreteValueSet values = (DiscreteValueSet) domain.getValues(issueString);
-            // values.ge
-            List<Long> randLongs = random.longs(values.size().longValue()).boxed().collect(Collectors.toList());
+            List<Long> randLongs = random.longs(values.size().longValue(), 0, 100).boxed().collect(Collectors.toList());
             Long sumOfValueLongs = randLongs.stream().mapToLong(Long::intValue).sum();
             Map<DiscreteValue, BigDecimal> valueWeights = LongStream.range(0, values.size().longValue()).boxed()
                     .collect(Collectors.toMap(values::get,
-                            index -> new BigDecimal(randLongs.get(index.intValue()) / sumOfValueLongs)));
+                            index -> new BigDecimal((double) randLongs.get(index.intValue()) / sumOfValueLongs, mc)));
+            // To make everything add to 1
+            Double valueRemainder = 1-valueWeights.values().stream().mapToDouble(bigD -> bigD.doubleValue()).sum();
+            DiscreteValue firstValueKey = (DiscreteValue) valueWeights.keySet().toArray()[0];
+            valueWeights.computeIfPresent(firstValueKey, (key,value) -> value.add(new BigDecimal(valueRemainder, mc)));
+
             issueValueWeights.put(issueString, new DiscreteValueSetUtilities(valueWeights));
         }
 

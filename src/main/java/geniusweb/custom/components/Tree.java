@@ -1,12 +1,15 @@
 package geniusweb.custom.components;
 
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 import geniusweb.actions.Action;
+import geniusweb.actions.Offer;
 import geniusweb.custom.beliefs.AbstractBelief;
 import geniusweb.custom.evaluators.AbstractEvaluationFunction;
+import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.HistoryState;
 import geniusweb.custom.state.StateRepresentationException;
@@ -20,15 +23,18 @@ public class Tree {
     private Domain domain;
     private AbstractBelief belief;
     private Integer maxWidth;
-    private AbstractPolicy ownExplorationStrategy; // The action we choose to simulate (expand new node).
+    private AbstractOwnExplorationPolicy ownExplorationStrategy; // The action we choose to simulate (expand new node).
     private AbstractEvaluationFunction evaluator;
     private static Double C = Math.sqrt(2); // TODO: Make it hyperparam
+    private ActionNode lastBestActionNode;
 
-    public Tree(Domain domain, AbstractBelief belief, Integer maxWidth, AbstractEvaluationFunction evaluationFunction) {
+    public Tree(Domain domain, AbstractBelief belief, Integer maxWidth, AbstractEvaluationFunction evaluationFunction, AbstractOwnExplorationPolicy ownPolicy) {
         this.evaluator = evaluationFunction;
         this.belief = belief;
         this.maxWidth = maxWidth;
         this.root = new BeliefNode(null, new HistoryState(domain, null), null);
+        this.ownExplorationStrategy = ownPolicy;
+        
     }
 
     public void simulate() throws StateRepresentationException {
@@ -63,6 +69,8 @@ public class Tree {
             node.setValue(node.getValue() + value);
             node = node.getParent();
         }
+        node.setVisits(node.getVisits() + 1);
+        node.setValue(node.getValue() + value);
     }
 
     public Double evaluate(AbstractState<?> state) {
@@ -77,10 +85,19 @@ public class Tree {
     // return adoptedChild;
     // }
 
+
+
     public static Node selectFavoriteChild(List<Node> candidatesChildrenForAdoption) {
         // True Random - Alt.: Proportional to the visits
         Node adoptedChild = candidatesChildrenForAdoption.stream().max(Comparator.comparing(Tree::UCB1)).get();
         return adoptedChild;
+    }
+
+    public Tree receiveRealObservation(Action observaAction) {
+        List<Node> rootCandidates = this.lastBestActionNode.getChildren();
+        this.belief = this.belief.updateBeliefs((Offer) observaAction, (Offer) this.lastBestActionNode.getAction(), this.lastBestActionNode.getState());
+        this.root = (BeliefNode) rootCandidates.get(0); // THIS IS DUMB! Get the node with the closest observation to the real one.
+        return this;
     }
 
     public void construct(Integer maxIter) throws StateRepresentationException {
@@ -93,8 +110,8 @@ public class Tree {
 
     public Action chooseBestAction() {
         List<Node> oldestChildren = this.root.getChildren();
-        ActionNode adoptedChild = (ActionNode) oldestChildren.stream().max(Comparator.comparing(node -> node.getValue())).get();
-        Action action = adoptedChild.getAction();
+        this.lastBestActionNode = (ActionNode) oldestChildren.stream().max(Comparator.comparing(node -> node.getValue())).get();
+        Action action = lastBestActionNode.getAction();
         return action;
     }
 
@@ -103,6 +120,27 @@ public class Tree {
         Double visits = node.getVisits().doubleValue();
         Double pVisits = node.getParent().getVisits().doubleValue();
         return (val / visits) + (C * Math.sqrt(Math.log(pVisits + 1) / visits));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder buffer = new StringBuilder(50);
+        this.buildStringBuffer(buffer, "", "", this.root);
+        return buffer.toString();
+    }
+
+    private void buildStringBuffer(StringBuilder buffer, String prefix, String childrenPrefix, Node root) {
+        buffer.append(prefix);
+        buffer.append(root.toString());
+        buffer.append('\n');
+        for (Iterator<Node> it = root.getChildren().iterator(); it.hasNext();) {
+            Node next = it.next();
+            if (it.hasNext()) {
+                buildStringBuffer(buffer, childrenPrefix + "├── ", childrenPrefix + "│   ", next);
+            } else {
+                buildStringBuffer(buffer, childrenPrefix + "└── ", childrenPrefix + "    ", next);
+            }
+        }
     }
 
 }

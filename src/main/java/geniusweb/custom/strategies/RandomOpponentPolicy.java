@@ -12,7 +12,7 @@ import geniusweb.issuevalue.Domain;
 public class RandomOpponentPolicy extends AbstractPolicy {
     
 
-    private static final float stubborness = 0.98f;
+    private static final float stubborness = 0.95f;
 
     public RandomOpponentPolicy(Domain domain) {
         super(domain, "Random");
@@ -24,7 +24,7 @@ public class RandomOpponentPolicy extends AbstractPolicy {
         Action action;
         long i = this.getRandom().nextInt(this.getBidspace().size().intValue());
         Bid bid = this.getBidspace().get(BigInteger.valueOf(i));
-        action = isGood(bid) ? new Offer(this.getPartyId(), bid) : new Accept(this.getPartyId(), lastAgentBid);
+        action = isGood(bid) ? new Accept(this.getPartyId(), lastAgentBid) : new Offer(this.getPartyId(), bid);
         return  action;
     }
     
@@ -39,7 +39,10 @@ public class RandomOpponentPolicy extends AbstractPolicy {
         if (bid == null)
             return false;
 
-        return this.getRandom().nextFloat() > stubborness ? true : false;
+        float sample = Math.abs(this.getRandom().nextFloat());
+        System.out.println("SAMPLE");
+        System.out.println(sample);
+        return sample > stubborness ? true : false;
         
     }
 
