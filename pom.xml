@@ -140,6 +140,25 @@
 			<version>${geniusweb.version}</version>
 			<classifier>jar-with-dependencies</classifier>
 		</dependency>
+		<!-- CUSTOM: Parties -->
+		<dependency>
+			<groupId>geniusweb.exampleparties</groupId>
+			<artifactId>boulware</artifactId>
+			<version>${geniusweb.version}</version>
+			<!-- <classifier>jar-with-dependencies</classifier> -->
+		</dependency>
+		<!-- <dependency>
+			<groupId>geniusweb.exampleparties</groupId>
+			<artifactId>boulware</artifactId>
+			<version>${geniusweb.version}</version>
+			<classifier>sources</classifier>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>geniusweb</groupId>
+			<artifactId>exampleparties</artifactId>
+			<version>-</version>
+			<type>pom</type>
+		</dependency> -->
 	</dependencies>
 
 

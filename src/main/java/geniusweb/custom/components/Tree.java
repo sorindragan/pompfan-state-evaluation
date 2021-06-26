@@ -4,18 +4,20 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.custom.beliefs.AbstractBelief;
 import geniusweb.custom.evaluators.EvaluationFunctionInterface;
 import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
+import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.HistoryState;
 import geniusweb.custom.state.StateRepresentationException;
-import geniusweb.custom.strategies.AbstractPolicy;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
+import geniusweb.profile.utilityspace.UtilitySpace;
 
 // Tree<T extends AbstractState<?>>
 public class Tree {
@@ -29,13 +31,14 @@ public class Tree {
     private static Double C = Math.sqrt(2); // TODO: Make it hyperparam
     private ActionNode lastBestActionNode;
 
-    public Tree(Domain domain, AbstractBelief belief, Integer maxWidth, EvaluationFunctionInterface evaluationFunction, AbstractOwnExplorationPolicy ownPolicy) {
-        this.evaluator = evaluationFunction;
+    public Tree(UtilitySpace utilitySpace, AbstractBelief belief, Integer maxWidth, AbstractState<?> startState,
+            AbstractOwnExplorationPolicy ownPolicy) {
+        // this.evaluator = evaluationFunction;
         this.belief = belief;
         this.maxWidth = maxWidth;
-        this.root = new BeliefNode(null, new HistoryState(domain, null), null);
+        this.root = new BeliefNode(null, startState, null);
         this.ownExplorationStrategy = ownPolicy;
-        
+
     }
 
     public void simulate() throws StateRepresentationException {
@@ -46,10 +49,9 @@ public class Tree {
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
             if (currRoot.getChildren().size() < this.maxWidth) {
                 currRoot = (BeliefNode) ((ActionNode) currRoot).receiveObservation();
-                Action opponentAction =  ((BeliefNode) currRoot).getObservation();
+                Action opponentAction = ((BeliefNode) currRoot).getObservation();
                 Action agentAction = ((ActionNode) currRoot.getParent()).getAction();
-                Double value = this.evaluate(currRoot.getState(), opponentAction, agentAction);
-                Tree.backpropagate(currRoot, value);
+                Double value = currRoot.getState().evaluate();
                 return;
             } else {
                 // Going down the tree
@@ -61,7 +63,7 @@ public class Tree {
             ActionNode actionNode = (ActionNode) ((BeliefNode) currRoot).act(ownExplorationStrategy); // What the fuck
             BeliefNode beliefNode = (BeliefNode) actionNode.receiveObservation();
             currRoot = beliefNode;
-            Double value = this.evaluate(currRoot.getState(), beliefNode.getObservation(), actionNode.getAction());
+            Double value = currRoot.getState().evaluate();
             Tree.backpropagate(currRoot, value);
         }
     }
@@ -76,9 +78,10 @@ public class Tree {
         node.setValue(node.getValue() + value);
     }
 
-    public Double evaluate(AbstractState<?> state, Action opponentAction, Action agentAction) {
-        Bid lastBid = ((Offer) opponentAction).getBid(); 
-        Bid secondTolastBid = ((Offer) agentAction).getBid(); 
+    public Double evaluate(AbstractState<?> state, Action opponentAction, Action agentAction) { // TODO: Not needed
+                                                                                                // anymore?
+        Bid lastBid = ((Offer) opponentAction).getBid();
+        Bid secondTolastBid = ((Offer) agentAction).getBid();
         return this.evaluator.evaluate(state, lastBid, secondTolastBid);
     }
 
@@ -90,18 +93,24 @@ public class Tree {
     // return adoptedChild;
     // }
 
-
-
     public static Node selectFavoriteChild(List<Node> candidatesChildrenForAdoption) {
         // True Random - Alt.: Proportional to the visits
         Node adoptedChild = candidatesChildrenForAdoption.stream().max(Comparator.comparing(Tree::UCB1)).get();
         return adoptedChild;
     }
 
-    public Tree receiveRealObservation(Action observaAction) {
+    public Tree receiveRealObservation(Action observationAction) {
         List<Node> rootCandidates = this.lastBestActionNode.getChildren();
-        this.belief = this.belief.updateBeliefs((Offer) observaAction, (Offer) this.lastBestActionNode.getAction(), this.lastBestActionNode.getState());
-        this.root = (BeliefNode) rootCandidates.get(0); // THIS IS DUMB! Get the node with the closest observation to the real one.
+        this.belief = this.belief.updateBeliefs((Offer) observationAction, (Offer) this.lastBestActionNode.getAction(),
+                this.lastBestActionNode.getState());
+        List<Bid> candidateBids = rootCandidates.stream().map(node -> ((BeliefNode) node))
+                .map(beliefNode -> ((Offer) beliefNode.getObservation())).map(offer -> offer.getBid())
+                .collect(Collectors.toList());
+        Bid realBid = ((Offer) observationAction).getBid();
+        Bid closestBid = this.belief.getDistance().computeMostSimilar(realBid, candidateBids);
+        Node nextRoot = rootCandidates.parallelStream()
+                .filter(node -> ((Offer) ((BeliefNode) node).getObservation()).getBid() == closestBid).findFirst().get();
+        this.root = (BeliefNode) nextRoot;
         return this;
     }
 
@@ -115,7 +124,8 @@ public class Tree {
 
     public Action chooseBestAction() {
         List<Node> oldestChildren = this.root.getChildren();
-        this.lastBestActionNode = (ActionNode) oldestChildren.stream().max(Comparator.comparing(node -> node.getValue())).get();
+        this.lastBestActionNode = (ActionNode) oldestChildren.stream()
+                .max(Comparator.comparing(node -> node.getValue())).get();
         Action action = lastBestActionNode.getAction();
         return action;
     }

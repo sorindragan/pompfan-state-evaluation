@@ -1,4 +1,4 @@
-package geniusweb.custom.strategies;
+package geniusweb.custom.opponents;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,11 +20,11 @@ import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.issuevalue.ValueSet;
 
-public class ValueApproximationPolicy extends AbstractPolicy {
+public class PolicyGradientPolicy extends AbstractPolicy {
     private Map<PolicyState, PolicyActionDistribution> policies;
     private List<String> allIssues;
 
-    public ValueApproximationPolicy(Domain domain, String name) {
+    public PolicyGradientPolicy(Domain domain, String name) {
         super(domain, name);
 
         allIssues = IVPair.getIssues(domain);
@@ -50,7 +50,18 @@ public class ValueApproximationPolicy extends AbstractPolicy {
         for (String issue : this.allIssues) {
             INDArray weights = actionDistribution.issueSetsWeights.get(issue);
             ValueSet values = actionDistribution.issueSets.get(issue);
-            
+            // Idea: https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html
+            // 3 Policy functions - Choose issue value a according to each issues value argmax  
+            // |
+            // | PI_theta(a1|s) = argmax(w1*i1v1 , w2*i1v2 , w3*i1v3)
+            // | PI_theta(a2|s) = argmax(w4*i2v1 , w5*i2v2)
+            // | PI_theta(a3|s) = argmax(w6*i3v1 , w7*i3v2 , w8*i3v3 , w9*i3v4)
+            // |
+            // #--> Combine to Bid
+            //      Issue: How to connect the different policy gradient functions to interact
+            //      | Idea1: Use NN -> Idea already taken!!!
+            //      | Idea2: Use Polynomial Linear Regression
+
         }
         return null;
     }

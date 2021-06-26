@@ -2,9 +2,9 @@ package geniusweb.custom.components;
 
 import geniusweb.actions.Action;
 import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
+import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.StateRepresentationException;
-import geniusweb.custom.strategies.AbstractPolicy;
 
 /**
  * BeliefNode

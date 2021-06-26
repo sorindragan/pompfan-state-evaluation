@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import geniusweb.actions.Action;
+import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.StateRepresentation;
-import geniusweb.custom.strategies.AbstractPolicy;
 
 /**
  * Node

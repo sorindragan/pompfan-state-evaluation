@@ -9,7 +9,7 @@ import java.util.Map;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
-import geniusweb.custom.strategies.AbstractPolicy;
+import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.issuevalue.Domain;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
@@ -18,8 +18,8 @@ public class UtilityState extends AbstractState<Map<PartyId, BigDecimal>> {
     private UtilitySpace utilitySpace;
     private ArrayList<Map<PartyId, BigDecimal>> history = new ArrayList<>();
 
-    public UtilityState(Domain domain, AbstractPolicy opponent, UtilitySpace utilitySpace) {
-        super(domain, opponent);
+    public UtilityState(UtilitySpace utilitySpace, AbstractPolicy opponent) {
+        super(utilitySpace, opponent);
         this.utilitySpace = utilitySpace;
     }
 

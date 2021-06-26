@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import geniusweb.actions.Offer;
+import geniusweb.custom.distances.AbstractBidDistance;
+import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;
-import geniusweb.custom.strategies.AbstractPolicy;
 
 public class RandomTestBelief extends AbstractBelief {
 
-    public RandomTestBelief(List<AbstractPolicy> listOfOpponents) {
-        super(listOfOpponents);
+    public RandomTestBelief(List<AbstractPolicy> listOfOpponents, AbstractBidDistance distance) {
+        super(listOfOpponents, distance);
     }
 
     @Override

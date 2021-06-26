@@ -1,6 +1,9 @@
 package geniusweb.custom.distances;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import geniusweb.custom.helper.BidVector;
 import geniusweb.custom.helper.IVPair;
@@ -19,7 +22,7 @@ public abstract class AbstractBidDistance {
         this.domain = utilitySpace.getDomain();
         this.utilitySpace = utilitySpace;
         this.issues = utilitySpace;
-        this.issueValues = IVPair.getIssueValueSets(this.domain);
+        // this.issueValues = IVPair.getIssueValueSets(this.domain);
     }
     public Domain getDomain() {
         return domain;
@@ -49,6 +52,14 @@ public abstract class AbstractBidDistance {
     }
     public void setIssueValues(Map<String, ValueSet> issueValues) {
         this.issueValues = issueValues;
+    }
+    public Bid computeMostSimilar(Bid b1, List<Bid> allBids){
+        Bid key = Collections.min(this.computeDistances(b1, allBids).entrySet(), Map.Entry.comparingByValue()).getKey();
+        return key;
+    };
+
+    public Map<Bid, Double> computeDistances(Bid b1, List<Bid> b2) {
+        return b2.parallelStream().collect(Collectors.toMap(bid -> bid, bid -> this.computeDistance(b1, bid)));
     }
     public abstract Double computeDistance(Bid b1, Bid b2);
 

@@ -20,14 +20,23 @@ import geniusweb.actions.LearningDone;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
 import geniusweb.bidspace.AllBidsList;
+import geniusweb.custom.beliefs.AbstractBelief;
+import geniusweb.custom.beliefs.ParticleFilterBelief;
 import geniusweb.custom.beliefs.RandomTestBelief;
 import geniusweb.custom.components.Tree;
+import geniusweb.custom.distances.AbstractBidDistance;
+import geniusweb.custom.distances.UtilityBidDistance;
 import geniusweb.custom.evaluators.MeanUtilityEvaluator;
 import geniusweb.custom.evaluators.RandomEvaluator;
 import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
+import geniusweb.custom.opponents.AbstractPolicy;
+import geniusweb.custom.opponents.RandomOpponentPolicy;
+import geniusweb.custom.state.AbstractState;
+import geniusweb.custom.state.HistoryState;
+import geniusweb.custom.state.Last2BidsState;
 import geniusweb.custom.state.StateRepresentationException;
-import geniusweb.custom.strategies.AbstractPolicy;
-import geniusweb.custom.strategies.RandomOpponentPolicy;
+import geniusweb.exampleparties.boulware.Boulware;
+import geniusweb.exampleparties.timedependentparty.TimeDependentParty;
 import geniusweb.inform.ActionDone;
 import geniusweb.inform.Agreements;
 import geniusweb.inform.Finished;
@@ -54,7 +63,8 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     /**
      *
      */
-    private static final int WIDTH = 100;
+    private static final int NUM_SIMULATIONS = 100;
+    private static final int MAX_WIDTH = 10;
     private static final boolean DEBUG = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -153,10 +163,14 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         listOfOpponents.add(new RandomOpponentPolicy(domain));
                         listOfOpponents.add(new RandomOpponentPolicy(domain));
                         listOfOpponents.add(new RandomOpponentPolicy(domain));
-                        RandomTestBelief belief = new RandomTestBelief(listOfOpponents);
-                        MeanUtilityEvaluator evaluator = new MeanUtilityEvaluator(this.utilitySpace);
+                        Boulware agent = new Boulware();
+                        AbstractBidDistance distance = new UtilityBidDistance(this.utilitySpace);
+                        AbstractBelief belief = new ParticleFilterBelief(listOfOpponents, distance);
+                        AbstractState<?> startState = new HistoryState(utilitySpace, null);
                         RandomOwnExplorerPolicy explorator = new RandomOwnExplorerPolicy(domain, this.utilitySpace, me);
-                        this.MCTS = new Tree(domain, belief, WIDTH, evaluator, explorator);
+                        this.MCTS = new Tree(this.utilitySpace, belief, MAX_WIDTH, startState, explorator);
+                        // MeanUtilityEvaluator evaluator = new MeanUtilityEvaluator(this.utilitySpace);
+                        // AbstractState<?> startState = new HistoryState(utilitySpace, null);
                     } catch (IOException e) {
                         throw new IllegalStateException(e);
                     }
@@ -255,6 +269,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             // negotiation data.
             this.lastReceivedBid = ((Offer) action).getBid();
             this.negotiationData.addBidUtil(this.utilitySpace.getUtility(this.lastReceivedBid).doubleValue());
+            this.MCTS.receiveRealObservation(action);
         }
     }
 
@@ -291,7 +306,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             action = new Accept(me, this.lastReceivedBid);
         } else {
             // STEP: Generate offer!
-            this.MCTS.construct(100);
+            this.MCTS.construct(NUM_SIMULATIONS);
             action = this.MCTS.chooseBestAction();
             if(action instanceof Offer){
                 Bid myBid = ((Offer) action).getBid();

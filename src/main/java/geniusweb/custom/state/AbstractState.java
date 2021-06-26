@@ -7,30 +7,31 @@ import geniusweb.actions.Action;
 import geniusweb.custom.distances.CosineSimilarity;
 import geniusweb.custom.distances.ExactSame;
 import geniusweb.custom.distances.L2Distance;
-import geniusweb.custom.strategies.AbstractPolicy;
+import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.issuevalue.Domain;
+import geniusweb.profile.utilityspace.UtilitySpace;
 
 public abstract class AbstractState<T>
         implements Comparable<AbstractState<T>>, CosineSimilarity, L2Distance, ExactSame<T> {
-    private Domain domain;
+    private UtilitySpace utilitySpace;
     private AbstractPolicy opponent;
     private T representation;
     public Class<T> containerClass;
 
-    public AbstractState(Domain domain, AbstractPolicy opponent) {
+    public AbstractState(UtilitySpace utilitySpace, AbstractPolicy opponent) {
         super();
-        this.domain = domain;
+        this.utilitySpace = utilitySpace;
         this.opponent = opponent;
     }
 
 
 
-    public Domain getDomain() {
-        return domain;
+    public UtilitySpace getUtilitySpace() {
+        return this.utilitySpace;
     }
 
-    public AbstractState<T> setDomain(Domain stateRepresentation) {
-        this.domain = stateRepresentation;
+    public AbstractState<T> setUtilitySpace(UtilitySpace utilitySpace) {
+        this.utilitySpace = utilitySpace;
         return this;
     }
 

@@ -1,4 +1,4 @@
-package geniusweb.custom.strategies;
+package geniusweb.custom.opponents;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
