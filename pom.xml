@@ -147,6 +147,12 @@
 			<version>${geniusweb.version}</version>
 			<!-- <classifier>jar-with-dependencies</classifier> -->
 		</dependency>
+		<dependency>
+			<groupId>geniusweb.exampleparties.anac2019</groupId>
+			<artifactId>winkyagent</artifactId>
+			<version>${geniusweb.version}</version>
+			<!-- <type>pom</type> -->
+		</dependency>
 		<!-- <dependency>
 			<groupId>geniusweb.exampleparties</groupId>
 			<artifactId>boulware</artifactId>

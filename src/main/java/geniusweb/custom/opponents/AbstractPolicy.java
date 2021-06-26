@@ -26,7 +26,7 @@ import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.profile.utilityspace.ValueSetUtilities;
 
-public abstract class AbstractPolicy {
+public abstract class AbstractPolicy implements CommonOpponentInterface{
     private UtilitySpace utilitySpace = null;
     private AllBidsList bidspace = null;
     private Domain domain;
@@ -133,8 +133,5 @@ public abstract class AbstractPolicy {
         this.partyId = partyId;
     }
 
-    public abstract Action chooseAction();
-    public abstract Action chooseAction(Bid lastAgentBid);
-    public abstract Action chooseAction(Bid lastAgentBid, AbstractState<?> state);
 
 }
