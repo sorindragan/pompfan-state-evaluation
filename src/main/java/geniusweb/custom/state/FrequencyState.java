@@ -13,17 +13,18 @@ import geniusweb.actions.Offer;
 import geniusweb.custom.distances.CosineSimilarity;
 import geniusweb.custom.distances.L2Distance;
 import geniusweb.custom.helper.IVPair;
-import geniusweb.custom.strategies.AbstractPolicy;
+import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
+import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
 
     private List<IVPair> allIssueValues;
 
-    public FrequencyState(Domain domain, AbstractPolicy opponent) {
-        super(domain, opponent);
-        this.init(IVPair.getVectorContainer(domain));
+    public FrequencyState(UtilitySpace utilitySpace, AbstractPolicy opponent) {
+        super(utilitySpace, opponent);
+        this.init(IVPair.getVectorContainer(utilitySpace.getDomain()));
     }
 
     public HashMap<IVPair, Double> getFrequency() {
@@ -49,7 +50,7 @@ public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
             for (IVPair issueValuePair : bidIssueValues) {
                 representation.computeIfPresent(issueValuePair, (key, val) -> val + 1);
             }
-            return new FrequencyState(this.getDomain(), this.getOpponent()).init(representation);
+            return new FrequencyState(this.getUtilitySpace(), this.getOpponent()).init(representation);
         }
         throw new StateRepresentationException();
     }
@@ -69,6 +70,12 @@ public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
         INDArray arr2 = Nd4j.createFromArray(otherVals);
 
         return this.computeL2(arr1, arr2);
+    }
+
+    @Override
+    public Double evaluate() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

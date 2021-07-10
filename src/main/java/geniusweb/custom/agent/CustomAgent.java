@@ -20,12 +20,23 @@ import geniusweb.actions.LearningDone;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
 import geniusweb.bidspace.AllBidsList;
+import geniusweb.custom.beliefs.AbstractBelief;
+import geniusweb.custom.beliefs.ParticleFilterBelief;
 import geniusweb.custom.beliefs.RandomTestBelief;
 import geniusweb.custom.components.Tree;
+import geniusweb.custom.distances.AbstractBidDistance;
+import geniusweb.custom.distances.UtilityBidDistance;
+import geniusweb.custom.evaluators.MeanUtilityEvaluator;
 import geniusweb.custom.evaluators.RandomEvaluator;
+import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
+import geniusweb.custom.opponents.AbstractPolicy;
+import geniusweb.custom.opponents.RandomOpponentPolicy;
+import geniusweb.custom.state.AbstractState;
+import geniusweb.custom.state.HistoryState;
+import geniusweb.custom.state.Last2BidsState;
 import geniusweb.custom.state.StateRepresentationException;
-import geniusweb.custom.strategies.AbstractPolicy;
-import geniusweb.custom.strategies.RandomOpponentPolicy;
+import geniusweb.exampleparties.boulware.Boulware;
+import geniusweb.exampleparties.timedependentparty.TimeDependentParty;
 import geniusweb.inform.ActionDone;
 import geniusweb.inform.Agreements;
 import geniusweb.inform.Finished;
@@ -49,6 +60,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CustomAgent extends DefaultParty { // TODO: change name
 
+    /**
+     *
+     */
+    private static final int NUM_SIMULATIONS = 100;
+    private static final int MAX_WIDTH = 10;
+    private static final boolean DEBUG = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
     private final Random random = new Random();
@@ -85,7 +102,6 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         System.out.println("RECEIVE INFO");
         try {
 
-            
             if (info instanceof Settings) {
                 // info is a Settings object that is passed at the start of a negotiation
                 Settings settings = (Settings) info;
@@ -141,6 +157,20 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(),
                                 getReporter());
                         this.utilitySpace = ((UtilitySpace) profileint.getProfile());
+                        // Our stuff
+                        Domain domain = this.utilitySpace.getDomain();
+                        List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
+                        listOfOpponents.add(new RandomOpponentPolicy(domain));
+                        listOfOpponents.add(new RandomOpponentPolicy(domain));
+                        listOfOpponents.add(new RandomOpponentPolicy(domain));
+                        Boulware agent = new Boulware();
+                        AbstractBidDistance distance = new UtilityBidDistance(this.utilitySpace);
+                        AbstractBelief belief = new ParticleFilterBelief(listOfOpponents, distance);
+                        AbstractState<?> startState = new HistoryState(utilitySpace, null);
+                        RandomOwnExplorerPolicy explorator = new RandomOwnExplorerPolicy(domain, this.utilitySpace, me);
+                        this.MCTS = new Tree(this.utilitySpace, belief, MAX_WIDTH, startState, explorator, this.progress);
+                        // MeanUtilityEvaluator evaluator = new MeanUtilityEvaluator(this.utilitySpace);
+                        // AbstractState<?> startState = new HistoryState(utilitySpace, null);
                     } catch (IOException e) {
                         throw new IllegalStateException(e);
                     }
@@ -155,7 +185,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                     if (this.opponentName == null) {
                         // The part behind the last _ is always changing, so we must cut it off.
                         String fullOpponentName = action.getActor().getName();
-                        int index = fullOpponentName.lastIndexOf("_");
+                        int lastIndexOf = fullOpponentName.lastIndexOf("_");
+                        // int index = lastIndexOf == -1 ? fullOpponentName.length() : lastIndexOf;
+                        int index = lastIndexOf;
                         this.opponentName = fullOpponentName.substring(0, index);
 
                         // Add name of the opponent to the negotiation data
@@ -169,15 +201,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 if (progress instanceof ProgressRounds) {
                     progress = ((ProgressRounds) progress).advance();
                 }
-                // Our stuff 
-                Domain domain = this.utilitySpace.getDomain();
-                List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
-                listOfOpponents.add(new RandomOpponentPolicy(domain));
-                listOfOpponents.add(new RandomOpponentPolicy(domain));
-                listOfOpponents.add(new RandomOpponentPolicy(domain));
-                RandomTestBelief belief = new RandomTestBelief(listOfOpponents);
-                RandomEvaluator evaluator = new RandomEvaluator();
-                MCTS = new Tree(domain, belief, 3, evaluator);
+
                 // The info notifies us that it is our turn
                 myTurn();
             } else if (info instanceof Finished) {
@@ -245,6 +269,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             // negotiation data.
             this.lastReceivedBid = ((Offer) action).getBid();
             this.negotiationData.addBidUtil(this.utilitySpace.getUtility(this.lastReceivedBid).doubleValue());
+            this.MCTS.receiveRealObservation(action, System.currentTimeMillis());
         }
     }
 
@@ -260,24 +285,42 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         if (!agreements.getMap().isEmpty()) {
             // Get the bid that is agreed upon and add it's value to our negotiation data
             Bid agreement = agreements.getMap().values().iterator().next();
+            System.out.println("AGREEMENT!!!! -- Util="+ String.valueOf(this.utilitySpace.getUtility(agreement)) + " -- " + agreement.toString());
             this.negotiationData.addAgreementUtil(this.utilitySpace.getUtility(agreement).doubleValue());
         }
     }
 
     /**
      * send our next offer
+     * 
      * @throws StateRepresentationException
      */
     private void myTurn() throws IOException, StateRepresentationException {
-        System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
+        if (this.lastReceivedBid != null) {            
+            System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
+            System.out.println("Opponent: Util="+ this.utilitySpace.getUtility(this.lastReceivedBid) + " -- " + this.lastReceivedBid.toString());
+        }
         Action action;
-        if (isGood(lastReceivedBid)) {
+        if (isGood(this.lastReceivedBid)) {
             // If the last received bid is good: create Accept action
-            action = new Accept(me, lastReceivedBid);
+            action = new Accept(me, this.lastReceivedBid);
         } else {
             // STEP: Generate offer!
-            this.MCTS.construct(10);//TODO: Must happen somewhere else. Below is a learn function.
+            this.MCTS.construct(NUM_SIMULATIONS);
             action = this.MCTS.chooseBestAction();
+            if(action instanceof Offer){
+                Bid myBid = ((Offer) action).getBid();
+                System.out.println("Agent:    Util="+ String.valueOf(this.utilitySpace.getUtility(myBid)) + " -- " + myBid.toString());
+            }else if(action instanceof Accept){
+                Bid acceptedBid = ((Accept) action).getBid();
+                System.out.println("We ACCEPT: Util="+ String.valueOf(this.utilitySpace.getUtility(acceptedBid)) + " -- " + acceptedBid.toString());
+            }else{
+                System.out.println("Something HAPPENED! "+ action.toString());
+            }
+            if (DEBUG) {
+                System.out.println(this.MCTS);
+                System.out.println(action);
+            }
         }
 
         // Send action

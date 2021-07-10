@@ -1,38 +1,44 @@
 package geniusweb.custom.state;
 
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import geniusweb.actions.Action;
 import geniusweb.custom.distances.CosineSimilarity;
 import geniusweb.custom.distances.ExactSame;
 import geniusweb.custom.distances.L2Distance;
-import geniusweb.custom.strategies.AbstractPolicy;
+import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.issuevalue.Domain;
+import geniusweb.profile.utilityspace.UtilitySpace;
 
 public abstract class AbstractState<T>
         implements Comparable<AbstractState<T>>, CosineSimilarity, L2Distance, ExactSame<T> {
-    private Domain domain;
+    private UtilitySpace utilitySpace;
     private AbstractPolicy opponent;
     private T representation;
+    private Double round;
     public Class<T> containerClass;
 
-    public AbstractState(Domain domain, AbstractPolicy opponent) {
+    public AbstractState(UtilitySpace utilitySpace, AbstractPolicy opponent) {
         super();
-        this.domain = domain;
+        this.utilitySpace = utilitySpace;
         this.opponent = opponent;
     }
 
-
-
-    public Domain getDomain() {
-        return domain;
+    public Double getRound() {
+        return round;
     }
 
-    public AbstractState<T> setDomain(Domain stateRepresentation) {
-        this.domain = stateRepresentation;
+    public AbstractState<T> setRound(Double currentTime) {
+        this.round = currentTime;
+        return this;
+    }
+
+    public UtilitySpace getUtilitySpace() {
+        return this.utilitySpace;
+    }
+
+    public AbstractState<T> setUtilitySpace(UtilitySpace utilitySpace) {
+        this.utilitySpace = utilitySpace;
         return this;
     }
 
@@ -75,6 +81,15 @@ public abstract class AbstractState<T>
         return compResult ? 1.0 : 0.0;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AbstractState<?>) {
+            AbstractState<?> otherState = (AbstractState<?>) obj;
+            return this.getRepresentation().equals(otherState.getRepresentation());
+        }
+        return false;
+    }
+
     public abstract String getStringRepresentation();
 
     public abstract AbstractState<T> updateState(Action nextAction) throws StateRepresentationException;
@@ -82,5 +97,7 @@ public abstract class AbstractState<T>
     public abstract T getCurrentState();
 
     public abstract Double computeDistance(T otherState);
+
+    public abstract Double evaluate();
 
 }
