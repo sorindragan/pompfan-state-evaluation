@@ -15,7 +15,6 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class HistoryState extends AbstractState<ArrayList<Action>> {
     private double DISCOUNT_RATE = 0.95;
-    private ArrayList<Action> history;
 
     public HistoryState(UtilitySpace utilitySpace, AbstractPolicy opponent) {
         super(utilitySpace, opponent);
@@ -39,12 +38,11 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
     public AbstractState<ArrayList<Action>> updateState(Action nextAction) throws StateRepresentationException {
         ArrayList<Action> representation = new ArrayList<Action>(this.getRepresentation());
         representation.add(nextAction);
-        return new HistoryState(this.getUtilitySpace(), this.getOpponent()).init(representation);
+        return new HistoryState(this.getUtilitySpace(), this.getOpponent()).init(representation).setRound((long) representation.size());
     }
 
     @Override
     public ArrayList<Action> getCurrentState() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -74,6 +72,12 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
                 : ZERO_UTILITY;
         BigDecimal mean = utility1.add(utility2).divide(new BigDecimal(2));
         return mean.doubleValue();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        HistoryState secondState = (HistoryState) obj;
+        return this.getHistory().equals(secondState.getHistory());
     }
 
 }

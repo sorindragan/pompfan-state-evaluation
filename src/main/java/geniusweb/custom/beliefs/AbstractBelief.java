@@ -17,8 +17,9 @@ public abstract class AbstractBelief {
 
     public AbstractBelief(HashMap<AbstractPolicy, Double> opponentProbabilities, AbstractBidDistance distance) {
         this.opponentProbabilities = opponentProbabilities;
+        Double sumVals = this.opponentProbabilities.values().stream().mapToDouble(val -> val).sum();
+        this.opponentProbabilities.entrySet().parallelStream().forEach(entry -> this.opponentProbabilities.put(entry.getKey(), entry.getValue()/sumVals));
         this.distance = distance;
-        
     }
     
     public AbstractBelief(List<AbstractPolicy> listOfOpponents, AbstractBidDistance distance) {

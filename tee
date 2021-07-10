@@ -1,0 +1,4 @@
+GeniusWeb stand-alone runner.
+first argument should be <settings.json>.
+The settings.json file should contain the NegoSettings.
+See the settings.json example file and the GeniusWeb wiki pages. 

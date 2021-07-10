@@ -1,5 +1,6 @@
 package geniusweb.custom.components;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -15,29 +16,38 @@ import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.HistoryState;
 import geniusweb.custom.state.StateRepresentationException;
+import geniusweb.deadline.DeadlineTime;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.profile.utilityspace.UtilitySpace;
+import geniusweb.progress.Progress;
+import geniusweb.progress.ProgressFactory;
 
 // Tree<T extends AbstractState<?>>
 public class Tree {
     private BeliefNode root;
     private static Random random = new Random(42);
     private Domain domain;
+    private UtilitySpace utilitySpace;
+
     private AbstractBelief belief;
     private Integer maxWidth;
     private AbstractOwnExplorationPolicy ownExplorationStrategy; // The action we choose to simulate (expand new node).
     private EvaluationFunctionInterface evaluator;
     private static Double C = Math.sqrt(2); // TODO: Make it hyperparam
     private ActionNode lastBestActionNode;
+    private int simulationTime;
+    private Progress progress;
+    private Double currentTime = 0.0;
 
     public Tree(UtilitySpace utilitySpace, AbstractBelief belief, Integer maxWidth, AbstractState<?> startState,
-            AbstractOwnExplorationPolicy ownPolicy) {
+            AbstractOwnExplorationPolicy ownPolicy, Progress progress) {
         // this.evaluator = evaluationFunction;
         this.belief = belief;
         this.maxWidth = maxWidth;
         this.root = new BeliefNode(null, startState, null);
         this.ownExplorationStrategy = ownPolicy;
+        this.setProgress(progress); // Around two seconds
 
     }
 
@@ -48,10 +58,13 @@ public class Tree {
         while (currRoot.getChildren().size() == this.maxWidth) { // yes the fuck
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
             if (currRoot.getChildren().size() < this.maxWidth) {
+                // System.out.println("========================================");
                 currRoot = (BeliefNode) ((ActionNode) currRoot).receiveObservation();
-                Action opponentAction = ((BeliefNode) currRoot).getObservation();
-                Action agentAction = ((ActionNode) currRoot.getParent()).getAction();
+                // For non-history state evaluation, we might need the last two bids.
+                // Action opponentAction = ((BeliefNode) currRoot).getObservation();
+                // Action agentAction = ((ActionNode) currRoot.getParent()).getAction();
                 Double value = currRoot.getState().evaluate();
+                Tree.backpropagate(currRoot, value);
                 return;
             } else {
                 // Going down the tree
@@ -60,7 +73,9 @@ public class Tree {
         }
 
         if (currRoot.getChildren().size() < this.maxWidth) {
+            // System.out.println("========================================");
             ActionNode actionNode = (ActionNode) ((BeliefNode) currRoot).act(ownExplorationStrategy); // What the fuck
+            // System.out.println("========================================");
             BeliefNode beliefNode = (BeliefNode) actionNode.receiveObservation();
             currRoot = beliefNode;
             Double value = currRoot.getState().evaluate();
@@ -99,18 +114,28 @@ public class Tree {
         return adoptedChild;
     }
 
-    public Tree receiveRealObservation(Action observationAction) {
+    public Tree receiveRealObservation(Action observationAction, Long time) {
         List<Node> rootCandidates = this.lastBestActionNode.getChildren();
+        this.currentTime = this.getProgress().get(time);
+
         this.belief = this.belief.updateBeliefs((Offer) observationAction, (Offer) this.lastBestActionNode.getAction(),
-                this.lastBestActionNode.getState());
+                this.lastBestActionNode.getState().setRound(this.currentTime));
         List<Bid> candidateBids = rootCandidates.stream().map(node -> ((BeliefNode) node))
                 .map(beliefNode -> ((Offer) beliefNode.getObservation())).map(offer -> offer.getBid())
                 .collect(Collectors.toList());
+        // System.out.println(candidateBids);
         Bid realBid = ((Offer) observationAction).getBid();
         Bid closestBid = this.belief.getDistance().computeMostSimilar(realBid, candidateBids);
         Node nextRoot = rootCandidates.parallelStream()
-                .filter(node -> ((Offer) ((BeliefNode) node).getObservation()).getBid() == closestBid).findFirst().get();
+                .filter(node -> ((Offer) ((BeliefNode) node).getObservation()).getBid() == closestBid).findFirst()
+                .get();
         this.root = (BeliefNode) nextRoot;
+        // try {
+        // } catch (Exception e) {
+        // e.printStackTrace();
+        // System.exit(0);
+
+        // }
         return this;
     }
 
@@ -127,6 +152,8 @@ public class Tree {
         this.lastBestActionNode = (ActionNode) oldestChildren.stream()
                 .max(Comparator.comparing(node -> node.getValue())).get();
         Action action = lastBestActionNode.getAction();
+        // System.out.println("Choose...");
+        // System.out.println(lastBestActionNode);
         return action;
     }
 
@@ -156,6 +183,69 @@ public class Tree {
                 buildStringBuffer(buffer, childrenPrefix + "└── ", childrenPrefix + "    ", next);
             }
         }
+    }
+
+    public Domain getDomain() {
+        return domain;
+    }
+
+    public Tree setDomain(Domain domain) {
+        this.domain = domain;
+        return this;
+    }
+
+    public AbstractBelief getBelief() {
+        return belief;
+    }
+
+    public Tree setBelief(AbstractBelief belief) {
+        this.belief = belief;
+        return this;
+    }
+
+    public Integer getMaxWidth() {
+        return maxWidth;
+    }
+
+    public Tree setMaxWidth(Integer maxWidth) {
+        this.maxWidth = maxWidth;
+        return this;
+    }
+
+    public AbstractOwnExplorationPolicy getOwnExplorationStrategy() {
+        return ownExplorationStrategy;
+    }
+
+    public Tree setOwnExplorationStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy) {
+        this.ownExplorationStrategy = ownExplorationStrategy;
+        return this;
+    }
+
+    public EvaluationFunctionInterface getEvaluator() {
+        return evaluator;
+    }
+
+    public Tree setEvaluator(EvaluationFunctionInterface evaluator) {
+        this.evaluator = evaluator;
+        return this;
+    }
+
+    public UtilitySpace getUtilitySpace() {
+        return utilitySpace;
+    }
+
+    public Tree setUtilitySpace(UtilitySpace utilitySpace) {
+        this.utilitySpace = utilitySpace;
+        return this;
+    }
+
+    public Progress getProgress() {
+        return progress;
+    }
+
+    public Tree setProgress(Progress progress) {
+        this.progress = progress;
+        return this;
     }
 
 }

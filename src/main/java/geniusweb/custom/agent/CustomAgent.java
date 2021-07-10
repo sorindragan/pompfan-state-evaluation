@@ -168,7 +168,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         AbstractBelief belief = new ParticleFilterBelief(listOfOpponents, distance);
                         AbstractState<?> startState = new HistoryState(utilitySpace, null);
                         RandomOwnExplorerPolicy explorator = new RandomOwnExplorerPolicy(domain, this.utilitySpace, me);
-                        this.MCTS = new Tree(this.utilitySpace, belief, MAX_WIDTH, startState, explorator);
+                        this.MCTS = new Tree(this.utilitySpace, belief, MAX_WIDTH, startState, explorator, this.progress);
                         // MeanUtilityEvaluator evaluator = new MeanUtilityEvaluator(this.utilitySpace);
                         // AbstractState<?> startState = new HistoryState(utilitySpace, null);
                     } catch (IOException e) {
@@ -269,7 +269,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             // negotiation data.
             this.lastReceivedBid = ((Offer) action).getBid();
             this.negotiationData.addBidUtil(this.utilitySpace.getUtility(this.lastReceivedBid).doubleValue());
-            this.MCTS.receiveRealObservation(action);
+            this.MCTS.receiveRealObservation(action, System.currentTimeMillis());
         }
     }
 

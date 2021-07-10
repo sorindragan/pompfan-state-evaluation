@@ -12,7 +12,6 @@ import geniusweb.custom.state.StateRepresentationException;
 public class BeliefNode extends Node {
     private Action observation;
 
-
     public Action getObservation() {
         return observation;
     }
@@ -27,12 +26,23 @@ public class BeliefNode extends Node {
         this.setObservation(observation);
     }
 
-    public Node act(AbstractOwnExplorationPolicy strategy) throws StateRepresentationException{
+    public Node act(AbstractOwnExplorationPolicy strategy) throws StateRepresentationException {
         AbstractState<?> state = this.getState();
-        Action agentAction = strategy.chooseAction(); 
-        AbstractState<?> newState = state.updateState(agentAction); 
-        ActionNode child = (ActionNode) Node.buildNode(Node.NODE_TYPE.ACTION, this, newState, state.getOpponent(), agentAction);
-        this.addChild(child);
+        Action agentAction = strategy.chooseAction();
+        AbstractState<?> newState = state.updateState(agentAction);
+        // System.out.println("================== "+this.getChildren().size()+" ==================");
+        // System.out.println("Parent: "+this);
+        ActionNode child = (ActionNode) this.getChildren().stream()
+                // .peek(e -> System.out.println("Belief: " + e))
+                // .peek(e -> System.out.println("State: " + ((ActionNode) e).getAction()))
+                .filter(childNode -> childNode.getState().equals(newState))
+                // .peek(e -> System.out.println("Filtered value: " + e))
+                .findFirst().orElse(null);
+
+        if (child==null) {
+            child = (ActionNode) Node.buildNode(Node.NODE_TYPE.ACTION, this, newState, state.getOpponent(), agentAction);
+            this.addChild(child);
+        }
         return child;
     }
 

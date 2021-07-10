@@ -1,6 +1,5 @@
 package geniusweb.custom.state;
 
-
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import geniusweb.actions.Action;
@@ -16,6 +15,7 @@ public abstract class AbstractState<T>
     private UtilitySpace utilitySpace;
     private AbstractPolicy opponent;
     private T representation;
+    private Double round;
     public Class<T> containerClass;
 
     public AbstractState(UtilitySpace utilitySpace, AbstractPolicy opponent) {
@@ -24,7 +24,14 @@ public abstract class AbstractState<T>
         this.opponent = opponent;
     }
 
+    public Double getRound() {
+        return round;
+    }
 
+    public AbstractState<T> setRound(Double currentTime) {
+        this.round = currentTime;
+        return this;
+    }
 
     public UtilitySpace getUtilitySpace() {
         return this.utilitySpace;
@@ -74,6 +81,15 @@ public abstract class AbstractState<T>
         return compResult ? 1.0 : 0.0;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AbstractState<?>) {
+            AbstractState<?> otherState = (AbstractState<?>) obj;
+            return this.getRepresentation().equals(otherState.getRepresentation());
+        }
+        return false;
+    }
+
     public abstract String getStringRepresentation();
 
     public abstract AbstractState<T> updateState(Action nextAction) throws StateRepresentationException;
@@ -83,7 +99,5 @@ public abstract class AbstractState<T>
     public abstract Double computeDistance(T otherState);
 
     public abstract Double evaluate();
-
-
 
 }
