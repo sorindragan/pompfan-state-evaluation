@@ -148,11 +148,47 @@
 			<!-- <classifier>jar-with-dependencies</classifier> -->
 		</dependency>
 		<dependency>
+			<groupId>geniusweb.exampleparties</groupId>
+			<artifactId>conceder</artifactId>
+			<version>${geniusweb.version}</version>
+			<!-- <classifier>jar-with-dependencies</classifier> -->
+		</dependency>
+		<dependency>
+			<groupId>geniusweb.exampleparties</groupId>
+			<artifactId>linear</artifactId>
+			<version>${geniusweb.version}</version>
+			<!-- <classifier>jar-with-dependencies</classifier> -->
+		</dependency>
+		<dependency>
+			<groupId>geniusweb.exampleparties</groupId>
+			<artifactId>hardliner</artifactId>
+			<version>${geniusweb.version}</version>
+			<!-- <classifier>jar-with-dependencies</classifier> -->
+		</dependency>
+		<dependency>
+			<groupId>geniusweb.exampleparties</groupId>
+			<artifactId>simpleboaparty</artifactId>
+			<version>${geniusweb.version}</version>
+			<!-- <classifier>jar-with-dependencies</classifier> -->
+		</dependency>
+		<dependency>
+			<groupId>geniusweb.exampleparties</groupId>
+			<artifactId>comparebids</artifactId>
+			<version>${geniusweb.version}</version>
+			<!-- <classifier>jar-with-dependencies</classifier> -->
+		</dependency>
+		<dependency>
 			<groupId>geniusweb.exampleparties.anac2019</groupId>
 			<artifactId>winkyagent</artifactId>
 			<version>${geniusweb.version}</version>
 			<!-- <type>pom</type> -->
 		</dependency>
+		<!-- <dependency>
+			<groupId>geniusweb</groupId>
+			<artifactId>exampleparties</artifactId>
+			<version>-</version>
+			<type>pom</type>
+		</dependency> -->
 		<!-- <dependency>
 			<groupId>geniusweb.exampleparties</groupId>
 			<artifactId>boulware</artifactId>
