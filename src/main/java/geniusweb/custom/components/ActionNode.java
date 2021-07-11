@@ -13,10 +13,10 @@ public class ActionNode extends Node {
         this.setAction(action);
     }
 
-    public Node receiveObservation() throws StateRepresentationException {
+    public Node receiveObservation(Double time) throws StateRepresentationException {
         AbstractState<?> state = this.getState();
         Action observation = state.getOpponent().chooseAction();
-        AbstractState<?> newState = state.updateState(observation);
+        AbstractState<?> newState = state.updateState(observation, time);
         // System.out.println("================== " + this.getChildren().size() + "
         // ==================");
         // System.out.println("Parent: " + this);

@@ -23,7 +23,7 @@ public class LearnedSimilarityState extends AbstractState<HashMap<IVPair,Double>
     }
 
     @Override
-    public AbstractState<HashMap<IVPair, Double>> updateState(Action nextAction) throws StateRepresentationException {
+    public AbstractState<HashMap<IVPair, Double>> updateState(Action nextAction, Double time) throws StateRepresentationException {
         // TODO Auto-generated method stub
         return null;
     }

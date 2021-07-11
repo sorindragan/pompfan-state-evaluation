@@ -65,6 +65,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     private static final int NUM_SIMULATIONS = 100;
     private static final int MAX_WIDTH = 10;
+    private Long SIMULATION_TIME = 1000l;
     private static final boolean DEBUG = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -301,12 +302,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             System.out.println("Opponent: Util="+ this.utilitySpace.getUtility(this.lastReceivedBid) + " -- " + this.lastReceivedBid.toString());
         }
         Action action;
+    
         if (isGood(this.lastReceivedBid)) {
             // If the last received bid is good: create Accept action
             action = new Accept(me, this.lastReceivedBid);
         } else {
             // STEP: Generate offer!
-            this.MCTS.construct(NUM_SIMULATIONS);
+            this.MCTS.construct(SIMULATION_TIME);
             action = this.MCTS.chooseBestAction();
             if(action instanceof Offer){
                 Bid myBid = ((Offer) action).getBid();
@@ -324,7 +326,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         }
 
         // Send action
-        getConnection().send(action);
+        try {
+            getConnection().send(action);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
     }
 
     /**

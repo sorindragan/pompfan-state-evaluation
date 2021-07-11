@@ -92,7 +92,7 @@ public abstract class AbstractState<T>
 
     public abstract String getStringRepresentation();
 
-    public abstract AbstractState<T> updateState(Action nextAction) throws StateRepresentationException;
+    public abstract AbstractState<T> updateState(Action nextAction, Double time) throws StateRepresentationException;
 
     public abstract T getCurrentState();
 

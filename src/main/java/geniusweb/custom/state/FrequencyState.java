@@ -41,7 +41,7 @@ public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
     }
 
     @Override
-    public AbstractState<HashMap<IVPair, Double>> updateState(Action nextAction) throws StateRepresentationException {
+    public AbstractState<HashMap<IVPair, Double>> updateState(Action nextAction, Double time) throws StateRepresentationException {
         HashMap<IVPair, Double> representation = new HashMap<IVPair, Double>(this.getRepresentation());
         if (nextAction instanceof Offer) {
             Bid bid = ((Offer) nextAction).getBid();
@@ -50,7 +50,7 @@ public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
             for (IVPair issueValuePair : bidIssueValues) {
                 representation.computeIfPresent(issueValuePair, (key, val) -> val + 1);
             }
-            return new FrequencyState(this.getUtilitySpace(), this.getOpponent()).init(representation);
+            return new FrequencyState(this.getUtilitySpace(), this.getOpponent()).init(representation).setRound(time);
         }
         throw new StateRepresentationException();
     }

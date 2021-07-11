@@ -29,7 +29,7 @@ public class UtilityState extends AbstractState<Map<PartyId, BigDecimal>> {
     }
 
     @Override
-    public AbstractState<Map<PartyId, BigDecimal>> updateState(Action nextAction) throws StateRepresentationException {
+    public AbstractState<Map<PartyId, BigDecimal>> updateState(Action nextAction, Double time) throws StateRepresentationException {
         Map<PartyId, BigDecimal> newRound = new HashMap<>();
         Offer offer = (Offer) nextAction; 
         if (this.getRepresentation().size() < 2) {

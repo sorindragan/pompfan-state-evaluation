@@ -35,10 +35,10 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
     }
 
     @Override
-    public AbstractState<ArrayList<Action>> updateState(Action nextAction) throws StateRepresentationException {
+    public AbstractState<ArrayList<Action>> updateState(Action nextAction, Double time) throws StateRepresentationException {
         ArrayList<Action> representation = new ArrayList<Action>(this.getRepresentation());
         representation.add(nextAction);
-        return new HistoryState(this.getUtilitySpace(), this.getOpponent()).init(representation).setRound((long) representation.size());
+        return new HistoryState(this.getUtilitySpace(), this.getOpponent()).init(representation).setRound(time);
     }
 
     @Override

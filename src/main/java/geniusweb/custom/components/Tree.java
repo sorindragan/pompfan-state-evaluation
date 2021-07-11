@@ -36,7 +36,6 @@ public class Tree {
     private EvaluationFunctionInterface evaluator;
     private static Double C = Math.sqrt(2); // TODO: Make it hyperparam
     private ActionNode lastBestActionNode;
-    private int simulationTime;
     private Progress progress;
     private Double currentTime = 0.0;
 
@@ -51,15 +50,20 @@ public class Tree {
 
     }
 
-    public void simulate() throws StateRepresentationException {
+    public void simulate(Progress simulatedProgress) throws StateRepresentationException {
         Node currRoot = this.root;
         AbstractPolicy currOpp = this.belief.sampleOpponent();
         currRoot.getState().setOpponent(currOpp);
+
         while (currRoot.getChildren().size() == this.maxWidth) { // yes the fuck
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
             if (currRoot.getChildren().size() < this.maxWidth) {
                 // System.out.println("========================================");
-                currRoot = (BeliefNode) ((ActionNode) currRoot).receiveObservation();
+                
+                Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
+                ActionNode currActionNode = (ActionNode) currRoot;
+                BeliefNode receivedObservationNode = (BeliefNode) currActionNode.receiveObservation(simulatedTimeOfObsReceival);
+                currRoot = receivedObservationNode;
                 // For non-history state evaluation, we might need the last two bids.
                 // Action opponentAction = ((BeliefNode) currRoot).getObservation();
                 // Action agentAction = ((ActionNode) currRoot.getParent()).getAction();
@@ -71,12 +75,16 @@ public class Tree {
                 currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
             }
         }
-
+        
         if (currRoot.getChildren().size() < this.maxWidth) {
             // System.out.println("========================================");
-            ActionNode actionNode = (ActionNode) ((BeliefNode) currRoot).act(ownExplorationStrategy); // What the fuck
+            Double simulatedTimeOfActReceival = simulatedProgress.get(System.currentTimeMillis());
+            BeliefNode currBeliefNode = (BeliefNode) currRoot;
+            ActionNode receivedActionNode = (ActionNode) currBeliefNode.act(ownExplorationStrategy, simulatedTimeOfActReceival);
+            ActionNode actionNode = receivedActionNode; // What the fuck
             // System.out.println("========================================");
-            BeliefNode beliefNode = (BeliefNode) actionNode.receiveObservation();
+            Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
+            BeliefNode beliefNode = (BeliefNode) actionNode.receiveObservation(simulatedTimeOfObsReceival);
             currRoot = beliefNode;
             Double value = currRoot.getState().evaluate();
             Tree.backpropagate(currRoot, value);
@@ -139,11 +147,14 @@ public class Tree {
         return this;
     }
 
-    public void construct(Integer maxIter) throws StateRepresentationException {
-        Integer currIter = 0;
-        while (currIter < maxIter) {
-            this.simulate();
+    public void construct(Long simulationTime) throws StateRepresentationException {
+        Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime), System.currentTimeMillis());
+        int currIter = 0;
+        System.out.println(simulatedProgress.getTerminationTime());
+        while (simulatedProgress.isPastDeadline(System.currentTimeMillis())==false) {
+            this.simulate(simulatedProgress);
             currIter++;
+            // System.out.println(currIter);
         }
     }
 
