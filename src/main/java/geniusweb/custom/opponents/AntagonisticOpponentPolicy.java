@@ -26,8 +26,8 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
     private Interval searchRange;
     private ImmutableList<Bid> possibleBids;
 
-    public AntagonisticOpponentPolicy(UtilitySpace uSpace, String name) {
-        super(uSpace, name);
+    public AntagonisticOpponentPolicy(UtilitySpace uSpace) {
+        super(uSpace, "Antagonist");
         this.allBids = new BidsWithUtility((LinearAdditive) uSpace);
         this.possibleRange = this.allBids.getRange();
         this.searchRange = new Interval(this.possibleRange.getMin(),

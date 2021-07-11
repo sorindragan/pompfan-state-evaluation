@@ -28,9 +28,13 @@ import geniusweb.custom.distances.AbstractBidDistance;
 import geniusweb.custom.distances.UtilityBidDistance;
 import geniusweb.custom.evaluators.MeanUtilityEvaluator;
 import geniusweb.custom.evaluators.RandomEvaluator;
+import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
+import geniusweb.custom.explorers.NeverAcceptOwnExplorationPolicy;
 import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.opponents.RandomOpponentPolicy;
+import geniusweb.custom.opponents.SelfishOpponentPolicy;
+import geniusweb.custom.opponents.TimeDependentOpponentPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.HistoryState;
 import geniusweb.custom.state.Last2BidsState;
@@ -162,13 +166,12 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         Domain domain = this.utilitySpace.getDomain();
                         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
                         listOfOpponents.add(new RandomOpponentPolicy(domain));
-                        listOfOpponents.add(new RandomOpponentPolicy(domain));
-                        listOfOpponents.add(new RandomOpponentPolicy(domain));
-                        Boulware agent = new Boulware();
+                        listOfOpponents.add(new SelfishOpponentPolicy(domain));
+                        listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
                         AbstractBidDistance distance = new UtilityBidDistance(this.utilitySpace);
                         AbstractBelief belief = new ParticleFilterBelief(listOfOpponents, distance);
                         AbstractState<?> startState = new HistoryState(utilitySpace, null);
-                        RandomOwnExplorerPolicy explorator = new RandomOwnExplorerPolicy(domain, this.utilitySpace, me);
+                        AbstractOwnExplorationPolicy explorator = new NeverAcceptOwnExplorationPolicy(domain, this.utilitySpace, me);
                         this.MCTS = new Tree(this.utilitySpace, belief, MAX_WIDTH, startState, explorator, this.progress);
                         // MeanUtilityEvaluator evaluator = new MeanUtilityEvaluator(this.utilitySpace);
                         // AbstractState<?> startState = new HistoryState(utilitySpace, null);
@@ -302,7 +305,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             System.out.println("Opponent: Util="+ this.utilitySpace.getUtility(this.lastReceivedBid) + " -- " + this.lastReceivedBid.toString());
         }
         Action action;
-    
+
         if (isGood(this.lastReceivedBid)) {
             // If the last received bid is good: create Accept action
             action = new Accept(me, this.lastReceivedBid);
@@ -310,6 +313,11 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             // STEP: Generate offer!
             this.MCTS.construct(SIMULATION_TIME);
             action = this.MCTS.chooseBestAction();
+            if (action == null) {
+                // if action==null we failed to suggest next action.
+                System.err.println("WARNING! Could not produce action!!!");;
+                action = new Accept(this.me, lastReceivedBid);
+            }
             if(action instanceof Offer){
                 Bid myBid = ((Offer) action).getBid();
                 System.out.println("Agent:    Util="+ String.valueOf(this.utilitySpace.getUtility(myBid)) + " -- " + myBid.toString());

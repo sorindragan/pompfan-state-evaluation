@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.custom.components.Opponent;
@@ -63,8 +64,15 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
     protected Double evaluateLast2Bids() {
         ArrayList<Action> currHistory = this.getHistory();
         int length = currHistory.size();
+        Action lastOpponentAction = currHistory.get(length - 1);
+        if (lastOpponentAction instanceof Accept) {
+            // In case last opponent action was an acceptance
+            Accept acceptanceBid = (Accept) lastOpponentAction;
+            return this.getUtilitySpace().getUtility(acceptanceBid.getBid()).doubleValue();
+        }
+        
+        Bid lastOpponentBid = length > 1 ? ((Offer) lastOpponentAction).getBid() : null;
         Bid lastAgentBid = length > 1 ? ((Offer) currHistory.get(length - 2)).getBid() : null;
-        Bid lastOpponentBid = length > 1 ? ((Offer) currHistory.get(length - 1)).getBid() : null;
         BigDecimal ZERO_UTILITY = new BigDecimal(0);
         BigDecimal utility1 = lastAgentBid != null ? this.getUtilitySpace().getUtility(lastAgentBid)
                 : ZERO_UTILITY;

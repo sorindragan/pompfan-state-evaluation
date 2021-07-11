@@ -21,7 +21,7 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
     }
 
     @Override
-    public Action chooseAction(Bid lastOpponentBid) {
+    public Action chooseAction(Bid lastOpponentBid, AbstractState<?> state) {
         Action action;
         long i = this.getRandom().nextInt(this.getBidspace().size().intValue());
         Bid bid = this.getBidspace().get(BigInteger.valueOf(i));
@@ -43,11 +43,5 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
         return this.getRandom().nextFloat() > stubborness ? true : false;
 
     }
-
-    @Override
-    public Action chooseAction(Bid lastAgentBid, AbstractState<?> state) {
-        return this.chooseAction();
-    }
-
 
 }

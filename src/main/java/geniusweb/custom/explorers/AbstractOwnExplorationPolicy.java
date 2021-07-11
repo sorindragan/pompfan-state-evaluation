@@ -95,7 +95,16 @@ public abstract class AbstractOwnExplorationPolicy {
     }
 
     public abstract Action chooseAction();
-    public abstract Action chooseAction(Bid lastAgentBid);
-    public abstract Action chooseAction(Bid lastAgentBid, AbstractState<?> state);
 
+    public Action chooseAction(AbstractState<?> state) {
+        return this.chooseAction();
+    }
+
+    public Action chooseAction(Bid lastOpponentBid, AbstractState<?> state) {
+        return this.chooseAction(state);
+    }
+
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
+        return this.chooseAction(lastReceivedBid, state);
+    }
 }

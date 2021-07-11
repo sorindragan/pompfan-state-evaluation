@@ -23,6 +23,7 @@ public class RandomOpponentPolicy extends AbstractPolicy {
         Action action;
         Offer offer = (Offer) this.chooseAction();
         action = isGood(offer.getBid()) ? new Accept(this.getPartyId(), lastAgentBid) : offer;
+        System.out.println(action);
         return action;
     }
 

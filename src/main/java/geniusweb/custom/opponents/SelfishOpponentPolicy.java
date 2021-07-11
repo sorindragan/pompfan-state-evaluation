@@ -23,9 +23,9 @@ public class SelfishOpponentPolicy extends AbstractPolicy {
     private ImmutableList<Bid> possibleBids;
     private final BigDecimal STUBBORNESS = new BigDecimal(0.8f);
 
-    public SelfishOpponentPolicy(UtilitySpace uSpace) {
-        super(uSpace, "SelfishAgent");
-        this.allBids = new BidsWithUtility((LinearAdditive) uSpace);
+    public SelfishOpponentPolicy(Domain domain) {
+        super(domain, "SelfishAgent");
+        this.allBids = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
         this.possibleRange = this.getAllBids().getRange();
         this.searchRange = new Interval(this.getPossibleRange().getMax().multiply(STUBBORNESS),
                 this.getPossibleRange().getMax());

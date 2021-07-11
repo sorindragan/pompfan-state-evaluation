@@ -1,8 +1,10 @@
 package geniusweb.custom.components;
 
 import geniusweb.actions.Action;
+import geniusweb.actions.Offer;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.StateRepresentationException;
+import geniusweb.issuevalue.Bid;
 
 public class ActionNode extends Node {
     private Action action;
@@ -15,7 +17,11 @@ public class ActionNode extends Node {
 
     public Node receiveObservation(Double time) throws StateRepresentationException {
         AbstractState<?> state = this.getState();
-        Action observation = state.getOpponent().chooseAction();
+        Action lastOpponentAction = ((BeliefNode) this.getParent()).getObservation();
+        Action lastAgentAction = this.getAction();
+        Bid lastOpponentBid = lastOpponentAction != null ? ((Offer) lastOpponentAction).getBid() : null;
+        Bid lastReceivedBidForOpponent = ((Offer) lastAgentAction).getBid();
+        Action observation = state.getOpponent().chooseAction(lastOpponentBid, lastReceivedBidForOpponent, state);
         AbstractState<?> newState = state.updateState(observation, time);
         // System.out.println("================== " + this.getChildren().size() + "
         // ==================");

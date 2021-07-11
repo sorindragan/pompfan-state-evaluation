@@ -28,7 +28,11 @@ public class BeliefNode extends Node {
 
     public Node act(AbstractOwnExplorationPolicy strategy, Double time) throws StateRepresentationException {
         AbstractState<?> state = this.getState();
+        // Action lastAgentAction = ((ActionNode) this.getParent()).getAction(); 
+        // Action lastReceivedAction = this.getObservation(); 
+        // Action agentAction = strategy.chooseAction(lastAgentAction, lastReceivedAction, state);
         Action agentAction = strategy.chooseAction();
+
         AbstractState<?> newState = state.updateState(agentAction, time);
         // System.out.println("================== "+this.getChildren().size()+" ==================");
         // System.out.println("Parent: "+this);
