@@ -32,6 +32,10 @@ import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
 import geniusweb.custom.explorers.NeverAcceptOwnExplorationPolicy;
 import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
 import geniusweb.custom.opponents.AbstractPolicy;
+import geniusweb.custom.opponents.AntagonisticOpponentPolicy;
+import geniusweb.custom.opponents.BoulwareOpponentPolicy;
+import geniusweb.custom.opponents.ConcederOpponentPolicy;
+import geniusweb.custom.opponents.HardHeadedOpponentPolicy;
 import geniusweb.custom.opponents.RandomOpponentPolicy;
 import geniusweb.custom.opponents.SelfishOpponentPolicy;
 import geniusweb.custom.opponents.TimeDependentOpponentPolicy;
@@ -165,14 +169,23 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         // Our stuff
                         Domain domain = this.utilitySpace.getDomain();
                         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
-                        listOfOpponents.add(new RandomOpponentPolicy(domain));
-                        listOfOpponents.add(new SelfishOpponentPolicy(domain));
-                        listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
+
+                        for (int cnt = 0; cnt <= 5; cnt++) {
+                            listOfOpponents.add(new AntagonisticOpponentPolicy(this.utilitySpace));
+                            listOfOpponents.add(new SelfishOpponentPolicy(domain));
+                            listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
+                            listOfOpponents.add(new HardHeadedOpponentPolicy(domain));
+                            listOfOpponents.add(new ConcederOpponentPolicy(domain));
+                            listOfOpponents.add(new BoulwareOpponentPolicy(domain));
+                        }
+
                         AbstractBidDistance distance = new UtilityBidDistance(this.utilitySpace);
                         AbstractBelief belief = new ParticleFilterBelief(listOfOpponents, distance);
                         AbstractState<?> startState = new HistoryState(utilitySpace, null);
-                        AbstractOwnExplorationPolicy explorator = new NeverAcceptOwnExplorationPolicy(domain, this.utilitySpace, me);
-                        this.MCTS = new Tree(this.utilitySpace, belief, MAX_WIDTH, startState, explorator, this.progress);
+                        AbstractOwnExplorationPolicy explorator = new RandomOwnExplorerPolicy(domain, this.utilitySpace,
+                                me);
+                        this.MCTS = new Tree(this.utilitySpace, belief, MAX_WIDTH, startState, explorator,
+                                this.progress);
                         // MeanUtilityEvaluator evaluator = new MeanUtilityEvaluator(this.utilitySpace);
                         // AbstractState<?> startState = new HistoryState(utilitySpace, null);
                     } catch (IOException e) {
@@ -289,7 +302,8 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         if (!agreements.getMap().isEmpty()) {
             // Get the bid that is agreed upon and add it's value to our negotiation data
             Bid agreement = agreements.getMap().values().iterator().next();
-            System.out.println("AGREEMENT!!!! -- Util="+ String.valueOf(this.utilitySpace.getUtility(agreement)) + " -- " + agreement.toString());
+            System.out.println("AGREEMENT!!!! -- Util=" + String.valueOf(this.utilitySpace.getUtility(agreement))
+                    + " -- " + agreement.toString());
             this.negotiationData.addAgreementUtil(this.utilitySpace.getUtility(agreement).doubleValue());
         }
     }
@@ -300,9 +314,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      * @throws StateRepresentationException
      */
     private void myTurn() throws IOException, StateRepresentationException {
-        if (this.lastReceivedBid != null) {            
+        if (this.lastReceivedBid != null) {
             System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
-            System.out.println("Opponent: Util="+ this.utilitySpace.getUtility(this.lastReceivedBid) + " -- " + this.lastReceivedBid.toString());
+            System.out.println("Opponent: Util=" + this.utilitySpace.getUtility(this.lastReceivedBid) + " -- "
+                    + this.lastReceivedBid.toString());
         }
         Action action;
 
@@ -315,17 +330,19 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             action = this.MCTS.chooseBestAction();
             if (action == null) {
                 // if action==null we failed to suggest next action.
-                System.err.println("WARNING! Could not produce action!!!");;
+                System.err.println("WARNING! Could not produce action!!!");
                 action = new Accept(this.me, lastReceivedBid);
             }
-            if(action instanceof Offer){
+            if (action instanceof Offer) {
                 Bid myBid = ((Offer) action).getBid();
-                System.out.println("Agent:    Util="+ String.valueOf(this.utilitySpace.getUtility(myBid)) + " -- " + myBid.toString());
-            }else if(action instanceof Accept){
+                System.out.println("Agent:    Util=" + String.valueOf(this.utilitySpace.getUtility(myBid)) + " -- "
+                        + myBid.toString());
+            } else if (action instanceof Accept) {
                 Bid acceptedBid = ((Accept) action).getBid();
-                System.out.println("We ACCEPT: Util="+ String.valueOf(this.utilitySpace.getUtility(acceptedBid)) + " -- " + acceptedBid.toString());
-            }else{
-                System.out.println("Something HAPPENED! "+ action.toString());
+                System.out.println("We ACCEPT: Util=" + String.valueOf(this.utilitySpace.getUtility(acceptedBid))
+                        + " -- " + acceptedBid.toString());
+            } else {
+                System.out.println("Something HAPPENED! " + action.toString());
             }
             if (DEBUG) {
                 System.out.println(this.MCTS);
@@ -336,7 +353,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         // Send action
         try {
             getConnection().send(action);
-            
+
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(0);
