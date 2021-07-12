@@ -19,11 +19,11 @@ public class RandomOpponentPolicy extends AbstractPolicy {
     }
 
     @Override
-    public Action chooseAction(Bid lastAgentBid, AbstractState<?> state) {
+    public Action chooseAction(Bid lastAgentBid, Bid lastReceivedBid, AbstractState<?> state) {
         Action action;
         Offer offer = (Offer) this.chooseAction();
-        action = isGood(offer.getBid()) ? new Accept(this.getPartyId(), lastAgentBid) : offer;
-        System.out.println(action);
+        action = isGood(offer.getBid()) ? new Accept(this.getPartyId(), lastReceivedBid) : offer;
+        // System.out.println(action);
         return action;
     }
 

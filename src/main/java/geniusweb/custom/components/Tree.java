@@ -55,14 +55,16 @@ public class Tree {
         AbstractPolicy currOpp = this.belief.sampleOpponent();
         currRoot.getState().setOpponent(currOpp);
 
-        while (currRoot.getChildren().size() == this.maxWidth) { // yes the fuck
+        while (currRoot.getChildren().size() == this.maxWidth) {
+            // Going down the tree - Action Node Level
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
             if (currRoot.getChildren().size() < this.maxWidth) {
-                // System.out.println("========================================");
-                
+                // Widening the Belief level
+
                 Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
                 ActionNode currActionNode = (ActionNode) currRoot;
-                BeliefNode receivedObservationNode = (BeliefNode) currActionNode.receiveObservation(simulatedTimeOfObsReceival);
+                BeliefNode receivedObservationNode = (BeliefNode) currActionNode
+                        .receiveObservation(simulatedTimeOfObsReceival);
                 currRoot = receivedObservationNode;
                 // For non-history state evaluation, we might need the last two bids.
                 // Action opponentAction = ((BeliefNode) currRoot).getObservation();
@@ -71,16 +73,17 @@ public class Tree {
                 Tree.backpropagate(currRoot, value);
                 return;
             } else {
-                // Going down the tree
+                // Going down the tree - Belief Node Level
                 currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
             }
         }
-        
+
         if (currRoot.getChildren().size() < this.maxWidth) {
-            // System.out.println("========================================");
+            // Widening the Action level
             Double simulatedTimeOfActReceival = simulatedProgress.get(System.currentTimeMillis());
             BeliefNode currBeliefNode = (BeliefNode) currRoot;
-            ActionNode receivedActionNode = (ActionNode) currBeliefNode.act(ownExplorationStrategy, simulatedTimeOfActReceival);
+            ActionNode receivedActionNode = (ActionNode) currBeliefNode.act(ownExplorationStrategy,
+                    simulatedTimeOfActReceival);
             ActionNode actionNode = receivedActionNode; // What the fuck
             // System.out.println("========================================");
             Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
@@ -118,19 +121,20 @@ public class Tree {
 
     public static Node selectFavoriteChild(List<Node> candidatesChildrenForAdoption) {
         // True Random - Alt.: Proportional to the visits
-        Node adoptedChild = candidatesChildrenForAdoption.stream().max(Comparator.comparing(Tree::UCB1)).get();
+        Node adoptedChild = candidatesChildrenForAdoption.stream().filter(child -> child.getIsTerminal() == false)
+                .max(Comparator.comparing(Tree::UCB1)).get();
         return adoptedChild;
     }
 
     public Tree receiveRealObservation(Action observationAction, Long time) {
-        List<Node> rootCandidates = this.lastBestActionNode.getChildren();
+        List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream().filter(node -> node.getIsTerminal() == false).collect(Collectors.toList());
         this.currentTime = this.getProgress().get(time);
 
         this.belief = this.belief.updateBeliefs((Offer) observationAction, (Offer) this.lastBestActionNode.getAction(),
                 this.lastBestActionNode.getState().setRound(this.currentTime));
-        List<Bid> candidateBids = rootCandidates.stream().map(node -> ((BeliefNode) node))
-                .map(beliefNode -> ((Offer) beliefNode.getObservation())).map(offer -> offer.getBid())
-                .collect(Collectors.toList());
+        List<Bid> candidateBids = rootCandidates.stream()
+                .map(node -> ((BeliefNode) node)).map(beliefNode -> ((Offer) beliefNode.getObservation()))
+                .map(offer -> offer.getBid()).collect(Collectors.toList());
         // System.out.println(candidateBids);
         Bid realBid = ((Offer) observationAction).getBid();
         Bid closestBid = this.belief.getDistance().computeMostSimilar(realBid, candidateBids);
@@ -148,10 +152,11 @@ public class Tree {
     }
 
     public void construct(Long simulationTime) throws StateRepresentationException {
-        Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime), System.currentTimeMillis());
+        Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime),
+                System.currentTimeMillis());
         int currIter = 0;
         System.out.println(simulatedProgress.getTerminationTime());
-        while (simulatedProgress.isPastDeadline(System.currentTimeMillis())==false) {
+        while (simulatedProgress.isPastDeadline(System.currentTimeMillis()) == false) {
             this.simulate(simulatedProgress);
             currIter++;
             // System.out.println(currIter);

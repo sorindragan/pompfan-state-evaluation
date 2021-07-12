@@ -3,6 +3,7 @@ package geniusweb.custom.components;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;
@@ -23,6 +24,7 @@ public class Node {
     private Integer visits = 0;
     private Double value = 0d;
     private AbstractState<?> state;
+    private Boolean isTerminal = false;
 
     public Node(Node parent, AbstractState<?> state) {
         super();
@@ -105,6 +107,17 @@ public class Node {
         return this;
     }
 
+    
+
+    public Boolean getIsTerminal() {
+        return isTerminal;
+    }
+
+    public Node setIsTerminal(Boolean isTerminal) {
+        this.isTerminal = isTerminal;
+        return this;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
@@ -126,6 +139,7 @@ public class Node {
             Action lastAction) {
 
         Node child;
+
         switch (type) {
         case BELIEF:
             child = new BeliefNode(parent, newState, lastAction);
@@ -137,6 +151,8 @@ public class Node {
             child = new Node(parent, newState);
             break;
         }
+
+        child = child.setIsTerminal(lastAction instanceof Accept);
         return child;
     }
 
