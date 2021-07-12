@@ -5,51 +5,25 @@ import java.math.BigInteger;
 import java.util.Random;
 
 import geniusweb.actions.Action;
+import geniusweb.bidspace.AllBidsList;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.exampleparties.boulware.Boulware;
 import geniusweb.issuevalue.Bid;
+import geniusweb.issuevalue.Domain;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class BoulwareOpponentPolicy extends Boulware implements CommonOpponentInterface {
+public class BoulwareOpponentPolicy extends TimeDependentOpponentPolicy {
 
+    private static final String BOULWARE = "Boulware";
 
-
-
-    @Override
-    public Action chooseAction(Bid lastAgentBid, AbstractState<?> state) {
-        // double time = this.progress.get(System.currentTimeMillis());
-
-        // BigDecimal utilityGoal = getUtilityGoal(time, getE(),
-        // extendedspace.getMin(), extendedspace.getMax());
-        // ImmutableList<Bid> options = extendedspace.getBids(utilityGoal);
-        // if (options.size() == BigInteger.ZERO) {
-        // // if we can't find good bid, get max util bid....
-        // options = extendedspace.getBids(extendedspace.getMax());
-        // }
-        // // pick a random one.
-        // return new Offer(this., options.get(new
-        // Random().nextInt(options.size().intValue())));
-        return null;
+    public BoulwareOpponentPolicy(Domain domain) {
+        super(domain);
+        this.setName(BOULWARE);
     }
 
     @Override
-    public Action chooseAction() {
-        // TODO Auto-generated method stub
-        return null;
+    public double getE() {
+        return 0.2;
     }
-
-    @Override
-    public Action chooseAction(AbstractState<?> state) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Action chooseAction(Bid lastAgentBid, Bid lastReceivedBid, AbstractState<?> state) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-
 
 }
