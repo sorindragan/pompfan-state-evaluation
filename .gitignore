@@ -1,4 +1,8 @@
-.vscode
+# CUSTOM
+.vscode/*.json
+!launch.json
+
+# DEFAULT
 target
 .classpath
 .settings

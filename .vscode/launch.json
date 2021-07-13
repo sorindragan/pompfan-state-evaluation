@@ -1,0 +1,88 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "vs. TimeDependentParty",
+            "request": "launch",
+            "mainClass": "geniusweb.simplerunner.NegoRunner",
+            "classPaths": [
+                "$Auto"
+            ],
+            "args": "src/test/resources/settingsTimeDependent.json",
+            "console": "internalConsole"
+        },
+        {
+            "type": "java",
+            "name": "vs. Boulware",
+            "request": "launch",
+            "mainClass": "geniusweb.simplerunner.NegoRunner",
+            "classPaths": [
+                "$Auto"
+            ],
+            "args": "src/test/resources/settingsBoulware.json",
+            "console": "internalConsole"
+        },
+        {
+            "type": "java",
+            "name": "vs. Conceder",
+            "request": "launch",
+            "mainClass": "geniusweb.simplerunner.NegoRunner",
+            "classPaths": [
+                "$Auto"
+            ],
+            "args": "src/test/resources/settingsConceder.json",
+            "console": "internalConsole"
+        },
+        {
+            "type": "java",
+            "name": "vs. SimpleBoa",
+            "request": "launch",
+            "mainClass": "geniusweb.simplerunner.NegoRunner",
+            "classPaths": [
+                "$Auto"
+            ],
+            "args": "src/test/resources/settingsSimpleBoa.json",
+            "console": "internalConsole"
+        },
+        {
+            "type": "java",
+            "name": "vs. Linear",
+            "request": "launch",
+            "mainClass": "geniusweb.simplerunner.NegoRunner",
+            "classPaths": [
+                "$Auto"
+            ],
+            "args": "src/test/resources/settingsLinear.json",
+            "console": "internalConsole"
+        },
+        {
+            "type": "java",
+            "name": "vs. Hardliner",
+            "request": "launch",
+            "mainClass": "geniusweb.simplerunner.NegoRunner",
+            "classPaths": [
+                "$Auto"
+            ],
+            "args": "src/test/resources/settingsHardliner.json",
+            "console": "internalConsole"
+        },
+        {
+            "type": "java",
+            "name": "vs. Random",
+            "request": "launch",
+            "mainClass": "geniusweb.simplerunner.NegoRunner",
+            "classPaths": [
+                "./libs/simplerunner-1.6.1-jar-with-dependencies.jar",
+                "./libs/boulware-1.6.1.jar",
+                "./target/classes",
+                "$Auto"
+            ],
+            "args": "src/test/resources/settingsRandom.json",
+            "console": "internalConsole"
+        }
+    ]
+}
