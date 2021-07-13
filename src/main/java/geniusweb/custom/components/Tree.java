@@ -127,11 +127,15 @@ public class Tree {
     }
 
     public Tree receiveRealObservation(Action observationAction, Long time) {
-        List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream().filter(node -> node.getIsTerminal() == false).collect(Collectors.toList());
         this.currentTime = this.getProgress().get(time);
-
         this.belief = this.belief.updateBeliefs((Offer) observationAction, (Offer) this.lastBestActionNode.getAction(),
-                this.lastBestActionNode.getState().setRound(this.currentTime));
+        this.lastBestActionNode.getState().setRound(this.currentTime));
+        
+        List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream().filter(node -> node.getIsTerminal() == false).collect(Collectors.toList());
+        if (rootCandidates.size()==0) {
+            return this;
+        }
+        
         List<Bid> candidateBids = rootCandidates.stream()
                 .map(node -> ((BeliefNode) node)).map(beliefNode -> ((Offer) beliefNode.getObservation()))
                 .map(offer -> offer.getBid()).collect(Collectors.toList());

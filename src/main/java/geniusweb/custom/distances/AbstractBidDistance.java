@@ -54,6 +54,13 @@ public abstract class AbstractBidDistance {
         this.issueValues = issueValues;
     }
     public Bid computeMostSimilar(Bid b1, List<Bid> allBids){
+        
+        try {
+            Collections.min(this.computeDistances(b1, allBids).entrySet(), Map.Entry.comparingByValue()).getKey();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         Bid key = Collections.min(this.computeDistances(b1, allBids).entrySet(), Map.Entry.comparingByValue()).getKey();
         return key;
     };

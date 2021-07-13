@@ -14,7 +14,7 @@ import geniusweb.issuevalue.Domain;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
-    private static final float stubborness = 0.98f;
+    private static final float stubborness = 0.0f;
 
     public RandomOwnExplorerPolicy(Domain domain, UtilitySpace utilitySpace, PartyId id) {
         super(domain, "RandomExplorerPolicy", utilitySpace, id);
