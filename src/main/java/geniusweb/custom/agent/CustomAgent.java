@@ -170,7 +170,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         Domain domain = this.utilitySpace.getDomain();
                         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
 
-                        for (int cnt = 0; cnt <= 5; cnt++) {
+                        for (int cnt = 0; cnt <= 10; cnt++) {
                             listOfOpponents.add(new AntagonisticOpponentPolicy(this.utilitySpace));
                             listOfOpponents.add(new SelfishOpponentPolicy(domain));
                             listOfOpponents.add(new TimeDependentOpponentPolicy(domain));

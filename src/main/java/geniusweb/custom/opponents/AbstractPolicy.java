@@ -3,6 +3,7 @@ package geniusweb.custom.opponents;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,33 +62,42 @@ public abstract class AbstractPolicy implements CommonOpponentInterface {
     private Entry<HashMap<String, ValueSetUtilities>, Map<String, BigDecimal>> initRandomUtilityProfile(Domain domain,
             String name) {
         List<String> issues = new ArrayList<String>(domain.getIssues());
-        List<Integer> allInts = random.ints(issues.size(), 0, 100).boxed().collect(Collectors.toList()); // TODO: Bound
-                                                                                                         // the
-        // random generation
-        MathContext mc = new MathContext(5);
-        Integer sumOfInts = allInts.stream().mapToInt(Integer::intValue).sum();
-        Map<String, BigDecimal> issueWeights = IntStream.range(0, issues.size()).boxed().collect(
-                Collectors.toMap(issues::get, index -> new BigDecimal((double) allInts.get(index) / sumOfInts, mc)));
+        List<BigDecimal> allInts = random.ints(issues.size(), 0, 100).boxed().map(String::valueOf).map(BigDecimal::new)
+                .collect(Collectors.toList());
+        // MathContext mc = new MathContext(5);
+        BigDecimal sumOfInts = allInts.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+        Map<String, BigDecimal> issueWeights = IntStream.range(0, issues.size()).boxed()
+                .collect(Collectors.toMap(issues::get, index -> allInts.get(index).divide(sumOfInts, 5, RoundingMode.HALF_UP)));
 
         // To make everything add to 1
-        Double remainder = 1 - issueWeights.values().stream().mapToDouble(bigD -> bigD.doubleValue()).sum();
+        BigDecimal remainder = BigDecimal.ONE
+                .subtract(issueWeights.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add));
         String firstKey = (String) issueWeights.keySet().toArray()[0];
-        issueWeights.computeIfPresent(firstKey, (key, value) -> value.add(new BigDecimal(remainder, mc)));
+        issueWeights.computeIfPresent(firstKey, (key, value) -> value.add(remainder));
 
         HashMap<String, ValueSetUtilities> issueValueWeights = new HashMap<String, ValueSetUtilities>();
         for (String issueString : issues) {
 
             DiscreteValueSet values = (DiscreteValueSet) domain.getValues(issueString);
-            List<Long> randLongs = random.longs(values.size().longValue(), 0, 100).boxed().collect(Collectors.toList());
-            Long sumOfValueLongs = randLongs.stream().mapToLong(Long::intValue).sum();
+            List<BigDecimal> randLongs = random.longs(values.size().longValue(), 1, 100).boxed().map(String::valueOf)
+                    .map(BigDecimal::new).collect(Collectors.toList());
+            BigDecimal sumOfValueLongs = randLongs.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
             Map<DiscreteValue, BigDecimal> valueWeights = LongStream.range(0, values.size().longValue()).boxed()
                     .collect(Collectors.toMap(values::get,
-                            index -> new BigDecimal((double) randLongs.get(index.intValue()) / sumOfValueLongs, mc)));
+                            index -> randLongs.get(index.intValue()).divide(sumOfValueLongs, 5, RoundingMode.HALF_UP)));
             // To make everything add to 1
-            Double valueRemainder = 1 - valueWeights.values().stream().mapToDouble(bigD -> bigD.doubleValue()).sum();
-            DiscreteValue firstValueKey = (DiscreteValue) valueWeights.keySet().toArray()[0];
-            valueWeights.computeIfPresent(firstValueKey, (key, value) -> value.add(new BigDecimal(valueRemainder, mc)));
-
+            BigDecimal valueRemainder = BigDecimal.ONE
+                    .subtract(valueWeights.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add));
+            DiscreteValue firstValueKey = (DiscreteValue) valueWeights.keySet().toArray()[valueWeights.keySet().size()-1];
+            valueWeights.computeIfPresent(firstValueKey, (key, value) -> value.add(valueRemainder));
+            // System.out.println("valueWeights");
+            // System.out.println(valueWeights);
+            // System.out.println(valueWeights.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add));
+            // try {
+            //     new DiscreteValueSetUtilities(valueWeights);
+            // } catch (Exception e) {
+            //     e.printStackTrace();
+            // }
             issueValueWeights.put(issueString, new DiscreteValueSetUtilities(valueWeights));
         }
 
