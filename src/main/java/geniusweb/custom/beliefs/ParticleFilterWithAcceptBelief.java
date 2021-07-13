@@ -17,9 +17,9 @@ public class ParticleFilterWithAcceptBelief extends ParticleFilterBelief {
     }
 
     @Override
-    protected void sample(Offer lastAction, AbstractState<?> state, AbstractPolicy abstractPolicy,
-            List<Bid> candidateObservations) {
-        Action chosenAction = abstractPolicy.chooseAction(lastAction.getBid(), null, state);
+    protected void sample(Offer lastAgentAction, Offer lastOppAction, AbstractState<?> state,
+            AbstractPolicy abstractPolicy, List<Bid> candidateObservations) {
+        Action chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state);
 
         if (chosenAction instanceof Offer) {
             candidateObservations.add(((Offer) chosenAction).getBid());

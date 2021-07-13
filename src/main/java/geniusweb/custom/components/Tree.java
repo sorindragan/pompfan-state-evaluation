@@ -1,6 +1,7 @@
 package geniusweb.custom.components;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -33,25 +34,26 @@ public class Tree {
     private UtilitySpace utilitySpace;
 
     private AbstractBelief belief;
-    private Integer maxWidth;
 
     private AbstractWidener widener; // The action we choose to simulate (expand new node).
     private EvaluationFunctionInterface evaluator;
     private static Double C = Math.sqrt(2); // TODO: Make it hyperparam
     private ActionNode lastBestActionNode;
+    private List<Action> realHistory;
     private Progress progress;
     private Double currentTime = 0.0;
 
-    public Tree(UtilitySpace utilitySpace, AbstractBelief belief, Integer maxWidth, AbstractState<?> startState,
-            AbstractWidener widener, Progress progress) {
+    public Tree(UtilitySpace utilitySpace, AbstractBelief belief, AbstractState<?> startState, AbstractWidener widener,
+            Progress progress) {
         // this.evaluator = evaluationFunction;
         this.belief = belief;
-        this.maxWidth = maxWidth;
         this.root = new BeliefNode(null, startState, null);
         this.widener = widener;
+        this.realHistory = new ArrayList<Action>();
         this.setProgress(progress); // Around two seconds
-        // TODO: Does it make sense to sample a new opponent everytime we simulate. This part was at the beginning of simulate
-        AbstractPolicy currOpp = this.belief.sampleOpponent(); 
+        // TODO: Does it make sense to sample a new opponent everytime we simulate. This
+        // part was at the beginning of simulate
+        AbstractPolicy currOpp = this.belief.sampleOpponent();
         this.root.getState().setOpponent(currOpp);
 
     }
@@ -94,9 +96,14 @@ public class Tree {
     }
 
     public Tree receiveRealObservation(Action observationAction, Long time) {
+        this.realHistory.add(observationAction);
         this.currentTime = this.getProgress().get(time);
-        this.belief = this.belief.updateBeliefs((Offer) observationAction, (Offer) this.lastBestActionNode.getAction(),
-                this.lastBestActionNode.getState().setRound(this.currentTime));
+        Offer newRealObservation = (Offer) observationAction;
+        Offer lastRealAgentAction = (Offer) this.lastBestActionNode.getAction();
+        Offer lastRealOpponentAction = (Offer) this.lastBestActionNode.getAction();
+        AbstractState<?> stateUpdatedWithRealTime = this.lastBestActionNode.getState().setRound(this.currentTime);
+        this.belief = this.belief.updateBeliefs(newRealObservation, lastRealAgentAction, lastRealOpponentAction,
+                stateUpdatedWithRealTime);
 
         if (DEBUG) {
             System.out.println("New Belief-Probabilities");
@@ -146,6 +153,7 @@ public class Tree {
         this.lastBestActionNode = (ActionNode) oldestChildren.stream()
                 .max(Comparator.comparing(node -> node.getValue())).get();
         Action action = lastBestActionNode.getAction();
+        this.realHistory.add(action);
         // System.out.println("Choose...");
         // System.out.println(lastBestActionNode);
         return action;
@@ -194,15 +202,6 @@ public class Tree {
 
     public Tree setBelief(AbstractBelief belief) {
         this.belief = belief;
-        return this;
-    }
-
-    public Integer getMaxWidth() {
-        return maxWidth;
-    }
-
-    public Tree setMaxWidth(Integer maxWidth) {
-        this.maxWidth = maxWidth;
         return this;
     }
 

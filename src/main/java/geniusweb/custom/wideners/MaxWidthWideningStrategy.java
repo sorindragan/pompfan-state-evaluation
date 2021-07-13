@@ -16,6 +16,15 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
         this.maxWidth = maxWidth;
     }
 
+    public Integer getMaxWidth() {
+        return maxWidth;
+    }
+
+    public MaxWidthWideningStrategy setMaxWidth(Integer maxWidth) {
+        this.maxWidth = maxWidth;
+        return this;
+    }
+
     @Override
     public void widen(Progress simulatedProgress, Node currRoot) throws StateRepresentationException  {
         while (currRoot.getChildren().size() == this.maxWidth) {

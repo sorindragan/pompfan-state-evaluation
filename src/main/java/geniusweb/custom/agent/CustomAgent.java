@@ -22,7 +22,7 @@ import geniusweb.actions.PartyId;
 import geniusweb.bidspace.AllBidsList;
 import geniusweb.custom.beliefs.AbstractBelief;
 import geniusweb.custom.beliefs.ParticleFilterBelief;
-import geniusweb.custom.beliefs.RandomTestBelief;
+import geniusweb.custom.beliefs.UniformBelief;
 import geniusweb.custom.components.Tree;
 import geniusweb.custom.distances.AbstractBidDistance;
 import geniusweb.custom.distances.UtilityBidDistance;
@@ -188,7 +188,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         AbstractState<?> startState = new HistoryState(uSpace, null);
                         AbstractOwnExplorationPolicy explorer = new RandomOwnExplorerPolicy(domain, this.uSpace, me);
                         AbstractWidener widener = new MaxWidthWideningStrategy(explorer, MAX_WIDTH);
-                        this.MCTS = new Tree(this.uSpace, belief, MAX_WIDTH, startState, widener, this.progress);
+                        this.MCTS = new Tree(this.uSpace, belief, startState, widener, this.progress);
                     } catch (IOException e) {
                         throw new IllegalStateException(e);
                     }

@@ -20,6 +20,7 @@ public class ParticleFilterBelief extends AbstractBelief {
     public static final int NUMBER_SAMPLES = 100;
     public static final Double SAMENESS_THRESHOLD = 0.1;
     private static final Double EPSILON = 0.001;
+
     List<AbstractPolicy> particles = new ArrayList<>();
 
     public ParticleFilterBelief(List<AbstractPolicy> listOfOpponents, AbstractBidDistance distance) {
@@ -32,43 +33,37 @@ public class ParticleFilterBelief extends AbstractBelief {
     }
 
     @Override
-    public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAction, AbstractState<?> state) {
+    public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAgentAction, Offer lastOppAction,
+            AbstractState<?> state) {
         for (AbstractPolicy abstractPolicy : this.getOpponentProbabilities().keySet()) {
             List<Bid> candidateObservations = new ArrayList<>();
             for (int i = 0; i < ParticleFilterBelief.NUMBER_SAMPLES; i++) {
                 // Monte Carlo Sampling
                 // This should be in a loop -- We need to try multiple actions to get an
                 // understanding of whether the opponent could generate the real obs.
-                sample(lastAction, state, abstractPolicy, candidateObservations);
+                sample(lastAgentAction, lastOppAction, state, abstractPolicy, candidateObservations);
             }
             Double weightOpponentLikelihood = candidateObservations.parallelStream()
                     .mapToDouble(obs -> this.getDistance().computeDistance(obs, realObservation.getBid()))
                     .map(val -> Math.abs(val)).sum();
-            // TODO: Maybe check the size because abstractpolicies might be overridden -- Not a problem!
+            // DONE TODO: Maybe check the size because abstractpolicies might be overridden
+            // -- Not a problem!
             this.getOpponentProbabilities().put(abstractPolicy, 1 / (weightOpponentLikelihood + EPSILON));
         }
         return new ParticleFilterBelief(this.getOpponentProbabilities(), this.getDistance());
     }
 
-    protected void sample(Offer lastAction, AbstractState<?> state, AbstractPolicy abstractPolicy,
-            List<Bid> candidateObservations) {
-        // TODO: Keep track of real observations and also supply the previous real observation
-        Action chosenAction = abstractPolicy.chooseAction(lastAction.getBid(), null, state);
+    protected void sample(Offer lastAgentAction, Offer lastOppAction, AbstractState<?> state,
+            AbstractPolicy abstractPolicy, List<Bid> candidateObservations) {
+        // TODO: Keep track of real observations and also supply the previous real
+        // observation
+        Action chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state);
         if (chosenAction instanceof Offer) {
             candidateObservations.add(((Offer) chosenAction).getBid());
         }
     }
 
-    @Override
-    public String toString() {
-        // List<String> opponents =
-        // this.getOpponentProbabilities().keySet().stream().map(key ->
-        // key.getName()).collect(Collectors.toList());
-        Map<String, Double> opponents = this.getOpponentProbabilities().entrySet().stream().collect(
-                Collectors.groupingBy(opp -> opp.getKey().getName(), Collectors.summingDouble(opp -> opp.getValue())));
-        // opponents.stream().collect(Collectors.groupingBy(o))
-        return opponents.toString();
-    }
+
     // @Override
     // public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAction,
     // AbstractState<?> state) {

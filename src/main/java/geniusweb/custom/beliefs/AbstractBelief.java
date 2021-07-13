@@ -2,8 +2,10 @@ package geniusweb.custom.beliefs;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import geniusweb.actions.Offer;
 import geniusweb.custom.distances.AbstractBidDistance;
@@ -14,14 +16,14 @@ public abstract class AbstractBelief {
     private HashMap<AbstractPolicy, Double> opponentProbabilities = new HashMap<AbstractPolicy, Double>();
     private AbstractBidDistance distance;
 
-
     public AbstractBelief(HashMap<AbstractPolicy, Double> opponentProbabilities, AbstractBidDistance distance) {
         this.opponentProbabilities = opponentProbabilities;
         Double sumVals = this.opponentProbabilities.values().stream().mapToDouble(val -> val).sum();
-        this.opponentProbabilities.entrySet().parallelStream().forEach(entry -> this.opponentProbabilities.put(entry.getKey(), entry.getValue()/sumVals));
+        this.opponentProbabilities.entrySet().parallelStream()
+                .forEach(entry -> this.opponentProbabilities.put(entry.getKey(), entry.getValue() / sumVals));
         this.distance = distance;
     }
-    
+
     public AbstractBelief(List<AbstractPolicy> listOfOpponents, AbstractBidDistance distance) {
         Double uniformProb = 1d / listOfOpponents.size();
         for (AbstractPolicy opponent : listOfOpponents) {
@@ -59,7 +61,17 @@ public abstract class AbstractBelief {
         this.distance = distance;
     }
 
+    // public abstract AbstractBelief updateBeliefs(Offer realObservation, Offer
+    // lastAction, AbstractState<?> state);
 
-    public abstract AbstractBelief updateBeliefs(Offer realObservation, Offer lastAction, AbstractState<?> state);
+    public abstract AbstractBelief updateBeliefs(Offer newOppObservation, Offer lastRealAgentAction,
+            Offer lastRealOppAction, AbstractState<?> state);
 
+    @Override
+    public String toString() {
+
+        Map<String, Double> opponents = this.getOpponentProbabilities().entrySet().stream().collect(
+                Collectors.groupingBy(opp -> opp.getKey().getName(), Collectors.summingDouble(opp -> opp.getValue())));
+        return opponents.toString();
+    }
 }
