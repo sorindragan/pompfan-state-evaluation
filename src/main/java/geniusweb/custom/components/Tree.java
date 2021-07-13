@@ -16,6 +16,7 @@ import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.HistoryState;
 import geniusweb.custom.state.StateRepresentationException;
+import geniusweb.custom.wideners.AbstractWidener;
 import geniusweb.deadline.DeadlineTime;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
@@ -33,7 +34,8 @@ public class Tree {
 
     private AbstractBelief belief;
     private Integer maxWidth;
-    private AbstractOwnExplorationPolicy ownExplorationStrategy; // The action we choose to simulate (expand new node).
+
+    private AbstractWidener widener; // The action we choose to simulate (expand new node).
     private EvaluationFunctionInterface evaluator;
     private static Double C = Math.sqrt(2); // TODO: Make it hyperparam
     private ActionNode lastBestActionNode;
@@ -41,61 +43,25 @@ public class Tree {
     private Double currentTime = 0.0;
 
     public Tree(UtilitySpace utilitySpace, AbstractBelief belief, Integer maxWidth, AbstractState<?> startState,
-            AbstractOwnExplorationPolicy ownPolicy, Progress progress) {
+            AbstractWidener widener, Progress progress) {
         // this.evaluator = evaluationFunction;
         this.belief = belief;
         this.maxWidth = maxWidth;
         this.root = new BeliefNode(null, startState, null);
-        this.ownExplorationStrategy = ownPolicy;
+        this.widener = widener;
         this.setProgress(progress); // Around two seconds
+        // TODO: Does it make sense to sample a new opponent everytime we simulate. This part was at the beginning of simulate
+        AbstractPolicy currOpp = this.belief.sampleOpponent(); 
+        this.root.getState().setOpponent(currOpp);
 
     }
 
     public void simulate(Progress simulatedProgress) throws StateRepresentationException {
         Node currRoot = this.root;
-        AbstractPolicy currOpp = this.belief.sampleOpponent();
-        currRoot.getState().setOpponent(currOpp);
-
-        while (currRoot.getChildren().size() == this.maxWidth) {
-            // Going down the tree - Action Node Level
-            currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
-            if (currRoot.getChildren().size() < this.maxWidth) {
-                // Widening the Belief level
-
-                Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
-                ActionNode currActionNode = (ActionNode) currRoot;
-                BeliefNode receivedObservationNode = (BeliefNode) currActionNode
-                        .receiveObservation(simulatedTimeOfObsReceival);
-                currRoot = receivedObservationNode;
-                // For non-history state evaluation, we might need the last two bids.
-                // Action opponentAction = ((BeliefNode) currRoot).getObservation();
-                // Action agentAction = ((ActionNode) currRoot.getParent()).getAction();
-                Double value = currRoot.getState().evaluate();
-                Tree.backpropagate(currRoot, value);
-                return;
-            } else {
-                // Going down the tree - Belief Node Level
-                currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
-            }
-        }
-
-        if (currRoot.getChildren().size() < this.maxWidth) {
-            // Widening the Action level
-            Double simulatedTimeOfActReceival = simulatedProgress.get(System.currentTimeMillis());
-            BeliefNode currBeliefNode = (BeliefNode) currRoot;
-            ActionNode receivedActionNode = (ActionNode) currBeliefNode.act(ownExplorationStrategy,
-                    simulatedTimeOfActReceival);
-            ActionNode actionNode = receivedActionNode; // What the fuck
-            // System.out.println("========================================");
-            Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
-            BeliefNode beliefNode = (BeliefNode) actionNode.receiveObservation(simulatedTimeOfObsReceival);
-            currRoot = beliefNode;
-            Double value = currRoot.getState().evaluate();
-            Tree.backpropagate(currRoot, value);
-        }
+        this.widener.widen(simulatedProgress, currRoot);
     }
 
-    private static void backpropagate(Node node, Double value) {
+    public static void backpropagate(Node node, Double value) {
         while (node.getParent() != null) {
             node.setVisits(node.getVisits() + 1);
             node.setValue(node.getValue() + value);
@@ -131,8 +97,8 @@ public class Tree {
         this.currentTime = this.getProgress().get(time);
         this.belief = this.belief.updateBeliefs((Offer) observationAction, (Offer) this.lastBestActionNode.getAction(),
                 this.lastBestActionNode.getState().setRound(this.currentTime));
-        
-        if (DEBUG) {            
+
+        if (DEBUG) {
             System.out.println("New Belief-Probabilities");
             System.out.println(this.belief);
         }
@@ -237,15 +203,6 @@ public class Tree {
 
     public Tree setMaxWidth(Integer maxWidth) {
         this.maxWidth = maxWidth;
-        return this;
-    }
-
-    public AbstractOwnExplorationPolicy getOwnExplorationStrategy() {
-        return ownExplorationStrategy;
-    }
-
-    public Tree setOwnExplorationStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy) {
-        this.ownExplorationStrategy = ownExplorationStrategy;
         return this;
     }
 

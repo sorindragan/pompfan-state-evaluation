@@ -43,6 +43,8 @@ import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.HistoryState;
 import geniusweb.custom.state.Last2BidsState;
 import geniusweb.custom.state.StateRepresentationException;
+import geniusweb.custom.wideners.AbstractWidener;
+import geniusweb.custom.wideners.MaxWidthWideningStrategy;
 import geniusweb.exampleparties.boulware.Boulware;
 import geniusweb.exampleparties.linear.Linear;
 import geniusweb.exampleparties.timedependentparty.TimeDependentParty;
@@ -83,7 +85,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private Progress progress;
     private String protocol;
     private Parameters parameters;
-    private UtilitySpace utilitySpace;
+    private UtilitySpace uSpace;
     private PersistentState persistentState;
     private NegotiationData negotiationData;
     private List<File> dataPaths;
@@ -166,13 +168,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                     try {
                         this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(),
                                 getReporter());
-                        this.utilitySpace = ((UtilitySpace) profileint.getProfile());
+                        this.uSpace = ((UtilitySpace) profileint.getProfile());
                         // Our stuff
-                        Domain domain = this.utilitySpace.getDomain();
+                        Domain domain = this.uSpace.getDomain();
                         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
 
                         for (int cnt = 0; cnt < 100; cnt++) {
-                            listOfOpponents.add(new AntagonisticOpponentPolicy(this.utilitySpace));
+                            listOfOpponents.add(new AntagonisticOpponentPolicy(this.uSpace));
                             listOfOpponents.add(new SelfishOpponentPolicy(domain));
                             listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
                             listOfOpponents.add(new HardLinerOpponentPolicy(domain));
@@ -180,16 +182,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                             listOfOpponents.add(new BoulwareOpponentPolicy(domain));
                         }
 
-                        AbstractBidDistance distance = new UtilityBidDistance(this.utilitySpace);
+                        AbstractBidDistance distance = new UtilityBidDistance(this.uSpace);
                         AbstractBelief belief = new ParticleFilterBelief(listOfOpponents, distance);
-                        // TODO: Check if belief is updated
-                        AbstractState<?> startState = new HistoryState(utilitySpace, null);
-                        AbstractOwnExplorationPolicy explorator = new RandomOwnExplorerPolicy(domain, this.utilitySpace,
-                                me);
-                        this.MCTS = new Tree(this.utilitySpace, belief, MAX_WIDTH, startState, explorator,
-                                this.progress);
-                        // MeanUtilityEvaluator evaluator = new MeanUtilityEvaluator(this.utilitySpace);
-                        // AbstractState<?> startState = new HistoryState(utilitySpace, null);
+                        // TODO: Check if belief is updated -- It is!
+                        AbstractState<?> startState = new HistoryState(uSpace, null);
+                        AbstractOwnExplorationPolicy explorer = new RandomOwnExplorerPolicy(domain, this.uSpace, me);
+                        AbstractWidener widener = new MaxWidthWideningStrategy(explorer, MAX_WIDTH);
+                        this.MCTS = new Tree(this.uSpace, belief, MAX_WIDTH, startState, widener, this.progress);
                     } catch (IOException e) {
                         throw new IllegalStateException(e);
                     }
@@ -287,7 +286,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             // If the action was an offer: Obtain the bid and add it's value to our
             // negotiation data.
             this.lastReceivedBid = ((Offer) action).getBid();
-            this.negotiationData.addBidUtil(this.utilitySpace.getUtility(this.lastReceivedBid).doubleValue());
+            this.negotiationData.addBidUtil(this.uSpace.getUtility(this.lastReceivedBid).doubleValue());
             this.MCTS.receiveRealObservation(action, System.currentTimeMillis());
         }
     }
@@ -304,9 +303,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         if (!agreements.getMap().isEmpty()) {
             // Get the bid that is agreed upon and add it's value to our negotiation data
             Bid agreement = agreements.getMap().values().iterator().next();
-            System.out.println("AGREEMENT!!!! -- Util=" + String.valueOf(this.utilitySpace.getUtility(agreement))
-                    + " -- " + agreement.toString());
-            this.negotiationData.addAgreementUtil(this.utilitySpace.getUtility(agreement).doubleValue());
+            System.out.println("AGREEMENT!!!! -- Util=" + String.valueOf(this.uSpace.getUtility(agreement)) + " -- "
+                    + agreement.toString());
+            this.negotiationData.addAgreementUtil(this.uSpace.getUtility(agreement).doubleValue());
         }
     }
 
@@ -318,7 +317,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private void myTurn() throws IOException, StateRepresentationException {
         if (this.lastReceivedBid != null) {
             System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
-            System.out.println("Opponent: Util=" + this.utilitySpace.getUtility(this.lastReceivedBid) + " -- "
+            System.out.println("Opponent: Util=" + this.uSpace.getUtility(this.lastReceivedBid) + " -- "
                     + this.lastReceivedBid.toString());
         }
         Action action;
@@ -337,12 +336,12 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             }
             if (action instanceof Offer) {
                 Bid myBid = ((Offer) action).getBid();
-                System.out.println("Agent:    Util=" + String.valueOf(this.utilitySpace.getUtility(myBid)) + " -- "
-                        + myBid.toString());
+                System.out.println(
+                        "Agent:    Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- " + myBid.toString());
             } else if (action instanceof Accept) {
                 Bid acceptedBid = ((Accept) action).getBid();
-                System.out.println("We ACCEPT: Util=" + String.valueOf(this.utilitySpace.getUtility(acceptedBid))
-                        + " -- " + acceptedBid.toString());
+                System.out.println("We ACCEPT: Util=" + String.valueOf(this.uSpace.getUtility(acceptedBid)) + " -- "
+                        + acceptedBid.toString());
             } else {
                 System.out.println("Something HAPPENED! " + action.toString());
             }
@@ -379,13 +378,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             Double avgMaxUtility = this.persistentState.getAvgMaxUtility(this.opponentName);
 
             // Request 5% more than the average max utility offered by the opponent.
-            return this.utilitySpace.getUtility(bid).doubleValue() > (avgMaxUtility * 1.05);
+            return this.uSpace.getUtility(bid).doubleValue() > (avgMaxUtility * 1.05);
         }
 
         // Check a simple business rule
         Boolean nearDeadline = progress.get(System.currentTimeMillis()) > 0.95;
-        Boolean acceptable = this.utilitySpace.getUtility(bid).doubleValue() > 0.7;
-        Boolean good = this.utilitySpace.getUtility(bid).doubleValue() > 0.9;
+        Boolean acceptable = this.uSpace.getUtility(bid).doubleValue() > 0.7;
+        Boolean good = this.uSpace.getUtility(bid).doubleValue() > 0.9;
         return (nearDeadline && acceptable) || good;
     }
 
