@@ -21,7 +21,7 @@ public class ActionNode extends Node {
         Action lastAgentAction = this.getAction();
         Bid lastOpponentBid = lastOpponentAction != null ? ((Offer) lastOpponentAction).getBid() : null;
         Bid lastReceivedBidForOpponent = ((Offer) lastAgentAction).getBid();
-        Action observation = state.getOpponent().chooseAction(lastOpponentBid, lastReceivedBidForOpponent, state);
+        Action observation = state.getOpponent().chooseAction(lastReceivedBidForOpponent, lastOpponentBid, state);
         AbstractState<?> newState = state.updateState(observation, time);
         // System.out.println("================== " + this.getChildren().size() + "
         // ==================");

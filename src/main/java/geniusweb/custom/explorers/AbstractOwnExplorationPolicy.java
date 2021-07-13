@@ -100,7 +100,7 @@ public abstract class AbstractOwnExplorationPolicy {
         return this.chooseAction();
     }
 
-    public Action chooseAction(Bid lastOpponentBid, AbstractState<?> state) {
+    public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
         return this.chooseAction(state);
     }
 

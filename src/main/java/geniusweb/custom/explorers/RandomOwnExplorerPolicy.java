@@ -14,7 +14,7 @@ import geniusweb.issuevalue.Domain;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
-    private static final float stubborness = 0.0f;
+    private static final float stubborness = 0.5f;
 
     public RandomOwnExplorerPolicy(Domain domain, UtilitySpace utilitySpace, PartyId id) {
         super(domain, "RandomExplorerPolicy", utilitySpace, id);
@@ -22,7 +22,7 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
 
     @Override
     public Action chooseAction(Bid lastOpponentBid, AbstractState<?> state) {
-        Action action;
+        Action action; 
         long i = this.getRandom().nextInt(this.getBidspace().size().intValue());
         Bid bid = this.getBidspace().get(BigInteger.valueOf(i));
         action = isGood(bid) ? new Offer(this.getPartyId(), bid) : new Accept(this.getPartyId(), lastOpponentBid);

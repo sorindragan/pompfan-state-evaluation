@@ -33,10 +33,10 @@ public class SelfishOpponentPolicy extends AbstractPolicy {
     }
 
     @Override
-    public Action chooseAction(Bid lastBid, AbstractState<?> state) {
+    public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
         Action action;
         Offer offer = (Offer) this.chooseAction();
-        action = isGood(lastBid) ? new Accept(this.getPartyId(), lastBid) : offer;
+        action = isGood(lastReceivedBid) ? new Accept(this.getPartyId(), lastReceivedBid) : offer;
         return action;
     }
 

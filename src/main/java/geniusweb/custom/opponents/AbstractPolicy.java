@@ -167,13 +167,13 @@ public abstract class AbstractPolicy implements CommonOpponentInterface {
     }
 
     @Override
-    public Action chooseAction(Bid lastAgentBid, AbstractState<?> state) {
+    public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
         return this.chooseAction(state);
     }
 
     @Override
-    public Action chooseAction(Bid lastAgentBid, Bid lastReceivedBid, AbstractState<?> state) {
-        return this.chooseAction(lastAgentBid, state);
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
+        return this.chooseAction(lastReceivedBid, state);
     }
 
 }

@@ -35,7 +35,7 @@ import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.opponents.AntagonisticOpponentPolicy;
 import geniusweb.custom.opponents.BoulwareOpponentPolicy;
 import geniusweb.custom.opponents.ConcederOpponentPolicy;
-import geniusweb.custom.opponents.HardHeadedOpponentPolicy;
+import geniusweb.custom.opponents.HardLinerOpponentPolicy;
 import geniusweb.custom.opponents.RandomOpponentPolicy;
 import geniusweb.custom.opponents.SelfishOpponentPolicy;
 import geniusweb.custom.opponents.TimeDependentOpponentPolicy;
@@ -44,6 +44,7 @@ import geniusweb.custom.state.HistoryState;
 import geniusweb.custom.state.Last2BidsState;
 import geniusweb.custom.state.StateRepresentationException;
 import geniusweb.exampleparties.boulware.Boulware;
+import geniusweb.exampleparties.linear.Linear;
 import geniusweb.exampleparties.timedependentparty.TimeDependentParty;
 import geniusweb.inform.ActionDone;
 import geniusweb.inform.Agreements;
@@ -73,7 +74,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     private static final int NUM_SIMULATIONS = 100;
     private static final int MAX_WIDTH = 10;
-    private Long SIMULATION_TIME = 1000l;
+    private Long SIMULATION_TIME = 250l;
     private static final boolean DEBUG = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -170,17 +171,18 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         Domain domain = this.utilitySpace.getDomain();
                         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
 
-                        for (int cnt = 0; cnt <= 10; cnt++) {
+                        for (int cnt = 0; cnt < 100; cnt++) {
                             listOfOpponents.add(new AntagonisticOpponentPolicy(this.utilitySpace));
                             listOfOpponents.add(new SelfishOpponentPolicy(domain));
                             listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
-                            listOfOpponents.add(new HardHeadedOpponentPolicy(domain));
+                            listOfOpponents.add(new HardLinerOpponentPolicy(domain));
                             listOfOpponents.add(new ConcederOpponentPolicy(domain));
                             listOfOpponents.add(new BoulwareOpponentPolicy(domain));
                         }
 
                         AbstractBidDistance distance = new UtilityBidDistance(this.utilitySpace);
                         AbstractBelief belief = new ParticleFilterBelief(listOfOpponents, distance);
+                        // TODO: Check if belief is updated
                         AbstractState<?> startState = new HistoryState(utilitySpace, null);
                         AbstractOwnExplorationPolicy explorator = new RandomOwnExplorerPolicy(domain, this.utilitySpace,
                                 me);

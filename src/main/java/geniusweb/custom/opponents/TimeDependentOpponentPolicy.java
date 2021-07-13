@@ -12,6 +12,7 @@ import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.exampleparties.timedependentparty.ExtendedUtilSpace;
+import geniusweb.exampleparties.timedependentparty.TimeDependentParty;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.profile.Profile;
@@ -20,6 +21,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.profileconnection.ProfileInterface;
 import geniusweb.progress.Progress;
 import tudelft.utilities.immutablelist.ImmutableList;
+
 
 public class TimeDependentOpponentPolicy extends AbstractPolicy {
 
@@ -38,12 +40,11 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
     }
 
     @Override
-    public Action chooseAction(Bid lastAgentBid, Bid lastReceivedBid, AbstractState<?> state) {
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
         return this.myTurn(lastReceivedBid, state);
     }
 
     private Action myTurn(Bid lastReceivedBid, AbstractState<?> state) {
-        // this.updateUtilSpace();
         Bid bid = makeBid(state.getRound());
 
         if (bid == null) {
@@ -64,15 +65,6 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
         return myAction;
     }
 
-    // TODO: DELETE
-    // private LinearAdditive updateUtilSpace() throws IOException {
-    // Profile newutilspace = this.profileint.getProfile();
-    // if (!newutilspace.equals(this.utilspace)) {
-    // utilspace = (LinearAdditive) newutilspace;
-    // extendedspace = new ExtendedUtilSpace(utilspace);
-    // }
-    // return utilspace;
-    // }
 
     /**
      * @return next possible bid with current target utility, or null if no such
@@ -111,27 +103,6 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
             ft1 = BigDecimal.valueOf(1 - Math.pow(t, 1 / e)).setScale(6, RoundingMode.HALF_UP);
         return minUtil.add((maxUtil.subtract(minUtil).multiply(ft1))).min(maxUtil).max(minUtil);
     }
-
-    // TODO: DELETE
-    // /**
-    // * @param bid the bid to check
-    // * @return true iff bid is good for us.
-    // */
-    // private boolean isGood(Bid bid) {
-    // if (bid == null || profileint == null)
-    // return false;
-    // Profile profile;
-    // try {
-    // profile = profileint.getProfile();
-    // } catch (IOException ex) {
-    // throw new IllegalStateException(ex);
-    // }
-    // // the profile MUST contain UtilitySpace
-    // double time = progress.get(System.currentTimeMillis());
-    // return ((UtilitySpace) profile).getUtility(bid)
-    // .compareTo(getUtilityGoal(time, getE(), extendedspace.getMin(),
-    // extendedspace.getMax())) >= 0;
-    // }
 
     /**
      * @return the E value that controls the party's behaviour. Depending on the

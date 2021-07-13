@@ -9,9 +9,9 @@ public interface CommonOpponentInterface {
 
     public abstract Action chooseAction(AbstractState<?> state);
 
-    public abstract Action chooseAction(Bid lastAgentBid, AbstractState<?> state);
+    public abstract Action chooseAction(Bid lastReceivedBid, AbstractState<?> state);
     
-    public abstract Action chooseAction(Bid lastAgentBid, Bid lastReceivedBid, AbstractState<?> state);
+    public abstract Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state);
 
     // public abstract Action chooseAction(Bid lastAgentBid, Bid lastReceivedBid, AbstractState<?> state, Long depthRound);
 }

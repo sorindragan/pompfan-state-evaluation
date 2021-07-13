@@ -25,6 +25,7 @@ import geniusweb.progress.ProgressFactory;
 
 // Tree<T extends AbstractState<?>>
 public class Tree {
+    private static final boolean DEBUG = true;
     private BeliefNode root;
     private static Random random = new Random(42);
     private Domain domain;
@@ -129,16 +130,23 @@ public class Tree {
     public Tree receiveRealObservation(Action observationAction, Long time) {
         this.currentTime = this.getProgress().get(time);
         this.belief = this.belief.updateBeliefs((Offer) observationAction, (Offer) this.lastBestActionNode.getAction(),
-        this.lastBestActionNode.getState().setRound(this.currentTime));
+                this.lastBestActionNode.getState().setRound(this.currentTime));
         
-        List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream().filter(node -> node.getIsTerminal() == false).collect(Collectors.toList());
-        if (rootCandidates.size()==0) {
+        if (DEBUG) {            
+            System.out.println("New Belief-Probabilities");
+            System.out.println(this.belief);
+        }
+
+        List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream()
+                .filter(node -> node.getIsTerminal() == false).collect(Collectors.toList());
+        if (rootCandidates.size() == 0) {
+            // Quickfix by doing nothing!
             return this;
         }
-        
-        List<Bid> candidateBids = rootCandidates.stream()
-                .map(node -> ((BeliefNode) node)).map(beliefNode -> ((Offer) beliefNode.getObservation()))
-                .map(offer -> offer.getBid()).collect(Collectors.toList());
+
+        List<Bid> candidateBids = rootCandidates.stream().map(node -> ((BeliefNode) node))
+                .map(beliefNode -> ((Offer) beliefNode.getObservation())).map(offer -> offer.getBid())
+                .collect(Collectors.toList());
         // System.out.println(candidateBids);
         Bid realBid = ((Offer) observationAction).getBid();
         Bid closestBid = this.belief.getDistance().computeMostSimilar(realBid, candidateBids);
@@ -159,7 +167,7 @@ public class Tree {
         Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime),
                 System.currentTimeMillis());
         int currIter = 0;
-        System.out.println(simulatedProgress.getTerminationTime());
+        // System.out.println(simulatedProgress.getTerminationTime());
         while (simulatedProgress.isPastDeadline(System.currentTimeMillis()) == false) {
             this.simulate(simulatedProgress);
             currIter++;
