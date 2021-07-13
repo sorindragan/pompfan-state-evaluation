@@ -8,16 +8,19 @@ import geniusweb.custom.distances.AbstractBidDistance;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;
 
-public class RandomTestBelief extends AbstractBelief {
+public class UniformBelief extends AbstractBelief {
 
-    public RandomTestBelief(List<AbstractPolicy> listOfOpponents, AbstractBidDistance distance) {
+    public UniformBelief(List<AbstractPolicy> listOfOpponents, AbstractBidDistance distance) {
         super(listOfOpponents, distance);
     }
 
     @Override
-    public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAction, AbstractState<?> state) {
+    public AbstractBelief updateBeliefs(Offer newOppObservation, Offer lastRealAgentAction, Offer lastRealOppAction,
+            AbstractState<?> state) {
         return this;
     }
+
+
 
 
 
