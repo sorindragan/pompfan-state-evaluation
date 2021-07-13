@@ -7,6 +7,7 @@ import geniusweb.custom.state.StateRepresentationException;
 import geniusweb.issuevalue.Bid;
 
 public class ActionNode extends Node {
+    private static final boolean SIM_DEBUG = false;
     private Action action;
 
     public ActionNode(Node parent, AbstractState<?> state, Action action) {
@@ -22,6 +23,10 @@ public class ActionNode extends Node {
         Bid lastOpponentBid = lastOpponentAction != null ? ((Offer) lastOpponentAction).getBid() : null;
         Bid lastReceivedBidForOpponent = ((Offer) lastAgentAction).getBid();
         Action observation = state.getOpponent().chooseAction(lastReceivedBidForOpponent, lastOpponentBid, state);
+        if (SIM_DEBUG) {
+            System.out.println("Counter...");
+            System.out.println(observation);
+        }
         AbstractState<?> newState = state.updateState(observation, time);
         // System.out.println("================== " + this.getChildren().size() + "
         // ==================");

@@ -16,11 +16,10 @@ import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
-
+public class SelfishReluctantOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
     private static final BigDecimal STUBBORNESS = new BigDecimal(0.5);
 
-    public RandomOwnExplorerPolicy(UtilitySpace utilitySpace,  PartyId id) {
+    public SelfishReluctantOwnExplorerPolicy(UtilitySpace utilitySpace, PartyId id) {
         super(utilitySpace, id);
     }
 
@@ -31,10 +30,13 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
         if (lastOpponentBid == null) {
             bid = this.getAllBids().getExtremeBid(true);
         } else {
-            long i = this.getRandom().nextInt(this.getBidspace().size().intValue());
-            bid = this.getBidspace().get(i);
+            long i = this.getRandom().nextInt(this.getPossibleBids().size().intValue());
+            Bid ownBidCandidate = this.getPossibleBids().get(i);
+            Boolean isBidHigherThanOpponent = this.getUtilitySpace().getUtility(ownBidCandidate)
+                    .compareTo(this.getUtilitySpace().getUtility(lastOpponentBid)) >= 0;
+            bid = isBidHigherThanOpponent ? ownBidCandidate : lastOpponentBid;
         }
-        action = isGood(bid) ? new Offer(this.getPartyId(), bid) : new Accept(this.getPartyId(), lastOpponentBid);
+        action = new Offer(this.getPartyId(), bid);
         return action;
     }
 
@@ -42,13 +44,12 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
         if (bid == null)
             return false;
         BigDecimal sample = this.getUtilitySpace().getUtility(bid);
-        return sample.compareTo(this.getSTUBBORNESS()) >= 0 ? true : false;
+        return sample.compareTo(STUBBORNESS) >= 0 ? true : false;
     }
 
     @Override
     protected void init() {
-        this.setSTUBBORNESS(STUBBORNESS);        
+        this.setSTUBBORNESS(STUBBORNESS);
     }
 
-  
 }

@@ -27,7 +27,8 @@ import geniusweb.progress.ProgressFactory;
 
 // Tree<T extends AbstractState<?>>
 public class Tree {
-    private static final boolean DEBUG = true;
+    private static final boolean PARTICLE_DEBUG = true;
+    private static final boolean SIM_DEBUG = true;
     private BeliefNode root;
     private static Random random = new Random(42);
     private Domain domain;
@@ -105,7 +106,7 @@ public class Tree {
         this.belief = this.belief.updateBeliefs(newRealObservation, lastRealAgentAction, lastRealOpponentAction,
                 stateUpdatedWithRealTime);
 
-        if (DEBUG) {
+        if (PARTICLE_DEBUG) {
             System.out.println("New Belief-Probabilities");
             System.out.println(this.belief);
         }
@@ -154,8 +155,6 @@ public class Tree {
                 .max(Comparator.comparing(node -> node.getValue())).get();
         Action action = lastBestActionNode.getAction();
         this.realHistory.add(action);
-        // System.out.println("Choose...");
-        // System.out.println(lastBestActionNode);
         return action;
     }
 

@@ -16,33 +16,18 @@ import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
-
+public class SelfishNeverAcceptOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
     private static final BigDecimal STUBBORNESS = new BigDecimal(0.5);
 
-    public RandomOwnExplorerPolicy(UtilitySpace utilitySpace,  PartyId id) {
+    public SelfishNeverAcceptOwnExplorerPolicy(Domain domain, UtilitySpace utilitySpace, PartyId id) {
         super(utilitySpace, id);
     }
 
     @Override
     public Action chooseAction(Bid lastOpponentBid, Bid lastAgentBid, AbstractState<?> state) {
-        Action action;
-        Bid bid;
-        if (lastOpponentBid == null) {
-            bid = this.getAllBids().getExtremeBid(true);
-        } else {
-            long i = this.getRandom().nextInt(this.getBidspace().size().intValue());
-            bid = this.getBidspace().get(i);
-        }
-        action = isGood(bid) ? new Offer(this.getPartyId(), bid) : new Accept(this.getPartyId(), lastOpponentBid);
-        return action;
-    }
-
-    private boolean isGood(Bid bid) {
-        if (bid == null)
-            return false;
-        BigDecimal sample = this.getUtilitySpace().getUtility(bid);
-        return sample.compareTo(this.getSTUBBORNESS()) >= 0 ? true : false;
+        long i = this.getRandom().nextInt(this.getPossibleBids().size().intValue());
+        Bid bid = this.getPossibleBids().get(BigInteger.valueOf(i));
+        return new Offer(this.getPartyId(), bid);
     }
 
     @Override
@@ -50,5 +35,6 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
         this.setSTUBBORNESS(STUBBORNESS);        
     }
 
-  
+   
+
 }

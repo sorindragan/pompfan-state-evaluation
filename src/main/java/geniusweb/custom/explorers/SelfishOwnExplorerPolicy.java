@@ -16,12 +16,11 @@ import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
+public class SelfishOwnExplorerPolicy extends RandomOwnExplorerPolicy {
 
-    private static final BigDecimal STUBBORNESS = new BigDecimal(0.5);
 
-    public RandomOwnExplorerPolicy(UtilitySpace utilitySpace,  PartyId id) {
-        super(utilitySpace, id);
+    public SelfishOwnExplorerPolicy(Domain domain, UtilitySpace utilitySpace, PartyId id) {
+        super(utilitySpace,  id);
     }
 
     @Override
@@ -31,8 +30,8 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
         if (lastOpponentBid == null) {
             bid = this.getAllBids().getExtremeBid(true);
         } else {
-            long i = this.getRandom().nextInt(this.getBidspace().size().intValue());
-            bid = this.getBidspace().get(i);
+            long i = this.getRandom().nextInt(this.getPossibleBids().size().intValue());
+            bid = this.getPossibleBids().get(i);
         }
         action = isGood(bid) ? new Offer(this.getPartyId(), bid) : new Accept(this.getPartyId(), lastOpponentBid);
         return action;
@@ -45,10 +44,5 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
         return sample.compareTo(this.getSTUBBORNESS()) >= 0 ? true : false;
     }
 
-    @Override
-    protected void init() {
-        this.setSTUBBORNESS(STUBBORNESS);        
-    }
 
-  
 }
