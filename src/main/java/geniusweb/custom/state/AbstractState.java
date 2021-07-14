@@ -96,7 +96,7 @@ public abstract class AbstractState<T>
 
     public abstract T getCurrentState();
 
-    public abstract Double computeDistance(T otherState);
+    public abstract Double computeStateDistance(T otherState);
 
     public abstract Double evaluate();
 

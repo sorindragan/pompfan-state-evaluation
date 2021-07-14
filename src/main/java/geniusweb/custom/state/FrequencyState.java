@@ -61,7 +61,7 @@ public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
     }
 
     @Override
-    public Double computeDistance(HashMap<IVPair, Double> otherState) {
+    public Double computeStateDistance(HashMap<IVPair, Double> otherState) {
         HashMap<IVPair, Double> currState = this.getRepresentation();
         double[] currVals = currState.values().stream().mapToDouble(val -> (double) val).toArray();
         double[] otherVals = otherState.values().stream().mapToDouble(val -> (double) val).toArray();

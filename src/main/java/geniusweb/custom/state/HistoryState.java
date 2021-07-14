@@ -49,7 +49,7 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
     }
 
     @Override
-    public Double computeDistance(ArrayList<Action> otherState) {
+    public Double computeStateDistance(ArrayList<Action> otherState) {
         ArrayList<Action> currState = this.getRepresentation();
         return this.computeExactSame(currState, otherState);
     }

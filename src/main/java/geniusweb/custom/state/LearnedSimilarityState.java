@@ -35,7 +35,7 @@ public class LearnedSimilarityState extends AbstractState<HashMap<IVPair,Double>
     }
 
     @Override
-    public Double computeDistance(HashMap<IVPair, Double> otherState) {
+    public Double computeStateDistance(HashMap<IVPair, Double> otherState) {
         // TODO Auto-generated method stub
         return null;
     }
