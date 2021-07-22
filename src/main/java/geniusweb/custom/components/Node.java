@@ -7,7 +7,6 @@ import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;
-import geniusweb.custom.state.StateRepresentation;
 
 /**
  * Node

@@ -180,6 +180,7 @@ public class Tree {
                 break;
             }
             if (action instanceof Accept) {
+                // System.out.println("jgfdjhdfhdthz");
                 this.root.getChildren().remove(this.lastBestActionNode);
             }
         } while (action instanceof Accept);

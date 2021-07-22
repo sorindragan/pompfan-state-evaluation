@@ -1,5 +1,6 @@
 package geniusweb.custom.components;
 
+import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
@@ -32,7 +33,7 @@ public class BeliefNode extends Node {
     public Node act(AbstractOwnExplorationPolicy strategy, Double time) throws StateRepresentationException {
         AbstractState<?> state = this.getState();
         Action lastOwnAction = this.getParent() != null ? ((ActionNode) this.getParent()).getAction() : null;
-        Action lastOpponentAction = this.getObservation();
+        Action lastOpponentAction = this.getObservation() instanceof Offer ? (Offer) this.getObservation() : (Accept) this.getObservation();
         Bid lastOwnBid = lastOwnAction != null ? ((Offer) lastOwnAction).getBid() : null;
         Bid lastOpponentBid = lastOpponentAction != null ? ((Offer) lastOpponentAction).getBid() : null;
 

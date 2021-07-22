@@ -6,23 +6,13 @@ import java.util.Random;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.issuevalue.Bid;
 
-public class RandomEvaluator implements EvaluationFunctionInterface{
+public class RandomEvaluator implements EvaluationFunctionInterface<Object>{
     Random random = new Random();
 
     @Override
-    public Double evaluate(AbstractState<?> state) {
+    public Double evaluate(Object state) {
+        // TODO Auto-generated method stub
         return random.nextDouble();
     }
-
-    @Override
-    public Double evaluate(AbstractState<?> state, Bid bid) {
-        return random.nextDouble();
-
-    }
-
-    @Override
-    public Double evaluate(AbstractState<?> state, Bid agentBid, Bid opponenentBid) {
-        return random.nextDouble();
-    }
-    
+ 
 }

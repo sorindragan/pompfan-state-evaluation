@@ -28,12 +28,15 @@ import geniusweb.custom.beliefs.UniformBelief;
 import geniusweb.custom.components.Tree;
 import geniusweb.custom.distances.AbstractBidDistance;
 import geniusweb.custom.distances.UtilityBidDistance;
-import geniusweb.custom.evaluators.MeanUtilityEvaluator;
+import geniusweb.custom.evaluators.EvaluationFunctionInterface;
+import geniusweb.custom.evaluators.Last2BidsMeanUtilityEvaluator;
+import geniusweb.custom.evaluators.Last2BidsProductUtilityEvaluator;
 import geniusweb.custom.evaluators.RandomEvaluator;
 import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
 import geniusweb.custom.explorers.RandomNeverAcceptOwnExplorationPolicy;
 import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
 import geniusweb.custom.explorers.SelfishNeverAcceptOwnExplorerPolicy;
+import geniusweb.custom.junk.Last2BidsState;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.opponents.AntagonisticOpponentPolicy;
 import geniusweb.custom.opponents.BoulwareOpponentPolicy;
@@ -44,7 +47,6 @@ import geniusweb.custom.opponents.SelfishOpponentPolicy;
 import geniusweb.custom.opponents.TimeDependentOpponentPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.HistoryState;
-import geniusweb.custom.state.Last2BidsState;
 import geniusweb.custom.state.StateRepresentationException;
 import geniusweb.custom.wideners.AbstractWidener;
 import geniusweb.custom.wideners.MaxWidthWideningStrategy;
@@ -192,12 +194,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         AbstractBelief belief = new ParticleFilterWithAcceptBelief(listOfOpponents, distance);
                         // AbstractBelief belief = new UniformBelief(listOfOpponents, distance);
                         // DONE: Check if belief is updated -- It is!
-                        AbstractState<?> startState = new HistoryState(this.uSpace, null);
+                        EvaluationFunctionInterface<HistoryState> evaluator = new Last2BidsProductUtilityEvaluator(this.uSpace);
+                        AbstractState<?> startState = new HistoryState(this.uSpace, null, evaluator);
                         // AbstractOwnExplorationPolicy explorer = new
                         // SelfishNeverAcceptOwnExplorerPolicy(domain, this.uSpace, me);
                         AbstractOwnExplorationPolicy explorer = new RandomOwnExplorerPolicy(this.uSpace, me);
-                        // AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.1, 4.0, 0.1); // TODO: BUG if increased
-                        AbstractWidener widener = new MaxWidthWideningStrategy(explorer, MAX_WIDTH);
+                        AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.1, 4.0, 0.1); // TODO: BUG if increased
+                        // AbstractWidener widener = new MaxWidthWideningStrategy(explorer, MAX_WIDTH);
                         this.MCTS = new Tree(this.uSpace, belief, startState, widener, this.progress);
                     } catch (IOException e) {
                         throw new IllegalStateException(e);

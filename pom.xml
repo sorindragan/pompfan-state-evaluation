@@ -183,6 +183,12 @@
 			<version>${geniusweb.version}</version>
 			<!-- <type>pom</type> -->
 		</dependency>
+		<dependency>
+			<groupId>geniusweb</groupId>
+			<artifactId>protocol</artifactId>
+			<version>${geniusweb.version}</version>
+			<!-- <type>pom</type> -->
+		</dependency>
 		<!-- <dependency>
 			<groupId>geniusweb</groupId>
 			<artifactId>exampleparties</artifactId>
