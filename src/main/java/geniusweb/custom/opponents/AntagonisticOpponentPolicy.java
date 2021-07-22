@@ -42,9 +42,6 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
         return new Offer(this.getPartyId(), bid);
     }
 
-    private boolean isGood(Bid bid) {
-        BigDecimal yourUtility = this.getUtilitySpace().getUtility(bid);
-        return yourUtility.compareTo(SYMPATHY) == -1;
-    }
+
 
 }

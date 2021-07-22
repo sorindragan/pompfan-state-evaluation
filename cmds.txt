@@ -10,3 +10,6 @@ java -cp ./target/olusorin-1.6.1-jar-with-dependencies.jar geniusweb.simplerunne
 Run command line no compilation:
 java --class-path "./libs/simplerunner-1.6.1-jar-with-dependencies.jar;./libs/partiesserver-1.6.1-jar-with-dependencies.jar;./target/classes" geniusweb.simplerunner.NegoRunner src/test/resources/settingsRandom.json 
 java --class-path "./libs/simplerunner-1.6.1-jar-with-dependencies.jar;./libs/boulware-1.6.1.jar;./target/classes" geniusweb.simplerunner.NegoRunner src/test/resources/settingsBoulware.json 
+
+
+Tree to short.

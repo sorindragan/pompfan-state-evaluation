@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -41,26 +42,30 @@ public class ParticleFilterBelief extends AbstractBelief {
                 // Monte Carlo Sampling
                 // This should be in a loop -- We need to try multiple actions to get an
                 // understanding of whether the opponent could generate the real obs.
-                this.sample(lastAgentAction, lastOppAction, state, abstractPolicy, candidateObservations);
+                Bid sampledBid = this.sample(lastAgentAction, lastOppAction, state, abstractPolicy);
+
+                candidateObservations.add(sampledBid);
             }
-            Double weightOpponentLikelihood = candidateObservations.parallelStream()
+            Double weightOpponentLikelihood = candidateObservations.parallelStream().filter(Objects::nonNull)
                     .mapToDouble(obs -> this.getDistance().computeDistance(obs, realObservation.getBid()))
                     .map(val -> Math.abs(val)).sum();
-            // DONE: Maybe check the size because abstractpolicies might be overridden -- Not a problem!
+            // DONE: Maybe check the size because abstractpolicies might be overridden --
+            // Not a problem!
             this.getOpponentProbabilities().put(abstractPolicy, 1 / (weightOpponentLikelihood + EPSILON));
         }
         return new ParticleFilterBelief(this.getOpponentProbabilities(), this.getDistance());
     }
 
-    protected void sample(Offer lastAgentAction, Offer lastOppAction, AbstractState<?> state,
-            AbstractPolicy abstractPolicy, List<Bid> candidateObservations) {
-        // DONE: Keep track of real observations and also supply the previous real observation
-        Action chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state);
-        if (chosenAction instanceof Offer) {
-            candidateObservations.add(((Offer) chosenAction).getBid());
-        }
-    }
+    protected Bid sample(Offer lastAgentAction, Offer lastOppAction, AbstractState<?> state,
+            AbstractPolicy abstractPolicy) {
+        // DONE: Keep track of real observations and also supply the previous real
+        // observation
+        Action chosenAction = lastOppAction != null
+                ? abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state)
+                : abstractPolicy.chooseAction(lastAgentAction.getBid(), state);
 
+        return chosenAction instanceof Offer ? ((Offer) chosenAction).getBid() : null;
+    }
 
     // @Override
     // public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAction,
