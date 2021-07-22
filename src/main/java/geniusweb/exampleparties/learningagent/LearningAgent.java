@@ -1,4 +1,4 @@
-package geniusweb.exampleparties.learningagent; // TODO: change name
+package geniusweb.exampleparties.learningagent; 
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +40,7 @@ import tudelft.utilities.logging.Reporter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class LearningAgent extends DefaultParty { // TODO: change name
+public class LearningAgent extends DefaultParty {
 
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -56,10 +56,10 @@ public class LearningAgent extends DefaultParty { // TODO: change name
     private File persistentPath;
     private String opponentName;
 
-    public LearningAgent() { // TODO: change name
+    public LearningAgent() { 
     }
 
-    public LearningAgent(Reporter reporter) { // TODO: change name
+    public LearningAgent(Reporter reporter) { 
         super(reporter); // for debugging
     }
 

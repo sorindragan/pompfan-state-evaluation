@@ -1,4 +1,4 @@
-package geniusweb.exampleparties.learningagent; // TODO: change name
+package geniusweb.exampleparties.learningagent; 
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -55,7 +55,7 @@ import geniusweb.references.ProtocolRef;
 import geniusweb.references.Reference;
 import tudelft.utilities.listener.DefaultListenable;
 
-public class LearningAgentTest { // TODO: change name
+public class LearningAgentTest { // TODO: Impl Tests for our agent
 
 	private static final PartyId PARTY1 = new PartyId("party1_1");
 	private static final String SAOP = "SAOP";
@@ -75,7 +75,7 @@ public class LearningAgentTest { // TODO: change name
 	private Parameters parameters = new Parameters();
 
 	private void refreshAgent() {
-		party = new LearningAgent(); // TODO: change name
+		party = new LearningAgent(); 
 	}
 
 	@Before
