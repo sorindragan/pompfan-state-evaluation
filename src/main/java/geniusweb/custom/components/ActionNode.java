@@ -1,5 +1,6 @@
 package geniusweb.custom.components;
 
+import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.custom.state.AbstractState;
@@ -21,7 +22,7 @@ public class ActionNode extends Node {
         Action lastOpponentAction = ((BeliefNode) this.getParent()).getObservation();
         Action lastAgentAction = this.getAction();
         Bid lastOpponentBid = lastOpponentAction != null ? ((Offer) lastOpponentAction).getBid() : null;
-        Bid lastReceivedBidForOpponent = ((Offer) lastAgentAction).getBid();
+        Bid lastReceivedBidForOpponent = (lastAgentAction instanceof Offer ? ((Offer) lastAgentAction)  : ((Accept) lastAgentAction)).getBid();
         Action observation = state.getOpponent().chooseAction(lastReceivedBidForOpponent, lastOpponentBid, state);
         if (SIM_DEBUG) {
             System.out.println("Counter...");

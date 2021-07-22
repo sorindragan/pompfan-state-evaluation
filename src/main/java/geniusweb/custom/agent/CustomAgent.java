@@ -1,6 +1,7 @@
 package geniusweb.custom.agent; // TODO: change name
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import geniusweb.custom.evaluators.MeanUtilityEvaluator;
 import geniusweb.custom.evaluators.RandomEvaluator;
 import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
 import geniusweb.custom.explorers.RandomNeverAcceptOwnExplorationPolicy;
+import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
 import geniusweb.custom.explorers.SelfishNeverAcceptOwnExplorerPolicy;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.opponents.AntagonisticOpponentPolicy;
@@ -46,6 +48,7 @@ import geniusweb.custom.state.Last2BidsState;
 import geniusweb.custom.state.StateRepresentationException;
 import geniusweb.custom.wideners.AbstractWidener;
 import geniusweb.custom.wideners.MaxWidthWideningStrategy;
+import geniusweb.custom.wideners.ProgressiveWideningStrategy;
 import geniusweb.exampleparties.boulware.Boulware;
 import geniusweb.exampleparties.linear.Linear;
 import geniusweb.exampleparties.timedependentparty.TimeDependentParty;
@@ -77,7 +80,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     private static final int NUM_SIMULATIONS = 100;
     private static final int MAX_WIDTH = 10;
-    private Long SIMULATION_TIME = 250l;
+    private Long SIMULATION_TIME = 250l; // TODO: BUG if increased
     private static final boolean DEBUG = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -113,6 +116,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     @Override
     public void notifyChange(Inform info) {
         System.out.println("RECEIVE INFO");
+        System.out.println(info.getClass().getName());
         try {
 
             if (info instanceof Settings) {
@@ -187,9 +191,12 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         // AbstractBelief belief = new ParticleFilterBelief(listOfOpponents, distance);
                         AbstractBelief belief = new ParticleFilterWithAcceptBelief(listOfOpponents, distance);
                         // AbstractBelief belief = new UniformBelief(listOfOpponents, distance);
-                        // TODO: Check if belief is updated -- It is!
-                        AbstractState<?> startState = new HistoryState(uSpace, null);
-                        AbstractOwnExplorationPolicy explorer = new SelfishNeverAcceptOwnExplorerPolicy(domain, this.uSpace, me);
+                        // DONE: Check if belief is updated -- It is!
+                        AbstractState<?> startState = new HistoryState(this.uSpace, null);
+                        // AbstractOwnExplorationPolicy explorer = new
+                        // SelfishNeverAcceptOwnExplorerPolicy(domain, this.uSpace, me);
+                        AbstractOwnExplorationPolicy explorer = new RandomOwnExplorerPolicy(this.uSpace, me);
+                        // AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.1, 4.0, 0.1); // TODO: BUG if increased
                         AbstractWidener widener = new MaxWidthWideningStrategy(explorer, MAX_WIDTH);
                         this.MCTS = new Tree(this.uSpace, belief, startState, widener, this.progress);
                     } catch (IOException e) {
@@ -231,6 +238,12 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 Agreements agreements = ((Finished) info).getAgreement();
                 processAgreements(agreements);
 
+                FileWriter fullTreeFileWriter = new FileWriter("log_fullTree.txt");
+                fullTreeFileWriter.write(this.MCTS.toStringOriginal());
+                fullTreeFileWriter.close();
+                FileWriter currRootFileWriter = new FileWriter("log_currRoot.txt");
+                currRootFileWriter.write(this.MCTS.toString());
+                currRootFileWriter.close();
                 // Write the negotiation data that we collected to the path provided.
                 if (this.dataPaths != null && this.negotiationData != null) {
                     try {
@@ -330,7 +343,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             action = new Accept(me, this.lastReceivedBid);
         } else {
             // STEP: Generate offer!
-            this.MCTS.construct(SIMULATION_TIME);
+            long negotiationEnd = this.progress.getTerminationTime().getTime();
+            long remainingTime = negotiationEnd - System.currentTimeMillis();
+            long simTime = Math.min(SIMULATION_TIME, remainingTime);
+
+            if (simTime <= 250) {
+                this.MCTS.construct(simTime);
+            }
             action = this.MCTS.chooseBestAction();
             if (action == null) {
                 // if action==null we failed to suggest next action.
@@ -345,6 +364,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 Bid acceptedBid = ((Accept) action).getBid();
                 System.out.println("We ACCEPT: Util=" + String.valueOf(this.uSpace.getUtility(acceptedBid)) + " -- "
                         + acceptedBid.toString());
+                // if(this.lastReceivedBid.equals(acceptedBid) == false){
+                //     System.out.println("BUT needs to be placed as Offer!");
+                //     action = new Offer(this.me, acceptedBid);
+                // }
             } else {
                 System.out.println("Something HAPPENED! " + action.toString());
             }
@@ -356,6 +379,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
 
         // Send action
         try {
+            if (action instanceof Accept) {
+                System.out.println(action);
+            }
             getConnection().send(action);
 
         } catch (IOException e) {

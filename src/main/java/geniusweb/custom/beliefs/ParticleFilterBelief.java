@@ -41,13 +41,12 @@ public class ParticleFilterBelief extends AbstractBelief {
                 // Monte Carlo Sampling
                 // This should be in a loop -- We need to try multiple actions to get an
                 // understanding of whether the opponent could generate the real obs.
-                sample(lastAgentAction, lastOppAction, state, abstractPolicy, candidateObservations);
+                this.sample(lastAgentAction, lastOppAction, state, abstractPolicy, candidateObservations);
             }
             Double weightOpponentLikelihood = candidateObservations.parallelStream()
                     .mapToDouble(obs -> this.getDistance().computeDistance(obs, realObservation.getBid()))
                     .map(val -> Math.abs(val)).sum();
-            // DONE TODO: Maybe check the size because abstractpolicies might be overridden
-            // -- Not a problem!
+            // DONE: Maybe check the size because abstractpolicies might be overridden -- Not a problem!
             this.getOpponentProbabilities().put(abstractPolicy, 1 / (weightOpponentLikelihood + EPSILON));
         }
         return new ParticleFilterBelief(this.getOpponentProbabilities(), this.getDistance());
@@ -55,8 +54,7 @@ public class ParticleFilterBelief extends AbstractBelief {
 
     protected void sample(Offer lastAgentAction, Offer lastOppAction, AbstractState<?> state,
             AbstractPolicy abstractPolicy, List<Bid> candidateObservations) {
-        // TODO: Keep track of real observations and also supply the previous real
-        // observation
+        // DONE: Keep track of real observations and also supply the previous real observation
         Action chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state);
         if (chosenAction instanceof Offer) {
             candidateObservations.add(((Offer) chosenAction).getBid());
