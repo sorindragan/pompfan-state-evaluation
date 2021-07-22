@@ -120,8 +120,9 @@ public class Node {
 
     @Override
     public String toString() {
+        Action a = this instanceof BeliefNode ? ((BeliefNode) this).getObservation() : ((ActionNode) this).getAction();
         return new StringBuilder()
-            .append(this.id)
+            .append(this.id.substring(24))
             .append("[")
             .append("children:")
             .append(this.children.size())
@@ -131,7 +132,12 @@ public class Node {
             .append(",")
             .append("value:")
             .append(this.value)
+            .append(",")
+            .append("isTerminal:")
+            .append(this.getIsTerminal())
             .append("]")
+            .append("-")
+            .append(a)
             .toString();
     }
 
