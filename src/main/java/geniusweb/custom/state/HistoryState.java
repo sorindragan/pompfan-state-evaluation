@@ -58,15 +58,44 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
     public Double evaluate() {
         // ArrayList<Action> currState = this.getRepresentation();
         // int numBids = currState.size();
-        // double discountedUtility = this.evaluateLast2Bids() * Math.pow(DISCOUNT_RATE, numBids);
+        // double discountedUtility = this.evaluateLast2Bids() * Math.pow(DISCOUNT_RATE,
+        // numBids);
         double discountedUtility = this.evaluateLast2Bids();
         return discountedUtility;
     }
 
+    // protected Double evaluateLast2Bids() {
+    // ArrayList<Action> currHistory = this.getHistory();
+    // int length = currHistory.size();
+    // Action lastOpponentAction = currHistory.get(length - 1);
+    // Action lastAgentAction = currHistory.get(length - 2);
+    // if (lastOpponentAction instanceof Accept) {
+    // // In case last opponent action was an acceptance
+    // Accept acceptanceBid = (Accept) lastOpponentAction;
+    // return
+    // this.getUtilitySpace().getUtility(acceptanceBid.getBid()).doubleValue();
+
+    // }
+
+    // // General Offer Case
+    // Bid lastOpponentBid = lastOpponentAction instanceof Offer ? ((Offer)
+    // lastOpponentAction).getBid() : ((Accept) lastOpponentAction).getBid();
+    // Bid lastAgentBid = lastAgentAction instanceof Offer ? ((Offer)
+    // lastAgentAction).getBid() : ((Accept) lastAgentAction).getBid() ;
+    // BigDecimal ZERO_UTILITY = new BigDecimal(0);
+    // BigDecimal utility1 = lastAgentBid != null ?
+    // this.getUtilitySpace().getUtility(lastAgentBid) : ZERO_UTILITY;
+    // BigDecimal utility2 = lastOpponentBid != null ?
+    // this.getUtilitySpace().getUtility(lastOpponentBid)
+    // : ZERO_UTILITY;
+    // BigDecimal mean = utility1.add(utility2).divide(new BigDecimal(2));
+    // return mean.doubleValue();
+    // }
     protected Double evaluateLast2Bids() {
         ArrayList<Action> currHistory = this.getHistory();
         int length = currHistory.size();
         Action lastOpponentAction = currHistory.get(length - 1);
+        Action lastAgentAction = currHistory.get(length - 2);
         if (lastOpponentAction instanceof Accept) {
             // In case last opponent action was an acceptance
             Accept acceptanceBid = (Accept) lastOpponentAction;
@@ -75,37 +104,17 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
         }
 
         // General Offer Case
-        Bid lastOpponentBid = length > 1 ? ((Offer) lastOpponentAction).getBid() : null;
-        Bid lastAgentBid = length > 1 ? ((Offer) currHistory.get(length - 2)).getBid() : null;
+        Bid lastOpponentBid = lastOpponentAction instanceof Offer ? ((Offer) lastOpponentAction).getBid()
+                : ((Accept) lastOpponentAction).getBid();
+        Bid lastAgentBid = lastAgentAction instanceof Offer ? ((Offer) lastAgentAction).getBid()
+                : ((Accept) lastAgentAction).getBid();
         BigDecimal ZERO_UTILITY = new BigDecimal(0);
         BigDecimal utility1 = lastAgentBid != null ? this.getUtilitySpace().getUtility(lastAgentBid) : ZERO_UTILITY;
         BigDecimal utility2 = lastOpponentBid != null ? this.getUtilitySpace().getUtility(lastOpponentBid)
                 : ZERO_UTILITY;
-        BigDecimal mean = utility1.add(utility2).divide(new BigDecimal(2));
+        BigDecimal mean = utility1.multiply(utility2);
         return mean.doubleValue();
     }
-
-    // protected Double evaluateLast2Bids() {
-    //     ArrayList<Action> currHistory = this.getHistory();
-    //     int length = currHistory.size();
-    //     Action lastOpponentAction = currHistory.get(length - 1);
-    //     if (lastOpponentAction instanceof Accept) {
-    //         // In case last opponent action was an acceptance
-    //         Accept acceptanceBid = (Accept) lastOpponentAction;
-    //         return this.getUtilitySpace().getUtility(acceptanceBid.getBid()).doubleValue();
-
-    //     }
-
-    //     // General Offer Case
-    //     Bid lastOpponentBid = length > 1 ? ((Offer) lastOpponentAction).getBid() : null;
-    //     Bid lastAgentBid = length > 1 ? ((Offer) currHistory.get(length - 2)).getBid() : null;
-    //     BigDecimal ZERO_UTILITY = new BigDecimal(0);
-    //     BigDecimal utility1 = lastAgentBid != null ? this.getUtilitySpace().getUtility(lastAgentBid) : ZERO_UTILITY;
-    //     BigDecimal utility2 = lastOpponentBid != null ? this.getUtilitySpace().getUtility(lastOpponentBid)
-    //             : ZERO_UTILITY;
-    //     BigDecimal mean = utility1.multiply(utility2);
-    //     return mean.doubleValue();
-    // }
 
     @Override
     public boolean equals(Object obj) {
