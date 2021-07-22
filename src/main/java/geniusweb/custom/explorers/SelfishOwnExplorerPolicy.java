@@ -19,7 +19,7 @@ import tudelft.utilities.immutablelist.ImmutableList;
 public class SelfishOwnExplorerPolicy extends RandomOwnExplorerPolicy {
 
 
-    public SelfishOwnExplorerPolicy(Domain domain, UtilitySpace utilitySpace, PartyId id) {
+    public SelfishOwnExplorerPolicy(UtilitySpace utilitySpace, PartyId id) {
         super(utilitySpace,  id);
     }
 

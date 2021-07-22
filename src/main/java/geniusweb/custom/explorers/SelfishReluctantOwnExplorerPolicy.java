@@ -23,6 +23,7 @@ public class SelfishReluctantOwnExplorerPolicy extends AbstractOwnExplorationPol
         super(utilitySpace, id);
     }
 
+    
     @Override
     public Action chooseAction(Bid lastOpponentBid, Bid lastAgentBid, AbstractState<?> state) {
         Action action;
