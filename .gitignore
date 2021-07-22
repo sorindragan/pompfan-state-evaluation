@@ -1,6 +1,7 @@
 # CUSTOM
 .vscode/*.json
 !launch.json
+log_*.txt
 
 # DEFAULT
 target
