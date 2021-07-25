@@ -12,17 +12,20 @@ import java.util.logging.Level;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import geniusweb.protocol.NegoSettings;
 import geniusweb.protocol.NegoState;
 import geniusweb.protocol.partyconnection.ProtocolToPartyConnFactory;
+import geniusweb.protocol.session.SessionState;
 import geniusweb.protocol.tournament.allpermutations.AllPermutationsState;
 import geniusweb.simplerunner.ClassPathConnectionFactory;
 import geniusweb.simplerunner.NegoRunner;
 import tudelft.utilities.logging.Reporter;
 
 public class CustomNegoRunner extends NegoRunner {
-    private final static ObjectMapper jackson = new ObjectMapper();
+    private final static ObjectMapper jacksonReader = new ObjectMapper();
+    private final static ObjectWriter jacksonWriter = jacksonReader.writerWithDefaultPrettyPrinter();
     // private final NegoProtocol protocol;
     // private NegoSettings settings;
     // private ProtocolToPartyConnFactory connectionfactory;
@@ -44,15 +47,26 @@ public class CustomNegoRunner extends NegoRunner {
 
     @Override
     protected void logFinal(Level level, NegoState state) {
-        FileWriter fullTreeFileWriter;
+        FileWriter resultsJsonFileWriter;
         try {
-            log.log(level, "protocol ended normally: " + jackson.writeValueAsString(state));
-            String date = new SimpleDateFormat("dd_MM_yyyy_hh_mm").format(new Date());
-            String logFileName = state instanceof AllPermutationsState ? "log_tournament" + "_" + date : "log_session";
-            fullTreeFileWriter = new FileWriter("logs/" + logFileName + ".json");
-            ResultsLogger finalResults = new ResultsLogger(state);
-            fullTreeFileWriter.write(jackson.writeValueAsString(finalResults));
-            fullTreeFileWriter.close();
+            log.log(level, "protocol ended normally: " + jacksonWriter.writeValueAsString(state));
+            Date now = new Date();
+            String timestamp = new SimpleDateFormat("dd_MM_yyyy_hh_mm").format(now);
+            String temporalState = new SimpleDateFormat("hh:mm:ss dd-MM-yyyy").format(now);
+            String logFileName = "none";
+            ResultsLogger finalResults = new ResultsLogger(state, temporalState);
+            if (state instanceof AllPermutationsState) {
+                logFileName = "log_tournament" + "_" + timestamp;
+                FileWriter newestResultsJsonFileWriter = new FileWriter("logs/newest_tournament.json");
+                newestResultsJsonFileWriter.write(jacksonWriter.writeValueAsString(finalResults));
+                newestResultsJsonFileWriter.close();
+            } else if (state instanceof SessionState) {
+                logFileName = "log_session";
+            }
+            resultsJsonFileWriter = new FileWriter("logs/" + logFileName + ".json");
+            resultsJsonFileWriter.write(jacksonWriter.writeValueAsString(finalResults));
+            resultsJsonFileWriter.close();
+
             System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
@@ -62,7 +76,7 @@ public class CustomNegoRunner extends NegoRunner {
 
     public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException {
         String serialized = new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8);
-        NegoSettings settings = jackson.readValue(serialized, NegoSettings.class);
+        NegoSettings settings = jacksonReader.readValue(serialized, NegoSettings.class);
 
         NegoRunner runner = new CustomNegoRunner(settings, new ClassPathConnectionFactory(), new StdOutReporter(), 0);
         runner.run();

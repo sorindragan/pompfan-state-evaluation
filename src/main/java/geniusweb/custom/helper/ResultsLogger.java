@@ -3,6 +3,7 @@ package geniusweb.custom.helper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,22 +37,16 @@ import tudelft.utilities.immutablelist.ImmutableList;
 import tudelft.utilities.logging.ReportToLogger;
 
 public class ResultsLogger {
-    private NegoState state = null;
+    private String timestamp;
     private List<Result> results = new ArrayList<Result>();
+    private NegoState state = null;
 
-    public ResultsLogger(NegoState state) {
+    public ResultsLogger(NegoState state, String temporalState) {
         super();
         this.state = state;
+        this.setTimestamp(temporalState);
         this.generateResults(this.state);
     }
-
-    // public NegoState getState() {
-    // return state;
-    // }
-
-    // public void setState(NegoState state) {
-    // this.state = state;
-    // }
 
     private void generateResults(NegoState state) {
         List<SessionResult> allSessions = new ArrayList<SessionResult>();
@@ -74,6 +69,30 @@ public class ResultsLogger {
             results.addAll(collectedResults);
         }
 
+    }
+
+    public NegoState getState() {
+        return state;
+    }
+
+    public void setState(NegoState state) {
+        this.state = state;
+    }
+
+    public List<Result> getResults() {
+        return results;
+    }
+
+    public void setResults(List<Result> results) {
+        this.results = results;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String temporalState) {
+        this.timestamp = temporalState;
     }
 
     public class Result {
@@ -151,21 +170,5 @@ public class ResultsLogger {
             this.bid = bid;
         }
 
-    }
-
-    public NegoState getState() {
-        return state;
-    }
-
-    public void setState(NegoState state) {
-        this.state = state;
-    }
-
-    public List<Result> getResults() {
-        return results;
-    }
-
-    public void setResults(List<Result> results) {
-        this.results = results;
     }
 }
