@@ -36,7 +36,6 @@ import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
 import geniusweb.custom.explorers.RandomNeverAcceptOwnExplorationPolicy;
 import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
 import geniusweb.custom.explorers.SelfishNeverAcceptOwnExplorerPolicy;
-import geniusweb.custom.junk.Last2BidsState;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.opponents.AntagonisticOpponentPolicy;
 import geniusweb.custom.opponents.BoulwareOpponentPolicy;
@@ -84,6 +83,8 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private static final int MAX_WIDTH = 10;
     private Long SIMULATION_TIME = 250l; // TODO: BUG if increased
     private static final boolean DEBUG = false;
+    private static final boolean DEBUG_PRINT_TREE = false;
+    private static final boolean DEBUG_IN_TOURNAMENT = true;
     private Bid lastReceivedBid = null;
     private PartyId me;
     private final Random random = new Random();
@@ -117,8 +118,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     @Override
     public void notifyChange(Inform info) {
-        System.out.println("RECEIVE INFO");
-        System.out.println(info.getClass().getName());
+        if (DEBUG_IN_TOURNAMENT == false) {
+            System.out.println("RECEIVE INFO");
+            System.out.println(info.getClass().getName());
+        }
         try {
 
             if (info instanceof Settings) {
@@ -194,12 +197,16 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         AbstractBelief belief = new ParticleFilterWithAcceptBelief(listOfOpponents, distance);
                         // AbstractBelief belief = new UniformBelief(listOfOpponents, distance);
                         // DONE: Check if belief is updated -- It is!
-                        EvaluationFunctionInterface<HistoryState> evaluator = new Last2BidsProductUtilityEvaluator(this.uSpace);
+                        EvaluationFunctionInterface<HistoryState> evaluator = new Last2BidsProductUtilityEvaluator(
+                                this.uSpace);
                         AbstractState<?> startState = new HistoryState(this.uSpace, null, evaluator);
                         // AbstractOwnExplorationPolicy explorer = new
                         // SelfishNeverAcceptOwnExplorerPolicy(domain, this.uSpace, me);
                         AbstractOwnExplorationPolicy explorer = new RandomOwnExplorerPolicy(this.uSpace, me);
-                        AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.1, 4.0, 0.1); // TODO: BUG if increased
+                        AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.1, 4.0, 0.1); // TODO:
+                                                                                                                 // BUG
+                                                                                                                 // if
+                                                                                                                 // increased
                         // AbstractWidener widener = new MaxWidthWideningStrategy(explorer, MAX_WIDTH);
                         this.MCTS = new Tree(this.uSpace, belief, startState, widener, this.progress);
                     } catch (IOException e) {
@@ -240,13 +247,14 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 // object also contains the final agreement (if any).
                 Agreements agreements = ((Finished) info).getAgreement();
                 processAgreements(agreements);
-
-                FileWriter fullTreeFileWriter = new FileWriter("log_fullTree.txt");
-                fullTreeFileWriter.write(this.MCTS.toStringOriginal());
-                fullTreeFileWriter.close();
-                FileWriter currRootFileWriter = new FileWriter("log_currRoot.txt");
-                currRootFileWriter.write(this.MCTS.toString());
-                currRootFileWriter.close();
+                if (DEBUG_PRINT_TREE) {
+                    FileWriter fullTreeFileWriter = new FileWriter("logs/log_fullTree.txt");
+                    fullTreeFileWriter.write(this.MCTS.toStringOriginal());
+                    fullTreeFileWriter.close();
+                    FileWriter currRootFileWriter = new FileWriter("logs/log_currRoot.txt");
+                    currRootFileWriter.write(this.MCTS.toString());
+                    currRootFileWriter.close();
+                }
                 // Write the negotiation data that we collected to the path provided.
                 if (this.dataPaths != null && this.negotiationData != null) {
                     try {
@@ -335,9 +343,11 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     private void myTurn() throws IOException, StateRepresentationException {
         if (this.lastReceivedBid != null) {
-            System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
-            System.out.println("Opponent: Util=" + this.uSpace.getUtility(this.lastReceivedBid) + " -- "
-                    + this.lastReceivedBid.toString());
+            if (DEBUG_IN_TOURNAMENT == false) {
+                System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
+                System.out.println("Opponent: Util=" + this.uSpace.getUtility(this.lastReceivedBid) + " -- "
+                        + this.lastReceivedBid.toString());
+            }
         }
         Action action;
 
@@ -361,15 +371,17 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             }
             if (action instanceof Offer) {
                 Bid myBid = ((Offer) action).getBid();
-                System.out.println(
-                        "Agent:    Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- " + myBid.toString());
+                if (DEBUG_IN_TOURNAMENT == false) {
+                    System.out.println("Agent:    Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- "
+                            + myBid.toString());
+                }
             } else if (action instanceof Accept) {
                 Bid acceptedBid = ((Accept) action).getBid();
                 System.out.println("We ACCEPT: Util=" + String.valueOf(this.uSpace.getUtility(acceptedBid)) + " -- "
                         + acceptedBid.toString());
                 // if(this.lastReceivedBid.equals(acceptedBid) == false){
-                //     System.out.println("BUT needs to be placed as Offer!");
-                //     action = new Offer(this.me, acceptedBid);
+                // System.out.println("BUT needs to be placed as Offer!");
+                // action = new Offer(this.me, acceptedBid);
                 // }
             } else {
                 System.out.println("Something HAPPENED! " + action.toString());
@@ -381,16 +393,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         }
 
         // Send action
-        try {
-            if (action instanceof Accept) {
-                System.out.println(action);
-            }
-            getConnection().send(action);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(0);
-        }
+        getConnection().send(action);
     }
 
     /**

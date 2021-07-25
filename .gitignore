@@ -1,7 +1,9 @@
 # CUSTOM
 .vscode/*.json
 !launch.json
-log_*.txt
+logs/**/*
+!logs/.gitkeep
+
 
 # DEFAULT
 target
