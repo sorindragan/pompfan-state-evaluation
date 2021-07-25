@@ -41,6 +41,11 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
 
     @Override
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
+        // if(lastReceivedBid==null){
+        //     ImmutableList<Bid> bids = this.extendedspace.getBids(BigDecimal.ONE);
+        //     Bid selectedBid = bids.get(this.getRandom().nextInt(bids.size().intValue()));
+        //     return new Offer(this.getPartyId(), selectedBid);
+        // }
         return this.myTurn(lastReceivedBid, state);
     }
 

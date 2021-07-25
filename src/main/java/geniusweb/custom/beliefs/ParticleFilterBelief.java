@@ -60,9 +60,15 @@ public class ParticleFilterBelief extends AbstractBelief {
             AbstractPolicy abstractPolicy) {
         // DONE: Keep track of real observations and also supply the previous real
         // observation
-        Action chosenAction = lastOppAction != null
-                ? abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state)
-                : abstractPolicy.chooseAction(lastAgentAction.getBid(), state);
+        Action chosenAction;
+        if (lastAgentAction != null) {   
+            chosenAction = lastOppAction != null
+            ? abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state)
+            : abstractPolicy.chooseAction(lastAgentAction.getBid(), state);
+        }else{
+            // Quickfix: Random action selection if no first own best action.         
+            chosenAction = abstractPolicy.chooseAction();
+        }
 
         return chosenAction instanceof Offer ? ((Offer) chosenAction).getBid() : null;
     }

@@ -20,9 +20,15 @@ public class ParticleFilterWithAcceptBelief extends ParticleFilterBelief {
     protected Bid sample(Offer lastAgentAction, Offer lastOppAction, AbstractState<?> state,
             AbstractPolicy abstractPolicy) {
 
-        Action chosenAction = lastOppAction != null
-                ? abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state)
-                : abstractPolicy.chooseAction(lastAgentAction.getBid(), state);
+        Action chosenAction;
+        if (lastAgentAction != null) {
+            chosenAction = lastOppAction != null
+                    ? abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state)
+                    : abstractPolicy.chooseAction(lastAgentAction.getBid(), state);
+        } else {
+            // Quickfix: Random action selection if no first own best action.
+            chosenAction = abstractPolicy.chooseAction();
+        }
 
         return chosenAction instanceof Offer ? ((Offer) chosenAction).getBid() : ((Accept) chosenAction).getBid();
     }
