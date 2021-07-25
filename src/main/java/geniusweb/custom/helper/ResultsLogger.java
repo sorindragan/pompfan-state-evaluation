@@ -27,6 +27,7 @@ public class ResultsLogger {
     private String timestamp;
     private List<Result> results = new ArrayList<Result>();
     private NegoState state = null;
+    private Integer sessionNum = 0;
 
     public ResultsLogger(NegoState state, String temporalState) {
         super();
@@ -48,11 +49,13 @@ public class ResultsLogger {
         }
 
         for (SessionResult sess : allSessions) {
+            this.sessionNum++;
             Agreements agreements = sess.getAgreements();
             Map<PartyId, PartyWithProfile> allParties = sess.getParticipants();
             Map<PartyId, Bid> allAgreements = agreements.getMap();
             List<Result> collectedResults = allParties.keySet().stream()
-                    .map(k -> new Result(k, allParties.get(k), allAgreements.get(k))).collect(Collectors.toList());
+                    .map(k -> new Result(this.sessionNum, k, allParties.get(k), allAgreements.get(k)))
+                    .collect(Collectors.toList());
             results.addAll(collectedResults);
         }
 
@@ -88,11 +91,13 @@ public class ResultsLogger {
         private Double util;
         private PartyWithProfile pwp;
         private Bid bid;
+        private Integer session;
 
         private String version;
         private Parameters params;
 
-        public Result(PartyId partyId, PartyWithProfile pwp, Bid aggreeBid) {
+        public Result(Integer sessionNum, PartyId partyId, PartyWithProfile pwp, Bid aggreeBid) {
+            this.setSession(sessionNum);
             this.setVersion(partyId.getName());
             this.pwp = pwp;
             String[] rawPartyString = pwp.getParty().getPartyRef().getURI().toString().split("\\.");
@@ -115,6 +120,14 @@ public class ResultsLogger {
                 this.util = -1.0;
                 e.printStackTrace();
             }
+        }
+
+        public Integer getSession() {
+            return session;
+        }
+
+        public void setSession(Integer session) {
+            this.session = session;
         }
 
         public Parameters getParams() {
