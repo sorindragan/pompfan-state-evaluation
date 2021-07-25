@@ -48,8 +48,8 @@ public class CustomNegoRunner extends NegoRunner {
         try {
             log.log(level, "protocol ended normally: " + jackson.writeValueAsString(state));
             String date = new SimpleDateFormat("dd_MM_yyyy_hh_mm").format(new Date());
-            String logFileName = state instanceof AllPermutationsState ? "log_tournament" : "log_session";
-            fullTreeFileWriter = new FileWriter("logs/" + logFileName + "_" + date + ".json");
+            String logFileName = state instanceof AllPermutationsState ? "log_tournament" + "_" + date : "log_session";
+            fullTreeFileWriter = new FileWriter("logs/" + logFileName + ".json");
             ResultsLogger finalResults = new ResultsLogger(state);
             fullTreeFileWriter.write(jackson.writeValueAsString(finalResults));
             fullTreeFileWriter.close();

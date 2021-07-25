@@ -24,6 +24,7 @@ import geniusweb.protocol.NegoSettings;
 import geniusweb.protocol.NegoState;
 import geniusweb.protocol.session.SessionResult;
 import geniusweb.protocol.session.SessionSettings;
+import geniusweb.protocol.session.SessionState;
 import geniusweb.protocol.tournament.allpermutations.AllPermutationsSettings;
 import geniusweb.protocol.tournament.allpermutations.AllPermutationsState;
 import geniusweb.protocol.tournament.allpermutationslearn.AllPermutationsLearnSettings;
@@ -53,64 +54,27 @@ public class ResultsLogger {
     // }
 
     private void generateResults(NegoState state) {
-        NegoSettings allResults = state.getSettings();
+        List<SessionResult> allSessions = new ArrayList<SessionResult>();
+        if (state instanceof SessionState) {
+            SessionState sessionState = (SessionState) state;
+            allSessions.add(sessionState.getResult());
+        }
 
         if (state instanceof AllPermutationsState) {
-            AllPermutationsState tournamentResults = (AllPermutationsState) state;
-            List<SessionResult> allSessions = tournamentResults.getResults();
+            AllPermutationsState tournamentStates = (AllPermutationsState) state;
+            allSessions.addAll(tournamentStates.getResults());
+        }
 
-            for (SessionResult sess : allSessions) {
-                Agreements agreements = sess.getAgreements();
-                Map<PartyId, PartyWithProfile> allParties = sess.getParticipants();
-                Map<PartyId, Bid> allAgreements = agreements.getMap();
-                List<Result> collectedResults = allParties.keySet().stream()
-                        .map(k -> new Result(k, allParties.get(k), allAgreements.get(k))).collect(Collectors.toList());
-                results.addAll(collectedResults);
-                // for (Entry<PartyId, PartyWithProfile> partyEntry : allParties) {
-                // results.add(new Result(partyEntry.getKey().getName(), ))
-                // }
-                // for (PartyWithProfile partyWithProfile : allParties) {
-                // try {
-
-                // PartyWithParameters party = partyWithProfile.getParty();
-                // ProfileRef profile = partyWithProfile.getProfile();
-                // ProfileInterface profileint =
-                // ProfileConnectionFactory.create(profile.getURI(),
-                // new ReportToLogger(profile.toString()));
-                // UtilitySpace utilitySpace = ((UtilitySpace) profileint.getProfile());
-                // // utilitySpace.getUtility(sess)
-                // } catch (IOException e) {
-                // throw new IllegalStateException(e);
-                // } catch (DeploymentException e) {
-                // // TODO Auto-generated catch block
-                // e.printStackTrace();
-                // }
-                // }
-            }
-
+        for (SessionResult sess : allSessions) {
+            Agreements agreements = sess.getAgreements();
+            Map<PartyId, PartyWithProfile> allParties = sess.getParticipants();
+            Map<PartyId, Bid> allAgreements = agreements.getMap();
+            List<Result> collectedResults = allParties.keySet().stream()
+                    .map(k -> new Result(k, allParties.get(k), allAgreements.get(k))).collect(Collectors.toList());
+            results.addAll(collectedResults);
         }
 
     }
-
-    // /**
-    // * ResultFactory
-    // */
-    // public interface ResultFactory {
-
-    // public static List<? extends Result> extract(Map<PartyId, Double> penalties)
-    // {
-    // List<Result> collected =
-    // penalties.entrySet().stream().peek(System.out::println)
-    // .map(e -> ResultFactory.create(e)).collect(Collectors.toList());
-    // return collected;
-    // }
-
-    // public static Result create(Entry<PartyId, Double> entry) {
-    // Result result = new Result(entry.getKey(), entry.getValue());
-    // return result;
-    // }
-
-    // }
 
     public class Result {
 
@@ -126,8 +90,10 @@ public class ResultsLogger {
             this.setVersion(partyId.getName());
             this.pwp = pwp;
             String[] rawPartyString = pwp.getParty().getPartyRef().getURI().toString().split("\\.");
-            this.setParty(rawPartyString[rawPartyString.length - 1]);;
-            this.setBid(aggreeBid);;
+            this.setParty(rawPartyString[rawPartyString.length - 1]);
+            ;
+            this.setBid(aggreeBid);
+            ;
             this.setParams(pwp.getParty().getParameters());
 
             try {
