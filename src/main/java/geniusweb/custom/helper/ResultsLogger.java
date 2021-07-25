@@ -2,12 +2,8 @@ package geniusweb.custom.helper;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.websocket.DeploymentException;
@@ -15,25 +11,16 @@ import javax.websocket.DeploymentException;
 import geniusweb.actions.PartyId;
 import geniusweb.inform.Agreements;
 import geniusweb.issuevalue.Bid;
-import geniusweb.profile.Profile;
-import geniusweb.profile.utilityspace.LinearAdditive;
-import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.profileconnection.ProfileConnectionFactory;
 import geniusweb.profileconnection.ProfileInterface;
-import geniusweb.protocol.NegoSettings;
 import geniusweb.protocol.NegoState;
 import geniusweb.protocol.session.SessionResult;
-import geniusweb.protocol.session.SessionSettings;
 import geniusweb.protocol.session.SessionState;
-import geniusweb.protocol.tournament.allpermutations.AllPermutationsSettings;
 import geniusweb.protocol.tournament.allpermutations.AllPermutationsState;
-import geniusweb.protocol.tournament.allpermutationslearn.AllPermutationsLearnSettings;
 import geniusweb.references.Parameters;
-import geniusweb.references.PartyWithParameters;
 import geniusweb.references.PartyWithProfile;
 import geniusweb.references.ProfileRef;
-import tudelft.utilities.immutablelist.ImmutableList;
 import tudelft.utilities.logging.ReportToLogger;
 
 public class ResultsLogger {

@@ -26,23 +26,11 @@ import tudelft.utilities.logging.Reporter;
 public class CustomNegoRunner extends NegoRunner {
     private final static ObjectMapper jacksonReader = new ObjectMapper();
     private final static ObjectWriter jacksonWriter = jacksonReader.writerWithDefaultPrettyPrinter();
-    // private final NegoProtocol protocol;
-    // private NegoSettings settings;
-    // private ProtocolToPartyConnFactory connectionfactory;
-    // private Reporter log;
-    // private long maxruntime;
 
     public CustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory, Reporter logger,
             long maxruntime) {
         super(settings, connectionfactory, logger, maxruntime);
-        // if (settings == null || connectionfactory == null) {
-        // throw new NullPointerException("Arguments must be not null");
-        // }
-        // this.settings = settings;
-        // this.log = logger;
-        // this.protocol = settings.getProtocol(log);
-        // this.connectionfactory = connectionfactory;
-        // this.maxruntime = maxruntime;
+
     }
 
     @Override
