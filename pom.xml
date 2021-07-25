@@ -138,7 +138,19 @@
 			<groupId>geniusweb</groupId>
 			<artifactId>simplerunner</artifactId>
 			<version>${geniusweb.version}</version>
-			<classifier>jar-with-dependencies</classifier>
+			<!-- <classifier>jar-with-dependencies</classifier> -->
+		</dependency>
+		<dependency>
+			<groupId>geniusweb</groupId>
+			<artifactId>protocol</artifactId>
+			<version>${geniusweb.version}</version>
+			<!-- <classifier>jar-with-dependencies</classifier> -->
+		</dependency>
+		<dependency>
+			<groupId>geniusweb</groupId>
+			<artifactId>events</artifactId>
+			<version>${geniusweb.version}</version>
+			<!-- <classifier>jar-with-dependencies</classifier> -->
 		</dependency>
 		<!-- CUSTOM: Parties -->
 		<dependency>
@@ -183,12 +195,7 @@
 			<version>${geniusweb.version}</version>
 			<!-- <type>pom</type> -->
 		</dependency>
-		<dependency>
-			<groupId>geniusweb</groupId>
-			<artifactId>protocol</artifactId>
-			<version>${geniusweb.version}</version>
-			<!-- <type>pom</type> -->
-		</dependency>
+
 		<!-- <dependency>
 			<groupId>geniusweb</groupId>
 			<artifactId>exampleparties</artifactId>
