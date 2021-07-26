@@ -45,7 +45,7 @@ public class CustomNegoRunner extends NegoRunner {
             ResultsLogger finalResults = new ResultsLogger(state, temporalState);
             if (state instanceof AllPermutationsState) {
                 logFileName = "log_tournament" + "_" + timestamp;
-                FileWriter newestResultsJsonFileWriter = new FileWriter("logs/newest_tournament.json");
+                FileWriter newestResultsJsonFileWriter = new FileWriter("logs/log_tournament_newest.json");
                 newestResultsJsonFileWriter.write(jacksonWriter.writeValueAsString(finalResults));
                 newestResultsJsonFileWriter.close();
             } else if (state instanceof SessionState) {
