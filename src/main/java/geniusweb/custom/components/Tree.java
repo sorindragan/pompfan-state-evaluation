@@ -28,7 +28,7 @@ import geniusweb.progress.ProgressFactory;
 
 // Tree<T extends AbstractState<?>>
 public class Tree {
-    private static final boolean PARTICLE_DEBUG = false;
+    private static final boolean PARTICLE_DEBUG = true;
     private static final boolean SIM_DEBUG = true;
     private BeliefNode root;
     private static Random random = new Random(42);
@@ -100,6 +100,7 @@ public class Tree {
     public static Node selectFavoriteChild(List<Node> candidatesChildrenForAdoption) {
         // True Random - Alt.: Proportional to the visits
         Node adoptedChild = candidatesChildrenForAdoption.stream().filter(child -> child.getIsTerminal() == false)
+        //.peek(System.out::println)
                 .max(Comparator.comparing(Tree::UCB1)).get();
         return adoptedChild;
     }

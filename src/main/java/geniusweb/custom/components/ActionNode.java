@@ -19,31 +19,30 @@ public class ActionNode extends Node {
 
     public Node receiveObservation(Double time) throws StateRepresentationException {
         AbstractState<?> state = this.getState();
+        
         Action lastOpponentAction = ((BeliefNode) this.getParent()).getObservation();
         Action lastAgentAction = this.getAction();
         Bid lastOpponentBid = lastOpponentAction != null ? ((Offer) lastOpponentAction).getBid() : null;
         Bid lastReceivedBidForOpponent = (lastAgentAction instanceof Offer ? ((Offer) lastAgentAction)  : ((Accept) lastAgentAction)).getBid();
         Action observation = state.getOpponent().chooseAction(lastReceivedBidForOpponent, lastOpponentBid, state);
+        
         if (SIM_DEBUG) {
             System.out.println("Counter...");
             System.out.println(observation);
         }
         AbstractState<?> newState = state.updateState(observation, time);
-        // System.out.println("================== " + this.getChildren().size() + "
-        // ==================");
-        // System.out.println("Parent: " + this);
+      
         BeliefNode child = (BeliefNode) this.getChildren().stream()
-                // .peek(e -> System.out.println("Action: " + e))
-                // .peek(e -> System.out.println("State: " + ((BeliefNode) e).getObservation()))
                 .filter(childNode -> childNode.getState().equals(newState))
-                // .peek(action -> System.out.println("Filtered value: " + action))
                 .findFirst().orElse(null);
+        
         if (child == null) {
             child = (BeliefNode) Node.buildNode(Node.NODE_TYPE.BELIEF, this, newState, state.getOpponent(),
                     observation);
             this.addChild(child);
+            return child;
         }
-        return child;
+        return null;
     }
 
     public Action getAction() {

@@ -28,11 +28,15 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
     public Action chooseAction(Bid lastOpponentBid, Bid lastAgentBid, AbstractState<?> state) {
         Action action;
         Bid bid;
+        // if (lastOpponentBid == null) {
+        //     bid = this.getAllBids().getExtremeBid(true);
+        // } else {
+        long i = this.getRandom().nextInt(this.getBidspace().size().intValue());
+        bid = this.getBidspace().get(i);
+        // }
+
         if (lastOpponentBid == null) {
-            bid = this.getAllBids().getExtremeBid(true);
-        } else {
-            long i = this.getRandom().nextInt(this.getBidspace().size().intValue());
-            bid = this.getBidspace().get(i);
+            return new Offer(this.getPartyId(), bid);
         }
         action = isGood(bid) ? new Offer(this.getPartyId(), bid) : new Accept(this.getPartyId(), lastOpponentBid);
         return action;
