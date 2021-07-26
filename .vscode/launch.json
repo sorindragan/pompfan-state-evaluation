@@ -28,6 +28,17 @@
         },
         {
             "type": "java",
+            "name": "Test",
+            "request": "launch",
+            "mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+            "classPaths": [
+                "$Auto"
+            ],
+            "args": "src/test/resources/settingsTest.json",
+            "console": "internalConsole"
+        },
+        {
+            "type": "java",
             "name": "vs. TimeDependentParty",
             "request": "launch",
             "mainClass": "geniusweb.simplerunner.NegoRunner",

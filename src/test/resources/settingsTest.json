@@ -12,12 +12,14 @@
 									"negotiationdata": [
 										"e74c1346-1022-438e-887f-26e0ab6b398d"
 									],
-									"confBidDistance": "UtilityBidDistance",
-									"confBelief": "UniformBelief",
-									"confEvaluator": "Last2BidsProductUtilityEvaluator",
-									"confState": "HistoryState",
-									"confExplorer": "RandomOwnExplorerPolicy",
-									"confWidener": "MaxWidthWideningStrategy"
+									"config": {
+										"confBidDistance": "UtilityBidDistance",
+										"confBelief": "UniformBelief",
+										"confEvaluator": "Last2BidsProductUtilityEvaluator",
+										"confState": "HistoryState",
+										"confExplorer": "RandomOwnExplorerPolicy",
+										"confWidener": "MaxWidthWideningStrategy"
+									}
 								}
 							},
 							"profile": "file:src/test/resources/flightbooking1.json"
