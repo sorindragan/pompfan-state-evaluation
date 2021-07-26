@@ -90,7 +90,7 @@ public class ResultsLogger {
     public class Result {
 
         private String party;
-        private Double util;
+        private Double utility;
         private PartyWithProfile pwp;
         private Map<String, Value> bid;
         private Integer session;
@@ -113,11 +113,11 @@ public class ResultsLogger {
                 ProfileInterface profileint = ProfileConnectionFactory.create(profile.getURI(),
                         new ReportToLogger(profile.toString()));
                 UtilitySpace utilitySpace = ((UtilitySpace) profileint.getProfile());
-                this.util = aggreeBid != null ? utilitySpace.getUtility(aggreeBid).doubleValue() : 0.0;
+                this.utility = aggreeBid != null ? utilitySpace.getUtility(aggreeBid).doubleValue() : 0.0;
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             } catch (DeploymentException e) {
-                this.util = -1.0;
+                this.utility = -1.0;
                 e.printStackTrace();
             }
         }
@@ -146,12 +146,12 @@ public class ResultsLogger {
             this.party = party;
         }
 
-        public Double getUtil() {
-            return util;
+        public Double getUtility() {
+            return utility;
         }
 
-        public void setUtil(Double util) {
-            this.util = util;
+        public void setUtility(Double util) {
+            this.utility = util;
         }
 
         public String getVersion() {

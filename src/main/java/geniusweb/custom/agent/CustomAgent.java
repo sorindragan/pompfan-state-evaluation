@@ -180,8 +180,11 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                                 getReporter());
                         this.uSpace = ((UtilitySpace) profileint.getProfile());
                         // Our stuff
+
                         Domain domain = this.uSpace.getDomain();
                         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
+
+                        // Object opponents = this.parameters.get("opponents");
 
                         for (int cnt = 0; cnt < 100; cnt++) {
                             listOfOpponents.add(new AntagonisticOpponentPolicy(this.uSpace));
