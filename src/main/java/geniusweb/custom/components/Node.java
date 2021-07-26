@@ -118,7 +118,7 @@ public class Node {
     @Override
     public String toString() {
         Action a = this instanceof BeliefNode ? ((BeliefNode) this).getObservation() : ((ActionNode) this).getAction();
-        return new StringBuilder().append(this instanceof BeliefNode ? "BN" : "AN").append("=>")
+        return new StringBuilder().append(this instanceof BeliefNode ? "BN" : "AN").append(" : ")
                 .append(this.id.substring(24)).append("[").append("children:").append(this.children.size()).append(",")
                 .append("visits:").append(this.visits).append(",").append("value:").append(this.value).append(",")
                 .append("isTerminal:").append(this.getIsTerminal()).append("]").append("-").append(a).toString();

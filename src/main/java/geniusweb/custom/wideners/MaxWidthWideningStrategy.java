@@ -38,9 +38,9 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
                 BeliefNode receivedObservationNode = (BeliefNode) currActionNode
                         .receiveObservation(simulatedTimeOfObsReceival);
                 currRoot = receivedObservationNode;
-                // TODO: For non-history state evaluation, we might need the last two bids.
-                // Action opponentAction = ((BeliefNode) currRoot).getObservation();
-                // Action agentAction = ((ActionNode) currRoot.getParent()).getAction();
+                if (currRoot == null) {
+                    return;
+                } //TODO: finish shit
                 Double value = currRoot.getState().evaluate();
                 Tree.backpropagate(currRoot, value);
                 return;
@@ -56,8 +56,7 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
             BeliefNode currBeliefNode = (BeliefNode) currRoot;
             ActionNode receivedActionNode = (ActionNode) currBeliefNode.act(this.getOwnExplorationStrategy(),
                     simulatedTimeOfActReceival);
-            ActionNode actionNode = receivedActionNode; // What the fuck
-            // System.out.println("========================================");
+            ActionNode actionNode = receivedActionNode;
             Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
             BeliefNode beliefNode = (BeliefNode) actionNode.receiveObservation(simulatedTimeOfObsReceival);
             currRoot = beliefNode;

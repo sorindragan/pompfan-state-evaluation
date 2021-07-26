@@ -34,8 +34,8 @@ public class BeliefNode extends Node {
         AbstractState<?> state = this.getState();
         Action lastOwnAction = this.getParent() != null ? ((ActionNode) this.getParent()).getAction() : null;
         Action lastOpponentAction = this.getObservation() instanceof Offer ? (Offer) this.getObservation() : (Accept) this.getObservation();
-        Bid lastOwnBid = lastOwnAction != null ? ((Offer) lastOwnAction).getBid() : null;
-        Bid lastOpponentBid = lastOpponentAction != null ? ((Offer) lastOpponentAction).getBid() : null;
+        Bid lastOwnBid = lastOwnAction instanceof Offer ? ((Offer) lastOwnAction).getBid() : null;
+        Bid lastOpponentBid = lastOpponentAction instanceof Offer ? ((Offer) lastOpponentAction).getBid() : null;
 
         Action agentAction = strategy.chooseAction(lastOpponentBid, lastOwnBid, state);
         if (SIM_DEBUG) {
@@ -43,20 +43,16 @@ public class BeliefNode extends Node {
             System.out.println(agentAction);
         }
         AbstractState<?> newState = state.updateState(agentAction, time);
-        // System.out.println("================== "+this.getChildren().size()+"
-        // ==================");
-        // System.out.println("Parent: "+this);
+        
         ActionNode child = (ActionNode) this.getChildren().stream()
-                // .peek(e -> System.out.println("Belief: " + e))
-                // .peek(e -> System.out.println("State: " + ((ActionNode) e).getAction()))
-                .filter(childNode -> childNode.getState().equals(newState))
-                // .peek(e -> System.out.println("Filtered value: " + e))
-                .findFirst().orElse(null);
+               .filter(childNode -> childNode.getState().equals(newState))
+               .findFirst().orElse(null);
 
         if (child == null) {
             child = (ActionNode) Node.buildNode(Node.NODE_TYPE.ACTION, this, newState, state.getOpponent(),
                     agentAction);
             this.addChild(child);
+            // return child;
         }
         return child;
     }

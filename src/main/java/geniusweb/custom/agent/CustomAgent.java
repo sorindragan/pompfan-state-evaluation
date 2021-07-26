@@ -84,9 +84,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private static final int NUM_SIMULATIONS = 100;
     private static final int MAX_WIDTH = 10;
     private Long SIMULATION_TIME = 250l; // TODO: BUG if increased
-    private static final boolean DEBUG = false;
-    private static final boolean DEBUG_PRINT_TREE = false;
-    private static final boolean DEBUG_IN_TOURNAMENT = true;
+    private static final boolean DEBUG = true;
+    private static final boolean DEBUG_SAVE_TREE = true;
+    private static final boolean DEBUG_IN_TOURNAMENT = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
     private final Random random = new Random();
@@ -215,10 +215,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         IEvalFunction<? extends HistoryState> evaluator = new Last2BidsProductUtilityEvaluator(
                                 this.uSpace);
                         AbstractState<?> startState = new HistoryState(this.uSpace, null, evaluator);
-                        // AbstractOwnExplorationPolicy explorer = new
-                        // SelfishNeverAcceptOwnExplorerPolicy(domain, this.uSpace, me);
+                        // AbstractOwnExplorationPolicy explorer = new SelfishNeverAcceptOwnExplorerPolicy(domain, this.uSpace, me);
                         AbstractOwnExplorationPolicy explorer = new RandomOwnExplorerPolicy(this.uSpace, me);
-                        AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.1, 4.0, 0.1); // TODO:
+                        AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.5, 4.0, 0.5); // TODO:
                                                                                                                  // BUG
                                                                                                                  // if
                                                                                                                  // increased
@@ -262,7 +261,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 // object also contains the final agreement (if any).
                 Agreements agreements = ((Finished) info).getAgreement();
                 processAgreements(agreements);
-                if (DEBUG_PRINT_TREE) {
+                if (DEBUG_SAVE_TREE) {
                     FileWriter fullTreeFileWriter = new FileWriter("logs/log_fullTree.txt");
                     fullTreeFileWriter.write(this.MCTS.toStringOriginal());
                     fullTreeFileWriter.close();
@@ -402,7 +401,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 System.out.println("Something HAPPENED! " + action.toString());
             }
             if (DEBUG) {
-                System.out.println(this.MCTS);
+                // System.out.println(this.MCTS);
                 System.out.println(action);
             }
         }
