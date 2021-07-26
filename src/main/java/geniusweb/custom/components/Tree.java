@@ -12,7 +12,7 @@ import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.custom.beliefs.AbstractBelief;
-import geniusweb.custom.evaluators.EvaluationFunctionInterface;
+import geniusweb.custom.evaluators.IEvalFunction;
 import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;

@@ -13,7 +13,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 /**
  * MeanUtilityEvaluator
  */
-public class Last2BidsProductUtilityEvaluator implements EvaluationFunctionInterface<HistoryState> {
+public class Last2BidsProductUtilityEvaluator implements IEvalFunction<HistoryState> {
 
     private UtilitySpace utilitySpace;
 

@@ -55,7 +55,7 @@ public class CustomNegoRunner extends NegoRunner {
             resultsJsonFileWriter.write(jacksonWriter.writeValueAsString(finalResults));
             resultsJsonFileWriter.close();
 
-            System.exit(0);
+            // System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(0);
