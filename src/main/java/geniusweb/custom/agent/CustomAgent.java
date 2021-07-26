@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -28,7 +29,7 @@ import geniusweb.custom.beliefs.UniformBelief;
 import geniusweb.custom.components.Tree;
 import geniusweb.custom.distances.AbstractBidDistance;
 import geniusweb.custom.distances.UtilityBidDistance;
-import geniusweb.custom.evaluators.EvaluationFunctionInterface;
+import geniusweb.custom.evaluators.IEvalFunction;
 import geniusweb.custom.evaluators.Last2BidsMeanUtilityEvaluator;
 import geniusweb.custom.evaluators.Last2BidsProductUtilityEvaluator;
 import geniusweb.custom.evaluators.RandomEvaluator;
@@ -36,6 +37,7 @@ import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
 import geniusweb.custom.explorers.RandomNeverAcceptOwnExplorationPolicy;
 import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
 import geniusweb.custom.explorers.SelfishNeverAcceptOwnExplorerPolicy;
+import geniusweb.custom.helper.Configurator;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.opponents.AntagonisticOpponentPolicy;
 import geniusweb.custom.opponents.BoulwareOpponentPolicy;
@@ -99,6 +101,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private File persistentPath;
     private String opponentName;
     private Tree MCTS;
+    private ObjectMapper mapper = new ObjectMapper();
 
     public CustomAgent() { // TODO: change name
     }
@@ -184,8 +187,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         Domain domain = this.uSpace.getDomain();
                         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
 
-                        // Object opponents = this.parameters.get("opponents");
-
+                        
                         for (int cnt = 0; cnt < 100; cnt++) {
                             listOfOpponents.add(new AntagonisticOpponentPolicy(this.uSpace));
                             listOfOpponents.add(new SelfishOpponentPolicy(domain));
@@ -194,13 +196,23 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                             listOfOpponents.add(new ConcederOpponentPolicy(domain));
                             listOfOpponents.add(new BoulwareOpponentPolicy(domain));
                         }
+                        
+                        // String confBidDistance = this.parameters.get("bidDistance", String.class);
+                        // String confBelief = this.parameters.get("belief", String.class);
+                        // String confEvaluator = this.parameters.get("evaluator", String.class);
+                        // String confState = this.parameters.get("state", String.class);
+                        // String confExplorer = this.parameters.get("explorer", String.class);
+                        // String confWidener = this.parameters.get("widener", String.class);
+                        HashMap config = this.parameters.get("config", HashMap.class);
+                        Configurator configurator = this.mapper.convertValue(config, Configurator.class).setUtilitySpace(this.uSpace).build();
+                        
 
                         AbstractBidDistance distance = new UtilityBidDistance(this.uSpace);
                         // AbstractBelief belief = new ParticleFilterBelief(listOfOpponents, distance);
                         AbstractBelief belief = new ParticleFilterWithAcceptBelief(listOfOpponents, distance);
                         // AbstractBelief belief = new UniformBelief(listOfOpponents, distance);
                         // DONE: Check if belief is updated -- It is!
-                        EvaluationFunctionInterface<HistoryState> evaluator = new Last2BidsProductUtilityEvaluator(
+                        IEvalFunction<? extends HistoryState> evaluator = new Last2BidsProductUtilityEvaluator(
                                 this.uSpace);
                         AbstractState<?> startState = new HistoryState(this.uSpace, null, evaluator);
                         // AbstractOwnExplorationPolicy explorer = new
