@@ -1,5 +1,7 @@
 package geniusweb.custom.wideners;
 
+import java.util.HashMap;
+
 import geniusweb.custom.components.ActionNode;
 import geniusweb.custom.components.BeliefNode;
 import geniusweb.custom.components.Node;
@@ -9,11 +11,11 @@ import geniusweb.custom.state.StateRepresentationException;
 import geniusweb.progress.Progress;
 
 public class MaxWidthWideningStrategy extends AbstractWidener {
-    private int maxWidth;
+    private Integer maxWidth;
 
-    public MaxWidthWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy, int maxWidth) {
+    public MaxWidthWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy, HashMap<String, Object> params) {
         super(ownExplorationStrategy);
-        this.maxWidth = maxWidth;
+        this.maxWidth = (Integer) params.get("maxWidth");
     }
 
     public Integer getMaxWidth() {
@@ -60,6 +62,9 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
             Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
             BeliefNode beliefNode = (BeliefNode) actionNode.receiveObservation(simulatedTimeOfObsReceival);
             currRoot = beliefNode;
+            if(currRoot == null){
+                return;
+            }
             Double value = currRoot.getState().evaluate();
             Tree.backpropagate(currRoot, value);
         }

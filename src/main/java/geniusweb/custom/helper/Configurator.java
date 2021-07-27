@@ -36,10 +36,10 @@ public class Configurator {
     private String confBidDistance = "UtilityBidDistance";
     private String confBelief = "ParticleFilterWithAcceptBelief";
     private String confEvaluator = "Last2BidsProductUtilityEvaluator";
-    private String confState = "HistoryState";
+    private String confInitState = "HistoryState";
     private String confExplorer = "RandomOwnExplorerPolicy";
     private String confWidener = "ProgressiveWideningStrategy";
-    private HashMap<String, Object> confExtra = new HashMap<String, Object>();
+    private HashMap<String, HashMap<String, Object>> confExtra = new HashMap<String, HashMap<String, Object>>();
 
     private UtilitySpace uSpace = null;
     private PartyId me = null;
@@ -51,6 +51,40 @@ public class Configurator {
     private AbstractState<?> State = null;
     private AbstractOwnExplorationPolicy Explorer = null;
     private AbstractWidener Widener = null;
+
+    public HashMap<String, HashMap<String, Object>> getConfExtra() {
+        return confExtra;
+    }
+
+    public void setConfExtra(HashMap<String, HashMap<String, Object>> confExtra) {
+        this.confExtra = confExtra;
+    }
+
+    public UtilitySpace getuSpace() {
+        return uSpace;
+    }
+
+    public void setuSpace(UtilitySpace uSpace) {
+        this.uSpace = uSpace;
+    }
+
+    public PartyId getMe() {
+        return me;
+    }
+
+    public Configurator setMe(PartyId me) {
+        this.me = me;
+        return this;
+    }
+
+    public List<AbstractPolicy> getListOfOpponents() {
+        return listOfOpponents;
+    }
+
+    public Configurator setListOfOpponents(List<AbstractPolicy> listOfOpponents) {
+        this.listOfOpponents = listOfOpponents;
+        return this;
+    }
 
     public UtilitySpace getUtilitySpace() {
         return uSpace;
@@ -86,11 +120,11 @@ public class Configurator {
     }
 
     public String getConfState() {
-        return confState;
+        return confInitState;
     }
 
     public void setConfState(String confState) {
-        this.confState = confState;
+        this.confInitState = confState;
     }
 
     public String getConfExplorer() {
@@ -113,8 +147,9 @@ public class Configurator {
         // this.BidDistance = ;
         return buildBidDistance(this.confBidDistance, this.uSpace)
                 .buildBelief(this.confBelief, this.listOfOpponents, this.getBidDistance())
-                .buildInitState(this.confEvaluator, this.confState, this.uSpace)
-                .buildExplorer(this.confExplorer, this.me, this.uSpace).buildWidener(this.confWidener, this.confExtra);
+                .buildInitState(this.confEvaluator, this.confInitState, this.uSpace)
+                .buildExplorer(this.confExplorer, this.me, this.uSpace)
+                .buildWidener(this.confWidener, this.confExtra.get("widener"));
     }
 
     private Configurator buildBidDistance(String confBidDistance, UtilitySpace uSpace) {
@@ -203,7 +238,7 @@ public class Configurator {
             this.setWidener(new ProgressiveWideningStrategy(this.getExplorer(), params));
             break;
         case "MaxWidthWideningStrategy":
-            this.setExplorer(new MaxWidthWideningStrategy(this.getExplorer(), params));
+            this.setWidener(new MaxWidthWideningStrategy(this.getExplorer(), params));
             break;
         default:
             // this.setExplorer(new RandomOwnExplorerPolicy(uSpace, me));
@@ -242,7 +277,7 @@ public class Configurator {
         Evaluator = evaluator;
     }
 
-    public AbstractState<?> getState() {
+    public AbstractState<?> getInitState() {
         return State;
     }
 

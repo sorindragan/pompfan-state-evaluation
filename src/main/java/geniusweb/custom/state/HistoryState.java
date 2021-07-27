@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
-import geniusweb.custom.components.Opponent;
 import geniusweb.custom.evaluators.IEvalFunction;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.issuevalue.Bid;

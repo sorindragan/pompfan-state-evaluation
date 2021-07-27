@@ -30,13 +30,11 @@ public class UtilityState extends AbstractState<Map<PartyId, BigDecimal>> {
         this.evaluator = evaluator;
     }
 
+
     public UtilitySpace getUtilitySpace() {
         return utilitySpace;
     }
 
-    public void setUtilitySpace(UtilitySpace utilitySpace) {
-        this.utilitySpace = utilitySpace;
-    }
 
     public ArrayList<Map<PartyId, BigDecimal>> getHistory() {
         return history;

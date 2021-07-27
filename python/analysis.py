@@ -1,4 +1,5 @@
 # %%
+import enum
 import io
 import itertools as it
 import json
@@ -26,6 +27,18 @@ display(jsonFile)
 all_results = jsonFile.get("results")
 df = pd.json_normalize(all_results)
 df["agreed"] = df.utility == 0.0
+df["vs"] = None
+df["vs_utility"] = None
+for i in df["session"].unique():
+    df_subset = df[df["session"] == i]
+    party1, party2 = df_subset["party"]
+    util1, util2 = df_subset["utility"]
+    df.loc[(df.party == party1) & (df.session == i), "vs"] = party2
+    df.loc[(df.party == party2) & (df.session == i), "vs"] = party1
+    df.loc[(df.party == party1) & (df.session == i), "vs_utility"] = util2
+    df.loc[(df.party == party2) & (df.session == i), "vs_utility"] = util1
+
+df.to_csv(file_to_analyse.parent / "data.csv")
 df
 # %%
 # for idx, grp in df.groupby("party"):
@@ -42,6 +55,22 @@ plt.show()
 # fig.legend(loc="upper left")
 # handles, labels = ax.get_legend_handles_labels()
 # ax.legend(handles, labels, loc="best")
+# %%
+fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+df_no_aggreement_sum = df.groupby("party").sum()
+unique_agents = df_no_aggreement_sum.index.unique()
+num_agents = len(unique_agents)
+(ax, ) = df_no_aggreement_sum["utility"].plot.bar(
+    subplots=True,
+    ax=ax,
+)
+for tick in ax.get_xticklabels():
+    tick.set_rotation(45)
+ax.set_ylabel("")
+fig.suptitle("Number of non-Agreements")
+fig.tight_layout()
+plt.show()
+
 # %%
 fig, ax = plt.subplots(1, 1, figsize=(10, 10))
 df_no_aggreement_counts = df[df["agreed"]].groupby("party").count()
