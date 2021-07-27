@@ -5,7 +5,25 @@
 				"Team": [
 					{
 						"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
-						"parameters": {}
+						"parameters": {
+							"config": {
+								"confBidDistance": "UtilityBidDistance",
+								"confBelief": "ParticleFilterBelief",
+								"confEvaluator": "Last2BidsProductUtilityEvaluator",
+								"confState": "HistoryState",
+								"confExplorer": "RandomOwnExplorerPolicy",
+								"confWidener": "ProgressiveWideningStrategy",
+								"confExtra": {
+									"widener": {
+										"maxWidth": 10,
+										"k_a": 4.0,
+										"a_a": 0.2,
+										"k_b": 4.0,
+										"a_b": 0.2
+									}
+								}
+							}
+						}
 					}
 				]
 			},
@@ -75,10 +93,10 @@
 			"SAOPSettings": {
 				"participants": [],
 				"deadline": {
-					"deadlinetime": { "durationms": 10000 }
+					"deadlinetime": { "durationms": 60000 }
 				}
 			}
 		},
-		"numberTournaments": 1
+		"numberTournaments": 5
 	}
 }

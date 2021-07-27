@@ -6,12 +6,23 @@
 					{
 						"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
 						"parameters": {
-							"confBidDistance": "UtilityBidDistance",
-							"confBelief": "UniformBelief",
-							"confEvaluator": "Last2BidsProductUtilityEvaluator",
-							"confState": "HistoryState",
-							"confExplorer": "RandomOwnExplorerPolicy",
-							"confWidener": "MaxWidthWideningStrategy"
+							"config": {
+								"confBidDistance": "UtilityBidDistance",
+								"confBelief": "ParticleFilterBelief",
+								"confEvaluator": "Last2BidsProductUtilityEvaluator",
+								"confState": "HistoryState",
+								"confExplorer": "RandomOwnExplorerPolicy",
+								"confWidener": "ProgressiveWideningStrategy",
+								"confExtra": {
+									"widener": {
+										"maxWidth": 10,
+										"k_a": 4.0,
+										"a_a": 0.2,
+										"k_b": 4.0,
+										"a_b": 0.2
+									}
+								}
+							}
 						}
 					}
 				]
@@ -20,6 +31,14 @@
 				"Team": [
 					{
 						"partyref": "classpath:geniusweb.exampleparties.conceder.Conceder",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.boulware.Boulware",
 						"parameters": {}
 					}
 				]

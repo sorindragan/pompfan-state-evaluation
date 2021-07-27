@@ -14,11 +14,20 @@
 									],
 									"config": {
 										"confBidDistance": "UtilityBidDistance",
-										"confBelief": "UniformBelief",
+										"confBelief": "ParticleFilterBelief",
 										"confEvaluator": "Last2BidsProductUtilityEvaluator",
 										"confState": "HistoryState",
 										"confExplorer": "RandomOwnExplorerPolicy",
-										"confWidener": "MaxWidthWideningStrategy"
+										"confWidener": "ProgressiveWideningStrategy",
+										"confExtra": {
+											"widener": {
+												"maxWidth": 10,
+												"k_a": 4.0,
+												"a_a": 0.2,
+												"k_b": 4.0,
+												"a_b": 0.2
+											}
+										}
 									}
 								}
 							},
@@ -32,7 +41,7 @@
 					"parties": [
 						{
 							"party": {
-								"partyref": "classpath:geniusweb.exampleparties.randomparty.RandomParty",
+								"partyref": "classpath:geniusweb.exampleparties.linear.Linear",
 								"parameters": {
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"negotiationdata": [

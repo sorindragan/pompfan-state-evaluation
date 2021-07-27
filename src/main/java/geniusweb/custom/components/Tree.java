@@ -28,7 +28,7 @@ import geniusweb.progress.ProgressFactory;
 
 // Tree<T extends AbstractState<?>>
 public class Tree {
-    private static final boolean PARTICLE_DEBUG = true;
+    private static final boolean PARTICLE_DEBUG = false;
     private static final boolean SIM_DEBUG = true;
     private BeliefNode root;
     private static Random random = new Random(42);
