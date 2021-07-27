@@ -84,9 +84,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private static final int NUM_SIMULATIONS = 100;
     private static final int MAX_WIDTH = 10;
     private Long SIMULATION_TIME = 250l; // TODO: BUG if increased
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG_OFFER = false;
     private static final boolean DEBUG_SAVE_TREE = true;
-    private static final boolean DEBUG_IN_TOURNAMENT = false;
+    private static final boolean DEBUG_IN_TOURNAMENT = true;
     private Bid lastReceivedBid = null;
     private PartyId me;
     private final Random random = new Random();
@@ -187,7 +187,6 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         Domain domain = this.uSpace.getDomain();
                         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
 
-                        
                         for (int cnt = 0; cnt < 100; cnt++) {
                             listOfOpponents.add(new AntagonisticOpponentPolicy(this.uSpace));
                             listOfOpponents.add(new SelfishOpponentPolicy(domain));
@@ -196,7 +195,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                             listOfOpponents.add(new ConcederOpponentPolicy(domain));
                             listOfOpponents.add(new BoulwareOpponentPolicy(domain));
                         }
-                        
+
                         // String confBidDistance = this.parameters.get("bidDistance", String.class);
                         // String confBelief = this.parameters.get("belief", String.class);
                         // String confEvaluator = this.parameters.get("evaluator", String.class);
@@ -204,25 +203,33 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         // String confExplorer = this.parameters.get("explorer", String.class);
                         // String confWidener = this.parameters.get("widener", String.class);
                         HashMap config = this.parameters.get("config", HashMap.class);
-                        Configurator configurator = this.mapper.convertValue(config, Configurator.class).setUtilitySpace(this.uSpace).build();
-                        
+                        Configurator configurator = this.mapper.convertValue(config, Configurator.class)
+                                .setUtilitySpace(this.uSpace).setListOfOpponents(listOfOpponents).setMe(this.me)
+                                .build();
 
-                        AbstractBidDistance distance = new UtilityBidDistance(this.uSpace);
-                        // AbstractBelief belief = new ParticleFilterBelief(listOfOpponents, distance);
-                        AbstractBelief belief = new ParticleFilterWithAcceptBelief(listOfOpponents, distance);
-                        // AbstractBelief belief = new UniformBelief(listOfOpponents, distance);
-                        // DONE: Check if belief is updated -- It is!
-                        IEvalFunction<? extends HistoryState> evaluator = new Last2BidsProductUtilityEvaluator(
-                                this.uSpace);
-                        AbstractState<?> startState = new HistoryState(this.uSpace, null, evaluator);
-                        // AbstractOwnExplorationPolicy explorer = new SelfishNeverAcceptOwnExplorerPolicy(domain, this.uSpace, me);
-                        AbstractOwnExplorationPolicy explorer = new RandomOwnExplorerPolicy(this.uSpace, me);
-                        AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.5, 4.0, 0.5); // TODO:
-                                                                                                                 // BUG
-                                                                                                                 // if
-                                                                                                                 // increased
+                        // AbstractBidDistance distance = new UtilityBidDistance(this.uSpace);
+                        // // AbstractBelief belief = new ParticleFilterBelief(listOfOpponents,
+                        // distance);
+                        // AbstractBelief belief = new ParticleFilterWithAcceptBelief(listOfOpponents,
+                        // distance);
+                        // // AbstractBelief belief = new UniformBelief(listOfOpponents, distance);
+                        // // DONE: Check if belief is updated -- It is!
+                        // IEvalFunction<? extends HistoryState> evaluator = new
+                        // Last2BidsProductUtilityEvaluator(
+                        // this.uSpace);
+                        // AbstractState<?> startState = new HistoryState(this.uSpace, null, evaluator);
+                        // // AbstractOwnExplorationPolicy explorer = new
+                        // SelfishNeverAcceptOwnExplorerPolicy(domain, this.uSpace, me);
+                        // AbstractOwnExplorationPolicy explorer = new
+                        // RandomOwnExplorerPolicy(this.uSpace, me);
+                        // AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.5,
+                        // 4.0, 0.5); // TODO:
+                        // // BUG
+                        // // if
+                        // // increased
                         // AbstractWidener widener = new MaxWidthWideningStrategy(explorer, MAX_WIDTH);
-                        this.MCTS = new Tree(this.uSpace, belief, startState, widener, this.progress);
+                        this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
+                                configurator.getWidener(), this.progress);
                     } catch (IOException e) {
                         throw new IllegalStateException(e);
                     }
@@ -244,6 +251,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
 
                         // Add name of the opponent to the negotiation data
                         this.negotiationData.setOpponentName(this.opponentName);
+                        getReporter().log(Level.INFO, "VS. " + this.opponentName);
                     }
                     // Process the action of the opponent.
                     processAction(action);
@@ -400,7 +408,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             } else {
                 System.out.println("Something HAPPENED! " + action.toString());
             }
-            if (DEBUG) {
+            if (DEBUG_OFFER) {
                 // System.out.println(this.MCTS);
                 System.out.println(action);
             }
