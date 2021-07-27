@@ -96,10 +96,10 @@
 			"SAOPSettings": {
 				"participants": [],
 				"deadline": {
-					"deadlinetime": { "durationms": 30000 }
+					"deadlinetime": { "durationms": 15000 }
 				}
 			}
 		},
-		"numberTournaments": 3
+		"numberTournaments": 2
 	}
 }

@@ -84,6 +84,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private static final int NUM_SIMULATIONS = 100;
     private static final int MAX_WIDTH = 10;
     private Long SIMULATION_TIME = 250l; // TODO: BUG if increased
+    private Long simulationTime = 500l; // TODO: BUG if increased
     private static final boolean DEBUG_OFFER = false;
     private static final boolean DEBUG_SAVE_TREE = true;
     private static final boolean DEBUG_IN_TOURNAMENT = true;
@@ -143,6 +144,11 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 // Parameters for the agent (can be passed through the GeniusWeb GUI, or a
                 // JSON-file)
                 this.parameters = settings.getParameters();
+                
+                if (this.parameters.containsKey("simulationTime")) {
+                    this.simulationTime = this.parameters.get("simulationTime", Long.class);
+                }
+
 
                 // The PersistentState is loaded here (see 'PersistenData,java')
                 if (this.parameters.containsKey("persistentstate"))
@@ -187,7 +193,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         Domain domain = this.uSpace.getDomain();
                         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
 
-                        for (int cnt = 0; cnt < 100; cnt++) {
+                        for (int cnt = 0; cnt < 50; cnt++) {
                             listOfOpponents.add(new AntagonisticOpponentPolicy(this.uSpace));
                             listOfOpponents.add(new SelfishOpponentPolicy(domain));
                             listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
@@ -380,10 +386,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             // STEP: Generate offer!
             long negotiationEnd = this.progress.getTerminationTime().getTime();
             long remainingTime = negotiationEnd - System.currentTimeMillis();
-            long simTime = Math.min(SIMULATION_TIME, remainingTime);
-
-            if (simTime <= 250) {
+            // long simTime = Math.min(this.simulationTime, );
+            long simTime = this.simulationTime;
+            System.out.println(simTime <= remainingTime);
+            if (simTime <= remainingTime) {
                 this.MCTS.construct(simTime);
+            }else{
+                System.out.println(this.MCTS);
             }
             action = this.MCTS.chooseBestAction();
             if (action == null) {

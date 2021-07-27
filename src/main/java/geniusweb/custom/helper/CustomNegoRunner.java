@@ -26,21 +26,22 @@ import tudelft.utilities.logging.Reporter;
 public class CustomNegoRunner extends NegoRunner {
     private final static ObjectMapper jacksonReader = new ObjectMapper();
     private final static ObjectWriter jacksonWriter = jacksonReader.writerWithDefaultPrettyPrinter();
+    private final static ObjectWriter jacksonWriterCompact = jacksonReader.writer();
 
     public CustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory, Reporter logger,
             long maxruntime) {
         super(settings, connectionfactory, logger, maxruntime);
-
+        // this.getProtocol().addListener(l);
     }
 
     @Override
     protected void logFinal(Level level, NegoState state) {
         FileWriter resultsJsonFileWriter;
         try {
-            log.log(level, "protocol ended normally: " + jacksonWriter.writeValueAsString(state));
+            log.log(level, "protocol ended normally: " + jacksonWriterCompact.writeValueAsString(state));
             Date now = new Date();
-            String timestamp = new SimpleDateFormat("dd_MM_yyyy_hh_mm").format(now);
-            String temporalState = new SimpleDateFormat("hh:mm:ss dd-MM-yyyy").format(now);
+            String timestamp = new SimpleDateFormat("dd_MM_yyyy_HH_mm").format(now);
+            String temporalState = new SimpleDateFormat("HH:mm:ss dd-MM-yyyy").format(now);
             String logFileName = "none";
             ResultsLogger finalResults = new ResultsLogger(state, temporalState);
             if (state instanceof AllPermutationsState) {

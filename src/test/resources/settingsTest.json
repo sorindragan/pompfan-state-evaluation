@@ -41,7 +41,7 @@
 					"parties": [
 						{
 							"party": {
-								"partyref": "classpath:geniusweb.exampleparties.linear.Linear",
+								"partyref": "classpath:geniusweb.exampleparties.boulware.Boulware",
 								"parameters": {
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"negotiationdata": [
