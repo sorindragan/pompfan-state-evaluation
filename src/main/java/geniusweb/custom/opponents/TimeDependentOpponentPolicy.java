@@ -22,7 +22,6 @@ import geniusweb.profileconnection.ProfileInterface;
 import geniusweb.progress.Progress;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-
 public class TimeDependentOpponentPolicy extends AbstractPolicy {
 
     // private ProfileInterface profileint = null;
@@ -37,14 +36,15 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
         super(domain, "TimeDependent");
         this.utilspace = (LinearAdditive) this.getUtilitySpace();
         this.extendedspace = new ExtendedUtilSpace(this.utilspace);
+        // this.maxBid = this.extendedspace.
     }
 
     @Override
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
         // if(lastReceivedBid==null){
-        //     ImmutableList<Bid> bids = this.extendedspace.getBids(BigDecimal.ONE);
-        //     Bid selectedBid = bids.get(this.getRandom().nextInt(bids.size().intValue()));
-        //     return new Offer(this.getPartyId(), selectedBid);
+        // ImmutableList<Bid> bids = this.extendedspace.getBids(BigDecimal.ONE);
+        // Bid selectedBid = bids.get(this.getRandom().nextInt(bids.size().intValue()));
+        // return new Offer(this.getPartyId(), selectedBid);
         // }
         return this.myTurn(lastReceivedBid, state);
     }
@@ -70,7 +70,6 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
         return myAction;
     }
 
-
     /**
      * @return next possible bid with current target utility, or null if no such
      *         bid.
@@ -80,11 +79,18 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
 
         BigDecimal utilityGoal = getUtilityGoal(currTime, getE(), extendedspace.getMin(), extendedspace.getMax());
         ImmutableList<Bid> options = extendedspace.getBids(utilityGoal);
-        if (options.size() == BigInteger.ZERO) {
-            // if we can't find good bid, get max util bid....
-            options = extendedspace.getBids(extendedspace.getMax());
+        if (options.size().compareTo(BigInteger.ONE) == -1) {
+            // if we can't find good bid, get max util bid and if no max bid take min bid as tolerance....
+            ImmutableList<Bid> alternativeOptions = extendedspace.getBids(extendedspace.getMax());
+            alternativeOptions = alternativeOptions.size().compareTo(BigInteger.ONE) < 1
+                    ? extendedspace.getBids(extendedspace.getMin())
+                    : alternativeOptions;
+            return alternativeOptions.get(0l);
         }
         // pick a random one.
+        // if(options.size().intValue() < 1){
+        // System.out.println(options.size().intValue());;
+        // }
         return options.get(new Random().nextInt(options.size().intValue()));
 
     }
