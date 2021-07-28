@@ -185,9 +185,9 @@ public class Configurator {
     private Configurator buildInitState(String confEvalutator, String confState, UtilitySpace uSpace) {
         switch (confState) {
         case "HistoryState":
-            if (confEvalutator == "Last2BidsProductUtilityEvaluator") {
+            if (confEvalutator.equals("Last2BidsProductUtilityEvaluator")) {
                 this.setEvaluator(new Last2BidsProductUtilityEvaluator(uSpace));
-            } else if (confEvalutator == "Last2BidsMeanUtilityEvaluator") {
+            } else if (confEvalutator.equals("Last2BidsMeanUtilityEvaluator")) {
                 this.setEvaluator(new Last2BidsMeanUtilityEvaluator(uSpace));
             } else {
                 this.setEvaluator(new RandomEvaluator<HistoryState>());
