@@ -103,6 +103,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private String opponentName;
     private Tree MCTS;
     private ObjectMapper mapper = new ObjectMapper();
+    private Long numOpponentCopies = 10l;
 
     public CustomAgent() { // TODO: change name
     }
@@ -146,7 +147,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 this.parameters = settings.getParameters();
                 
                 if (this.parameters.containsKey("simulationTime")) {
-                    this.simulationTime = this.parameters.get("simulationTime", Long.class);
+                    this.simulationTime = ((Number) this.parameters.get("simulationTime")).longValue();
+                }
+                if (this.parameters.containsKey("numOpponentCopies")) {
+                    this.numOpponentCopies = ((Number) this.parameters.get("numOpponentCopies")).longValue();
                 }
 
 
@@ -193,7 +197,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         Domain domain = this.uSpace.getDomain();
                         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
 
-                        for (int cnt = 0; cnt < 50; cnt++) {
+                        for (int cnt = 0; cnt < this.numOpponentCopies; cnt++) {
                             listOfOpponents.add(new AntagonisticOpponentPolicy(this.uSpace));
                             listOfOpponents.add(new SelfishOpponentPolicy(domain));
                             listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
@@ -202,38 +206,11 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                             listOfOpponents.add(new BoulwareOpponentPolicy(domain));
                         }
 
-                        // String confBidDistance = this.parameters.get("bidDistance", String.class);
-                        // String confBelief = this.parameters.get("belief", String.class);
-                        // String confEvaluator = this.parameters.get("evaluator", String.class);
-                        // String confState = this.parameters.get("state", String.class);
-                        // String confExplorer = this.parameters.get("explorer", String.class);
-                        // String confWidener = this.parameters.get("widener", String.class);
                         HashMap config = this.parameters.get("config", HashMap.class);
                         Configurator configurator = this.mapper.convertValue(config, Configurator.class)
                                 .setUtilitySpace(this.uSpace).setListOfOpponents(listOfOpponents).setMe(this.me)
                                 .build();
 
-                        // AbstractBidDistance distance = new UtilityBidDistance(this.uSpace);
-                        // // AbstractBelief belief = new ParticleFilterBelief(listOfOpponents,
-                        // distance);
-                        // AbstractBelief belief = new ParticleFilterWithAcceptBelief(listOfOpponents,
-                        // distance);
-                        // // AbstractBelief belief = new UniformBelief(listOfOpponents, distance);
-                        // // DONE: Check if belief is updated -- It is!
-                        // IEvalFunction<? extends HistoryState> evaluator = new
-                        // Last2BidsProductUtilityEvaluator(
-                        // this.uSpace);
-                        // AbstractState<?> startState = new HistoryState(this.uSpace, null, evaluator);
-                        // // AbstractOwnExplorationPolicy explorer = new
-                        // SelfishNeverAcceptOwnExplorerPolicy(domain, this.uSpace, me);
-                        // AbstractOwnExplorationPolicy explorer = new
-                        // RandomOwnExplorerPolicy(this.uSpace, me);
-                        // AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.5,
-                        // 4.0, 0.5); // TODO:
-                        // // BUG
-                        // // if
-                        // // increased
-                        // AbstractWidener widener = new MaxWidthWideningStrategy(explorer, MAX_WIDTH);
                         this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
                                 configurator.getWidener(), this.progress);
                     } catch (IOException e) {
@@ -317,6 +294,8 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             this.profileint.close();
             this.profileint = null;
         }
+        this.MCTS = null;
+
     }
 
     /*
@@ -336,7 +315,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      * 
      * @param action
      */
-    private void processAction(Action action) {
+    protected void processAction(Action action) {
         if (action instanceof Offer) {
             // If the action was an offer: Obtain the bid and add it's value to our
             // negotiation data.
@@ -352,7 +331,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      * 
      * @param agreements
      */
-    private void processAgreements(Agreements agreements) {
+    protected void processAgreements(Agreements agreements) {
         // Check if we reached an agreement (walking away or passing the deadline
         // results in no agreement)
         if (!agreements.getMap().isEmpty()) {
@@ -369,7 +348,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      * 
      * @throws StateRepresentationException
      */
-    private void myTurn() throws IOException, StateRepresentationException {
+    protected void myTurn() throws IOException, StateRepresentationException {
         if (this.lastReceivedBid != null) {
             if (DEBUG_IN_TOURNAMENT == false) {
                 System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
@@ -391,8 +370,6 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             System.out.println(simTime <= remainingTime);
             if (simTime <= remainingTime) {
                 this.MCTS.construct(simTime);
-            }else{
-                System.out.println(this.MCTS);
             }
             action = this.MCTS.chooseBestAction();
             if (action == null) {
@@ -433,7 +410,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      * @param bid the bid to check
      * @return true iff bid is good for us.
      */
-    private boolean isGood(Bid bid) {
+    protected boolean isGood(Bid bid) {
         if (bid == null)
             return false;
 
@@ -460,7 +437,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      * This persistent state is passed to the agent again in future negotiation
      * session. REMEMBER that there is a deadline of 60 seconds for this step.
      */
-    private void learn() {
+    protected void learn() {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // Iterate through the negotiation data file paths

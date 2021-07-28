@@ -6,6 +6,19 @@
 	"configurations": [
 		{
 			"type": "java",
+			"name": "Tournament Final",
+			"request": "launch",
+			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"classPaths": ["$Auto"],
+			"args": [
+				"src/test/resources/test/tournament_test_1.json",
+				"src/test/resources/test/tournament_test_2.json",
+				"src/test/resources/test/tournament_test_3.json"
+			],
+			"console": "internalConsole"
+		},
+		{
+			"type": "java",
 			"name": "Tournament Flight",
 			"request": "launch",
 			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
@@ -28,7 +41,11 @@
 			"request": "launch",
 			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
-			"args": "src/test/resources/tournament_test.json",
+			"args": [
+				"src/test/resources/test/tournament_test_1.json",
+				"src/test/resources/test/tournament_test_2.json",
+				"src/test/resources/test/tournament_test_3.json"
+			],
 			"console": "internalConsole"
 		},
 		{

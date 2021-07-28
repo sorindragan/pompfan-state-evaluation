@@ -6,8 +6,8 @@
 					{
 						"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
 						"parameters": {
-							"numOpponentCopies":100,
-							"simulationTime":250,
+							"numOpponentCopies": 100,
+							"simulationTime": 500,
 							"config": {
 								"confBidDistance": "UtilityBidDistance",
 								"confBelief": "ParticleFilterBelief",
@@ -32,14 +32,6 @@
 			{
 				"Team": [
 					{
-						"partyref": "classpath:geniusweb.exampleparties.boulware.Boulware",
-						"parameters": {}
-					}
-				]
-			},
-			{
-				"Team": [
-					{
 						"partyref": "classpath:geniusweb.exampleparties.conceder.Conceder",
 						"parameters": {}
 					}
@@ -48,31 +40,7 @@
 			{
 				"Team": [
 					{
-						"partyref": "classpath:geniusweb.exampleparties.hardliner.Hardliner",
-						"parameters": {}
-					}
-				]
-			},
-			{
-				"Team": [
-					{
-						"partyref": "classpath:geniusweb.exampleparties.randomparty.RandomParty",
-						"parameters": {}
-					}
-				]
-			},
-			{
-				"Team": [
-					{
-						"partyref": "classpath:geniusweb.exampleparties.simpleboa.SimpleBoa",
-						"parameters": {}
-					}
-				]
-			},
-			{
-				"Team": [
-					{
-						"partyref": "classpath:geniusweb.exampleparties.timedependentparty.TimeDependentParty",
+						"partyref": "classpath:geniusweb.exampleparties.boulware.Boulware",
 						"parameters": {}
 					}
 				]
@@ -81,16 +49,10 @@
 		"reuseTeams": false,
 		"profileslists": [
 			{
-				"ProfileList": ["file:src/test/resources/party1.json"]
+				"ProfileList": ["file:src/test/resources/flightbooking1.json"]
 			},
 			{
-				"ProfileList": ["file:src/test/resources/party2.json"]
-			},
-			{
-				"ProfileList": ["file:src/test/resources/party3.json"]
-			},
-			{
-				"ProfileList": ["file:src/test/resources/party4.json"]
+				"ProfileList": ["file:src/test/resources/flightbooking2.json"]
 			}
 		],
 		"teamsPerSession": 2,
@@ -98,7 +60,7 @@
 			"SAOPSettings": {
 				"participants": [],
 				"deadline": {
-					"deadlinetime": { "durationms": 15000 }
+					"deadlinetime": { "durationms": 10000 }
 				}
 			}
 		},
