@@ -33,6 +33,7 @@ import geniusweb.custom.evaluators.Last2BidsMeanUtilityEvaluator;
 import geniusweb.custom.evaluators.Last2BidsProductUtilityEvaluator;
 import geniusweb.custom.evaluators.RandomEvaluator;
 import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
+import geniusweb.custom.explorers.HighSelfEsteemOwnExplorationPolicy;
 import geniusweb.custom.explorers.RandomNeverAcceptOwnExplorationPolicy;
 import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
 import geniusweb.custom.explorers.SelfishNeverAcceptOwnExplorerPolicy;
@@ -196,19 +197,22 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                         }
 
                         AbstractBidDistance distance = new UtilityBidDistance(this.uSpace);
+                        
                         // AbstractBelief belief = new ParticleFilterBelief(listOfOpponents, distance);
                         AbstractBelief belief = new ParticleFilterWithAcceptBelief(listOfOpponents, distance);
                         // AbstractBelief belief = new UniformBelief(listOfOpponents, distance);
                         // DONE: Check if belief is updated -- It is!
+                        
                         EvaluationFunctionInterface<HistoryState> evaluator = new Last2BidsProductUtilityEvaluator(
                                 this.uSpace);
+                        
                         AbstractState<?> startState = new HistoryState(this.uSpace, null, evaluator);
+                        
                         // AbstractOwnExplorationPolicy explorer = new SelfishNeverAcceptOwnExplorerPolicy(domain, this.uSpace, me);
-                        AbstractOwnExplorationPolicy explorer = new RandomOwnExplorerPolicy(this.uSpace, me);
-                        AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.5, 4.0, 0.5); // TODO:
-                                                                                                                 // BUG
-                                                                                                                 // if
-                                                                                                                 // increased
+                        // AbstractOwnExplorationPolicy explorer = new RandomOwnExplorerPolicy(this.uSpace, me);
+                        HighSelfEsteemOwnExplorationPolicy explorer = new HighSelfEsteemOwnExplorationPolicy(this.uSpace, me);
+                        // TODO: BUG if increased
+                        AbstractWidener widener = new ProgressiveWideningStrategy(explorer, 4.0, 0.5, 4.0, 0.5);
                         // AbstractWidener widener = new MaxWidthWideningStrategy(explorer, MAX_WIDTH);
                         this.MCTS = new Tree(this.uSpace, belief, startState, widener, this.progress);
                     } catch (IOException e) {
