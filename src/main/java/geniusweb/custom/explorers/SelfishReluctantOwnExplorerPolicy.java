@@ -28,6 +28,7 @@ public class SelfishReluctantOwnExplorerPolicy extends AbstractOwnExplorationPol
     public Action chooseAction(Bid lastOpponentBid, Bid lastAgentBid, AbstractState<?> state) {
         Action action;
         Bid bid;
+        // TODO: fix this
         if (lastOpponentBid == null) {
             bid = this.getAllBids().getExtremeBid(true);
         } else {

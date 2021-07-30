@@ -2,6 +2,7 @@ package geniusweb.custom.explorers;
 
 import java.util.Random;
 
+import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
@@ -30,6 +31,8 @@ public class HighSelfEsteemOwnExplorationPolicy extends AbstractOwnExplorationPo
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
         Action action;
         Bid bid;
+        // TODO: progressively raise the percentages of accepts
+        
         
         if (lastReceivedBid == null) {
             bid = this.getAllBids().getExtremeBid(true);
@@ -40,8 +43,14 @@ public class HighSelfEsteemOwnExplorationPolicy extends AbstractOwnExplorationPo
             
             bid = options.get(new Random().nextInt(options.size().intValue()));
         }
-        
         action = new Offer(this.getPartyId(), bid);
+        
+        // 2pcent of the time we do accepts
+        long i = this.getRandom().nextInt(100);
+        if (i > 98) {
+            action = new Accept(this.getPartyId(), lastReceivedBid);
+        }
+
         return action;
     }
 

@@ -58,6 +58,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
                             min(new BigDecimal("0.0")), this.getUtilitySpace().getUtility(lastOfferedBid)
                         ));
                 // TODO: check if options is empty
+                // TODO: if everything brakes do minbid or max
                 i = this.getRandom().nextInt(options.size().intValue());
                 
             }
