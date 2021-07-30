@@ -13,13 +13,15 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 /**
  * MeanUtilityEvaluator
  */
-public class Last2BidsProductUtilityEvaluator implements IEvalFunction<HistoryState> {
+public class Last2BidsProductUtilityEvaluator extends Last2BidsMeanUtilityEvaluator {
 
-    private UtilitySpace utilitySpace;
+    public Last2BidsProductUtilityEvaluator() {
+        super();
+    }
 
     public Last2BidsProductUtilityEvaluator(UtilitySpace utilitySpace) {
-        super();
-        this.utilitySpace = utilitySpace;
+        super(utilitySpace);
+
     }
 
     @Override
@@ -31,8 +33,8 @@ public class Last2BidsProductUtilityEvaluator implements IEvalFunction<HistorySt
         Bid bid2 = action2 instanceof Offer ? ((Offer) action2).getBid() : ((Accept) action2).getBid();
         if (action1 instanceof Accept)
             return state.getUtilitySpace().getUtility(bid1).doubleValue();
-        BigDecimal utility1 = action1 != null ? this.utilitySpace.getUtility(bid1) : BigDecimal.ONE;
-        BigDecimal utility2 = action2 != null ? this.utilitySpace.getUtility(bid2) : BigDecimal.ONE;
+        BigDecimal utility1 = action1 != null ? this.getUtilitySpace().getUtility(bid1) : BigDecimal.ONE;
+        BigDecimal utility2 = action2 != null ? this.getUtilitySpace().getUtility(bid2) : BigDecimal.ONE;
         BigDecimal mean = utility1.multiply(utility2);
         return mean.doubleValue();
     }

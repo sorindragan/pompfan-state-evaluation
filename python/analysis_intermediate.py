@@ -12,7 +12,7 @@ import pandas as pd
 import seaborn as sns
 import jsonlines
 # %%
-filename = "log_tournament_intermediate.jsonl"
+filename = "log_tournament_results.jsonl"
 # filename = "log_tournament_xx_xx_xxxx_xx_xx.json" # Something else
 curr_dir = pathlib.Path(__file__)
 log_dir = curr_dir.parent.parent / "logs"

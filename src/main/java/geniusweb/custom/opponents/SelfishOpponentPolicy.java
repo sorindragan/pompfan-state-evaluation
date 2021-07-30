@@ -3,6 +3,9 @@ package geniusweb.custom.opponents;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
@@ -15,16 +18,29 @@ import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class SelfishOpponentPolicy extends AbstractPolicy {
 
+public class SelfishOpponentPolicy extends AbstractPolicy {
+    @JsonIgnore
     private BidsWithUtility allBids;
+    @JsonIgnore
     private Interval possibleRange;
+    @JsonIgnore
     private Interval searchRange;
+    @JsonIgnore
     private ImmutableList<Bid> possibleBids;
     private final BigDecimal STUBBORNESS = new BigDecimal(0.8f);
 
+    public SelfishOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("e") double e) {
+        super(utilitySpace, name);
+        this.allBids = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
+        this.possibleRange = this.getAllBids().getRange();
+        this.searchRange = new Interval(this.getPossibleRange().getMax().multiply(STUBBORNESS),
+                this.getPossibleRange().getMax());
+        this.possibleBids = this.getAllBids().getBids(this.getSearchRange());
+    }
+
     public SelfishOpponentPolicy(Domain domain) {
-        super(domain, "SelfishAgent");
+        super(domain, "Selfish");
         this.allBids = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
         this.possibleRange = this.getAllBids().getRange();
         this.searchRange = new Interval(this.getPossibleRange().getMax().multiply(STUBBORNESS),

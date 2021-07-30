@@ -3,6 +3,11 @@ package geniusweb.custom.components;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.custom.opponents.AbstractPolicy;
@@ -11,6 +16,7 @@ import geniusweb.custom.state.AbstractState;
 /**
  * Node
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class Node {
     public static enum NODE_TYPE {
         NORMAL, BELIEF, ACTION
@@ -18,12 +24,15 @@ public class Node {
 
     private String id;
     private NODE_TYPE type;
+    @JsonBackReference
     private Node parent;
+    @JsonManagedReference
     private ArrayList<Node> children;
     private Integer visits = 0;
     private Double value = 0d;
     private AbstractState<?> state;
     private Boolean isTerminal = false;
+    private Action storedAction = null;
 
     public Node(Node parent, AbstractState<?> state) {
         super();
@@ -32,6 +41,17 @@ public class Node {
         this.state = state;
         this.children = new ArrayList<Node>();
 
+    }
+
+    public Action getStoredAction() {
+        return storedAction;
+    }
+
+    public void setStoredAction(Action storedAction) {
+        this.storedAction = storedAction;
+    }
+
+    public Node() {
     }
 
     public NODE_TYPE getType() {

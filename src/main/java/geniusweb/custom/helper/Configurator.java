@@ -190,13 +190,13 @@ public class Configurator {
             } else if (confEvalutator.equals("Last2BidsMeanUtilityEvaluator")) {
                 this.setEvaluator(new Last2BidsMeanUtilityEvaluator(uSpace));
             } else {
-                this.setEvaluator(new RandomEvaluator<HistoryState>());
+                this.setEvaluator(new RandomEvaluator());
             }
             IEvalFunction<HistoryState> evaluator1 = (IEvalFunction<HistoryState>) this.getEvaluator();
             this.setState(new HistoryState(this.uSpace, null, evaluator1));
             break;
         case "UtilityState":
-            this.setEvaluator(new RandomEvaluator<UtilityState>());
+            this.setEvaluator(new RandomEvaluator());
             IEvalFunction<UtilityState> evaluator2 = (IEvalFunction<UtilityState>) this.getEvaluator();
             this.setState(new UtilityState(uSpace, null, evaluator2));
             break;

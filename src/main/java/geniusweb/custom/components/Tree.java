@@ -51,11 +51,39 @@ public class Tree {
         // this.evaluator = evaluationFunction;
         this.belief = belief;
         this.originalRoot = new BeliefNode(null, startState, null);
-        this.root = this.originalRoot;
+        this.setRoot(this.originalRoot);
         this.widener = widener;
         this.realHistory = new ArrayList<Action>();
         this.setProgress(progress); // Around two seconds
 
+    }
+
+    public BeliefNode getRoot() {
+        return root;
+    }
+
+    public void setRoot(BeliefNode root) {
+        this.root = root;
+    }
+
+    public ActionNode getLastBestActionNode() {
+        return lastBestActionNode;
+    }
+
+    public void setLastBestActionNode(ActionNode lastBestActionNode) {
+        this.lastBestActionNode = lastBestActionNode;
+    }
+
+    public List<Action> getRealHistory() {
+        return realHistory;
+    }
+
+    public void setRealHistory(List<Action> realHistory) {
+        this.realHistory = realHistory;
+    }
+
+    public void setOriginalRoot(BeliefNode originalRoot) {
+        this.originalRoot = originalRoot;
     }
 
     public BeliefNode getOriginalRoot() {
@@ -100,7 +128,7 @@ public class Tree {
     public static Node selectFavoriteChild(List<Node> candidatesChildrenForAdoption) {
         // True Random - Alt.: Proportional to the visits
         Node adoptedChild = candidatesChildrenForAdoption.stream().filter(child -> child.getIsTerminal() == false)
-        //.peek(System.out::println)
+                // .peek(System.out::println)
                 .max(Comparator.comparing(Tree::UCB1)).get();
         return adoptedChild;
     }
@@ -125,7 +153,7 @@ public class Tree {
             System.out.println("New Belief-Probabilities");
             System.out.println(this.belief);
         }
-        
+
         if (this.lastBestActionNode == null) {
             // Quickfix: by doing nothing!
             return this;

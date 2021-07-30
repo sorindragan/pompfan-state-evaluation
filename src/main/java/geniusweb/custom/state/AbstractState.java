@@ -1,5 +1,11 @@
 package geniusweb.custom.state;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import geniusweb.actions.Action;
@@ -7,9 +13,12 @@ import geniusweb.custom.distances.CosineSimilarity;
 import geniusweb.custom.distances.ExactSame;
 import geniusweb.custom.distances.L2Distance;
 import geniusweb.custom.opponents.AbstractPolicy;
-import geniusweb.issuevalue.Domain;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
+@JsonSubTypes({ @Type(value = HistoryState.class), @Type(value = FrequencyState.class),
+        @Type(value = UtilityState.class) })
 public abstract class AbstractState<T>
         implements Comparable<AbstractState<T>>, CosineSimilarity, L2Distance, ExactSame<T> {
     private UtilitySpace utilitySpace;
@@ -17,6 +26,10 @@ public abstract class AbstractState<T>
     private T representation;
     private Double round;
     public Class<T> containerClass;
+
+    public AbstractState() {
+        super();
+    }
 
     public AbstractState(UtilitySpace utilitySpace, AbstractPolicy opponent) {
         super();

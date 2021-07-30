@@ -22,6 +22,10 @@ public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
 
     private List<IVPair> allIssueValues;
 
+    public FrequencyState() {
+        super();
+    }
+
     public FrequencyState(UtilitySpace utilitySpace, AbstractPolicy opponent) {
         super(utilitySpace, opponent);
         this.init(IVPair.getVectorContainer(utilitySpace.getDomain()));

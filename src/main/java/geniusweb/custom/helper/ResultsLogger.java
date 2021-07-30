@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import javax.websocket.DeploymentException;
@@ -101,34 +102,63 @@ public class ResultsLogger {
         private String party;
         private Double utility;
         private PartyWithProfile pwp;
+        private Bid aggreeBid;
         private Map<String, Value> bid;
         private Integer session;
 
         private String version;
         private Parameters params;
+        private ReportToLogger reporter;
+        private ProfileRef profile;
 
         public Result(Integer sessionNum, PartyId partyId, PartyWithProfile pwp, Bid aggreeBid) {
+            this.setAggreeBid(aggreeBid);
             this.setSession(sessionNum);
             this.setVersion(partyId.getName());
-            this.pwp = pwp;
+            this.setPwp(pwp);
             String[] rawPartyString = pwp.getParty().getPartyRef().getURI().toString().split("\\.");
             this.setParty(rawPartyString[rawPartyString.length - 1]);
-            this.setBid(aggreeBid != null ? aggreeBid.getIssueValues() : new HashMap<String, Value>());
+            HashMap<String, Value> emptyTemp = new HashMap<String, Value>();
+            this.setBid(this.getAggreeBid() != null ? this.getAggreeBid().getIssueValues() : emptyTemp);
             this.setParams(pwp.getParty().getParameters());
+            this.reporter = new ReportToLogger(this.getPwp().toString());
+        }
 
+        public Bid getAggreeBid() {
+            return aggreeBid;
+        }
+
+        public void setAggreeBid(Bid aggreeBid) {
+            this.aggreeBid = aggreeBid;
+        }
+
+        public PartyWithProfile getPwp() {
+            return pwp;
+        }
+
+        public void setPwp(PartyWithProfile pwp) {
+            this.pwp = pwp;
+        }
+
+        private Result computeUtility() {
             try {
                 // PartyWithParameters party = pwp.getParty();
-                ProfileRef profile = pwp.getProfile();
-                ProfileInterface profileint = ProfileConnectionFactory.create(profile.getURI(),
-                        new ReportToLogger(profile.toString()));
+                this.profile = this.getPwp().getProfile();
+                ProfileInterface profileint = ProfileConnectionFactory.create(this.profile.getURI(), this.reporter);
                 UtilitySpace utilitySpace = ((UtilitySpace) profileint.getProfile());
-                this.utility = aggreeBid != null ? utilitySpace.getUtility(aggreeBid).doubleValue() : 0.0;
+                this.utility = this.getAggreeBid() != null ? utilitySpace.getUtility(this.getAggreeBid()).doubleValue()
+                        : 0.0;
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             } catch (DeploymentException e) {
                 this.utility = -1.0;
                 e.printStackTrace();
+                return null;
+            } catch (IllegalArgumentException e) {
+                this.reporter.log(Level.WARNING, "Couldn't create profile from: " + this.profile.getURI());
+                return null;
             }
+            return this;
         }
 
         public Integer getSession() {

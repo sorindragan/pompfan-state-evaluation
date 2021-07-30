@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
@@ -17,6 +19,10 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 public class HistoryState extends AbstractState<ArrayList<Action>> {
     private double DISCOUNT_RATE = 0.95;
     public IEvalFunction<HistoryState> evaluator;
+
+    public HistoryState() {
+        super();
+    }
 
     public HistoryState(UtilitySpace utilitySpace, AbstractPolicy opponent,
             IEvalFunction<? extends HistoryState> evaluator) {
@@ -44,6 +50,7 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
     }
 
     @Override
+    @JsonIgnore
     public String getStringRepresentation() {
         return this.getHistory().stream().map(Object::toString).collect(Collectors.joining("->"));
     }

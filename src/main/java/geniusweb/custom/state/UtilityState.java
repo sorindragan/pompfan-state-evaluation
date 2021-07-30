@@ -20,6 +20,10 @@ public class UtilityState extends AbstractState<Map<PartyId, BigDecimal>> {
     private ArrayList<Map<PartyId, BigDecimal>> history = new ArrayList<>();
     private IEvalFunction<? extends UtilityState> evaluator;
 
+    public UtilityState() {
+        super();
+    }
+
     public UtilityState(UtilitySpace utilitySpace, AbstractPolicy opponent,
             IEvalFunction<? extends UtilityState> evaluator) {
         super(utilitySpace, opponent);

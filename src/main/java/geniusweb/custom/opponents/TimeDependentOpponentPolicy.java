@@ -1,27 +1,30 @@
 package geniusweb.custom.opponents;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.Random;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
-import geniusweb.actions.PartyId;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.exampleparties.timedependentparty.ExtendedUtilSpace;
-import geniusweb.exampleparties.timedependentparty.TimeDependentParty;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
-import geniusweb.profile.Profile;
 import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;
-import geniusweb.profileconnection.ProfileInterface;
-import geniusweb.progress.Progress;
 import tudelft.utilities.immutablelist.ImmutableList;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
+@JsonSubTypes({ @Type(value = BoulwareOpponentPolicy.class), @Type(value = ConcederOpponentPolicy.class),
+        @Type(value = HardLinerOpponentPolicy.class), @Type(value = LinearOpponentPolicy.class) })
 public class TimeDependentOpponentPolicy extends AbstractPolicy {
 
     // private ProfileInterface profileint = null;
@@ -32,11 +35,20 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
     private double e = 1.2;
     // private Settings settings;
 
+    
+
     public TimeDependentOpponentPolicy(Domain domain) {
         super(domain, "TimeDependent");
         this.utilspace = (LinearAdditive) this.getUtilitySpace();
         this.extendedspace = new ExtendedUtilSpace(this.utilspace);
         // this.maxBid = this.extendedspace.
+    }
+
+    @JsonCreator
+    public TimeDependentOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("e") double e) {
+        super(utilitySpace, name);
+        this.utilspace = (LinearAdditive) utilspace;
+        this.e = e;
     }
 
     @Override
@@ -80,7 +92,8 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
         BigDecimal utilityGoal = getUtilityGoal(currTime, getE(), extendedspace.getMin(), extendedspace.getMax());
         ImmutableList<Bid> options = extendedspace.getBids(utilityGoal);
         if (options.size().compareTo(BigInteger.ONE) == -1) {
-            // if we can't find good bid, get max util bid and if no max bid take min bid as tolerance....
+            // if we can't find good bid, get max util bid and if no max bid take min bid as
+            // tolerance....
             ImmutableList<Bid> alternativeOptions = extendedspace.getBids(extendedspace.getMax());
             alternativeOptions = alternativeOptions.size().compareTo(BigInteger.ONE) < 1
                     ? extendedspace.getBids(extendedspace.getMin())

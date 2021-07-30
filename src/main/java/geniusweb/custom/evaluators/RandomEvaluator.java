@@ -1,18 +1,24 @@
 package geniusweb.custom.evaluators;
 
-
 import java.util.Random;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import geniusweb.custom.state.AbstractState;
 import geniusweb.issuevalue.Bid;
 
-public class RandomEvaluator<T> implements IEvalFunction<T>{
-    Random random = new Random();
+public class RandomEvaluator implements IEvalFunction<Object> {
+    @JsonIgnore
+    Random random = null;
+
+    public RandomEvaluator() {
+        super();
+        this.random = new Random();
+    }
 
     @Override
-    public Double evaluate(T state) {
+    public Double evaluate(Object state) {
         return random.nextDouble();
     }
 
- 
 }

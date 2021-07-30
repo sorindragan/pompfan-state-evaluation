@@ -91,7 +91,11 @@ public class CustomNegoRunner extends NegoRunner {
                 SessionResult sessionState = (SessionResult) tournamentState.getResults().get(idxLastFinishedSession);
                 Date sessionTimestamp = new Date();
                 String sessionTime = this.tFormatter.format(sessionTimestamp);
-                this.intermediateWriter.writeSession(this.sessNum, sessionState, sessionTime);
+                try {
+                    this.intermediateWriter.writeSession(this.sessNum, sessionState, sessionTime);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
