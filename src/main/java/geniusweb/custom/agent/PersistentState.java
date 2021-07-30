@@ -1,10 +1,26 @@
 package geniusweb.custom.agent; // TODO: change name
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import geniusweb.actions.PartyId;
+import geniusweb.custom.beliefs.AbstractBelief;
+import geniusweb.custom.components.BeliefNode;
+import geniusweb.custom.components.Tree;
+import geniusweb.custom.helper.Configurator;
+import geniusweb.custom.state.AbstractState;
+import geniusweb.custom.wideners.AbstractWidener;
+import geniusweb.profile.utilityspace.UtilitySpace;
+import geniusweb.progress.Progress;
 
 /**
  * This class can hold the persistent state of your agent. You can off course
@@ -20,6 +36,11 @@ public class PersistentState {
     private Integer negotiations = 0;
     private Map<String, Double> avgMaxUtilityOpponent = new HashMap<String, Double>();
     private Map<String, Integer> opponentEncounters = new HashMap<String, Integer>();
+    private AbstractBelief currentBelief;
+    private HashMap<String, Object> configuration;
+    private BeliefNode rootNode;
+    @JsonIgnore
+    private ObjectMapper mapper = new ObjectMapper();
 
     /**
      * Update the persistent state with a negotiation data of a previous negotiation
@@ -50,6 +71,35 @@ public class PersistentState {
             avgMaxUtilityOpponent.put(opponent,
                     (avgUtil * encounters + negotiationData.getMaxReceivedUtil()) / (encounters + 1));
         }
+
+        this.setCurrentBelief(negotiationData.getBelief());
+        this.setConfiguration(negotiationData.getConfiguration());
+        this.setRootNode(negotiationData.getRootNode());
+
+    }
+
+    public BeliefNode getRootNode() {
+        return rootNode;
+    }
+
+    public void setRootNode(BeliefNode rootNode) {
+        this.rootNode = rootNode;
+    }
+
+    public HashMap<String, Object> getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(HashMap<String, Object> configuration) {
+        this.configuration = configuration;
+    }
+
+    public AbstractBelief getCurrentBelief() {
+        return currentBelief;
+    }
+
+    public void setCurrentBelief(AbstractBelief currentBelief) {
+        this.currentBelief = currentBelief;
     }
 
     public Double getAvgMaxUtility(String opponent) {
@@ -68,5 +118,19 @@ public class PersistentState {
 
     public Boolean knownOpponent(String opponent) {
         return opponentEncounters.containsKey(opponent);
+    }
+
+    public Tree reconstructTree(PartyId me, UtilitySpace utilitySpace, Progress progress) {
+        AbstractBelief belief = this.getCurrentBelief();
+        AbstractState<?> startState = this.getRootNode().getState();
+        Configurator configurator = this.mapper.convertValue(this.getConfiguration(), Configurator.class)
+                .setUtilitySpace(utilitySpace).setListOfOpponents(belief.getOpponents()).setMe(me).build();
+        AbstractWidener widener = configurator.getWidener();
+        Tree mcts = new Tree(utilitySpace, belief, startState, widener, progress);
+        return mcts;
+    }
+
+    public void save(File destination) throws JsonGenerationException, JsonMappingException, IOException {
+        mapper.writerWithDefaultPrettyPrinter().writeValue(destination, this);
     }
 }

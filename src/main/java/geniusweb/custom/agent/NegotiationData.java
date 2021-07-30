@@ -1,7 +1,15 @@
 package geniusweb.custom.agent; // TODO: change name
 
+import java.lang.module.Configuration;
+import java.util.HashMap;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
+import geniusweb.custom.beliefs.AbstractBelief;
+import geniusweb.custom.components.BeliefNode;
 
 /**
  * The class hold the negotiation data that is obtain during a negotiation
@@ -16,6 +24,22 @@ public class NegotiationData {
     private Double maxReceivedUtil = 0.0;
     private Double agreementUtil = 0.0;
     private String opponentName;
+    private AbstractBelief belief;
+    private BeliefNode rootNode;
+    private HashMap<String, Object> configuration;
+
+    public HashMap<String, Object> getConfiguration() {
+        return configuration;
+    }
+
+    public NegotiationData setConfiguration(HashMap<String, Object> configuration) {
+        this.configuration = configuration;
+        return this;
+    }
+
+    public void setRootNode(BeliefNode rootNode) {
+        this.rootNode = rootNode;
+    }
 
     public void addAgreementUtil(Double agreementUtil) {
         this.agreementUtil = agreementUtil;
@@ -42,5 +66,23 @@ public class NegotiationData {
 
     public Double getAgreementUtil() {
         return this.agreementUtil;
+    }
+
+    public NegotiationData setBelief(AbstractBelief belief) {
+        this.belief = belief;
+        return this;
+    }
+
+    public NegotiationData setRoot(BeliefNode rootNode) {
+        this.rootNode = rootNode;
+        return this;
+    }
+
+    public AbstractBelief getBelief() {
+        return belief;
+    }
+
+    public BeliefNode getRootNode() {
+        return rootNode;
     }
 }

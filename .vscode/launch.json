@@ -11,9 +11,7 @@
 			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": [
-				"src/test/resources/test/tournament_test_1.json",
-				"src/test/resources/test/tournament_test_2.json",
-				"src/test/resources/test/tournament_test_3.json"
+				"src/test/resources/test/tournament_test_1.json"
 			],
 			"console": "internalConsole"
 		},
@@ -41,11 +39,7 @@
 			"request": "launch",
 			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
-			"args": [
-				"src/test/resources/test/tournament_test_1.json",
-				"src/test/resources/test/tournament_test_2.json",
-				"src/test/resources/test/tournament_test_3.json"
-			],
+			"args": "src/test/resources/tournament_test.json",
 			"console": "internalConsole"
 		},
 		{
@@ -55,6 +49,15 @@
 			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/settingsTest.json",
+			"console": "internalConsole"
+		},
+		{
+			"type": "java",
+			"name": "Test Learn",
+			"request": "launch",
+			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"classPaths": ["$Auto"],
+			"args": "src/test/resources/settingsTestLearn.json",
 			"console": "internalConsole"
 		},
 		{
