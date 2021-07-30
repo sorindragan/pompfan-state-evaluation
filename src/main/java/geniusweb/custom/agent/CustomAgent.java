@@ -14,6 +14,8 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import javax.websocket.DeploymentException;
+
 import geniusweb.actions.FileLocation;
 
 import java.util.UUID;
@@ -75,6 +77,8 @@ import geniusweb.progress.ProgressRounds;
 import geniusweb.references.Parameters;
 import tudelft.utilities.logging.Reporter;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CustomAgent extends DefaultParty { // TODO: change name
@@ -86,6 +90,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private static final int MAX_WIDTH = 10;
     private Long SIMULATION_TIME = 250l; // TODO: BUG if increased
     private Long simulationTime = 500l; // TODO: BUG if increased
+    private static final boolean DEBUG_LEARN = true;
     private static boolean DEBUG_OFFER = false;
     private static boolean DEBUG_SAVE_TREE = true;
     private static boolean DEBUG_IN_TOURNAMENT = true;
@@ -99,13 +104,14 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private UtilitySpace uSpace;
     private PersistentState persistentState;
     private NegotiationData negotiationData;
-    private List<File> dataPaths;
+    private List<File> dataPaths = new ArrayList<>();
     private File persistentPath;
     private String opponentName;
     private Tree MCTS;
     private ObjectMapper mapper = new ObjectMapper();
     private Long numOpponentCopies = 10l;
     private Boolean isLearn = false;
+    private HashMap<String, Object> config;
 
     public CustomAgent() { // TODO: change name
     }
@@ -130,199 +136,208 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             System.out.println(info.getClass().getName());
         }
         try {
-
             if (info instanceof Settings) {
-                // info is a Settings object that is passed at the start of a negotiation
-                Settings settings = (Settings) info;
-
-                // ID of my agent
-                this.me = settings.getID();
-
-                // The progress object keeps track of the deadline
-                this.progress = settings.getProgress();
-
-                // Protocol that is initiate for the agent
-                this.protocol = settings.getProtocol().getURI().getPath();
-                this.isLearn = "Learn".equals(protocol);
-
-                // Parameters for the agent (can be passed through the GeniusWeb GUI, or a
-                // JSON-file)
-                this.parameters = settings.getParameters();
-                if (this.parameters.containsKey("simulationTime")) {
-                    this.simulationTime = ((Number) this.parameters.get("simulationTime")).longValue();
-                }
-                if (this.parameters.containsKey("numOpponentCopies")) {
-                    this.numOpponentCopies = ((Number) this.parameters.get("numOpponentCopies")).longValue();
-                }
-                HashMap<String, Object> config = (HashMap<String, Object>) this.parameters.get("config");
-
-                // The PersistentState is loaded here (see 'PersistenData,java')
-                if (this.parameters.containsKey("persistentstate")) {
-                    UUID fileLocation = UUID.fromString((String) this.parameters.get("persistentstate"));
-                    this.persistentPath = new FileLocation(fileLocation).getFile();
-                }
-                if (this.persistentPath != null && this.persistentPath.exists()) {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    this.persistentState = objectMapper.readValue(this.persistentPath, PersistentState.class);
-                } else {
-                    this.persistentState = new PersistentState();
-                }
-                // The negotiation data paths are converted here from List<String> to List<File>
-                // for improved usage. For safety reasons, this is more comprehensive than
-                // normally.
-                // System.out.println("WTF " + protocol);
-                // System.out.println("WTF " +
-                // this.parameters.get("negotiationdata").toString());
-                // System.out.println("WTF " +
-                // this.parameters.get("persistentstate").toString());
-                // if (this.parameters.containsKey("negotiationdata") && this.isLearn) {
-                // this.dataPaths = new ArrayList<>();
-                // List<?> dataPaths_raw = (List<?>) this.parameters.get("negotiationdata");
-                // for (FileLocation path : (List<FileLocation>) dataPaths_raw) {
-                // this.dataPaths.add(path.getFile());
-                // }
-                // }
-                this.getReporter().log(Level.INFO, protocol);
-                ;
-                if (this.isLearn) {
-                    // We are in the learning step: We execute the learning and notify when we are
-                    // done. REMEMBER that there is a deadline of 60 seconds for this step.
-                    System.out.println("WTF " + protocol);
-                    System.out.println("WTF " + this.parameters.get("negotiationdata").toString());
-                    System.out.println("WTF " + this.parameters.get("persistentstate").toString());
-                    if (this.parameters.containsKey("negotiationdata")) {
-                        this.dataPaths = new ArrayList<>();
-                        List<?> dataPaths_raw = (List<?>) this.parameters.get("negotiationdata");
-                        for (String path : (List<String>) dataPaths_raw) {
-                            this.dataPaths.add(new FileLocation(UUID.fromString(path)).getFile());
-                        }
-                    }
-                    learn();
-                    getConnection().send(new LearningDone(me));
-                } else {
-                    // The negotiation data paths are converted here from List<String> to List<File>
-                    // for improved usage. For safety reasons, this is more comprehensive than
-                    // normally.
-                    System.out.println("WTF " + protocol);
-                    System.out.println("WTF " + this.parameters.get("negotiationdata").toString());
-                    System.out.println("WTF " + this.parameters.get("persistentstate").toString());
-                    if (this.parameters.containsKey("negotiationdata")) {
-                        this.dataPaths = new ArrayList<>();
-                        List<?> dataPaths_raw = (List<?>) this.parameters.get("negotiationdata");
-                        for (FileLocation path : (List<FileLocation>) dataPaths_raw) {
-                            this.dataPaths.add(path.getFile());
-                        }
-                    }
-                    // We are in the negotiation step.
-
-                    // Create a new NegotiationData object to store information on this negotiation.
-                    // See 'NegotiationData.java'.
-                    this.negotiationData = new NegotiationData().setConfiguration(config);
-                    // Obtain our utility space, i.e. the problem we are negotiating and our
-                    // preferences over it.
-                    try {
-                        this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(),
-                                getReporter());
-                        this.uSpace = ((UtilitySpace) profileint.getProfile());
-                        // Our stuff
-
-                    } catch (IOException e) {
-                        throw new IllegalStateException(e);
-                    }
-
-                    if (this.persistentState.getCurrentBelief() == null) {
-                        Domain domain = this.uSpace.getDomain();
-                        AllBidsList bidspace = new AllBidsList(domain);
-                        List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
-
-                        for (int cnt = 0; cnt < this.numOpponentCopies; cnt++) {
-                            listOfOpponents.add(new AntagonisticOpponentPolicy(this.uSpace));
-                            listOfOpponents.add(new SelfishOpponentPolicy(domain));
-                            listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
-                            listOfOpponents.add(new HardLinerOpponentPolicy(domain));
-                            listOfOpponents.add(new ConcederOpponentPolicy(domain));
-                            listOfOpponents.add(new BoulwareOpponentPolicy(domain));
-                        }
-                        listOfOpponents = listOfOpponents.stream().map(opponent -> opponent.setBidspace(bidspace))
-                                .collect(Collectors.toList());
-
-                        Configurator configurator = this.mapper.convertValue(config, Configurator.class)
-                                .setUtilitySpace(this.uSpace).setListOfOpponents(listOfOpponents).setMe(this.me)
-                                .build();
-
-                        this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
-                                configurator.getWidener(), this.progress);
-
-                    } else {
-                        this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress);
-                    }
-
-                    if (this.MCTS == null) {
-                        throw new Exception("Failed to instantiate the tree.");
-                    }
-                }
+                runSetupPhase(info);
             } else if (info instanceof ActionDone) {
-                // The info object is an action that is performed by an agent.
-                Action action = ((ActionDone) info).getAction();
-
-                // Check if this is not our own action
-                if (!this.me.equals(action.getActor())) {
-                    // Check if we already know who we are playing against.
-                    if (this.opponentName == null) {
-                        // The part behind the last _ is always changing, so we must cut it off.
-                        String fullOpponentName = action.getActor().getName();
-                        int lastIndexOf = fullOpponentName.lastIndexOf("_");
-                        // int index = lastIndexOf == -1 ? fullOpponentName.length() : lastIndexOf;
-                        int index = lastIndexOf;
-                        this.opponentName = fullOpponentName.substring(0, index);
-
-                        // Add name of the opponent to the negotiation data
-                        this.negotiationData.setOpponentName(this.opponentName);
-                        getReporter().log(Level.INFO, "VS. " + this.opponentName);
-                    }
-                    // Process the action of the opponent.
-                    processAction(action);
-                }
+                runOpponentPhase(info);
             } else if (info instanceof YourTurn) {
-                // Advance the round number if a round-based deadline is set.
-                if (progress instanceof ProgressRounds) {
-                    progress = ((ProgressRounds) progress).advance();
-                }
-
-                // The info notifies us that it is our turn
-                myTurn();
+                runAgentPhase(info);
             } else if (info instanceof Finished) {
-                // The info is a notification that th negotiation has ended. This Finished
-                // object also contains the final agreement (if any).
-                Agreements agreements = ((Finished) info).getAgreement();
-                processAgreements(agreements);
-                if (DEBUG_SAVE_TREE && !this.isLearn) {
-                    FileWriter fullTreeFileWriter = new FileWriter("logs/log_fullTree.txt");
-                    fullTreeFileWriter.write(this.MCTS.toStringOriginal());
-                    fullTreeFileWriter.close();
-                    FileWriter currRootFileWriter = new FileWriter("logs/log_currRoot.txt");
-                    currRootFileWriter.write(this.MCTS.toString());
-                    currRootFileWriter.close();
-                }
-                // Write the negotiation data that we collected to the path provided.
-                if (this.dataPaths != null && this.negotiationData != null) {
-                    this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot());
-                    try {
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.dataPaths.get(0),
-                                this.negotiationData);
-
-                    } catch (IOException e) {
-                        throw new RuntimeException("Failed to write negotiation data to disk", e);
-                    }
-                }
-
-                // Log the final outcome and terminate
-                getReporter().log(Level.INFO, "Final outcome:" + info);
-                terminate();
+                runEndPhase(info);
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to handle info", e);
+        }
+    }
+
+    private void runEndPhase(Inform info) throws IOException {
+        // The info is a notification that th negotiation has ended. This Finished
+        // object also contains the final agreement (if any).
+        Agreements agreements = ((Finished) info).getAgreement();
+        processAgreements(agreements);
+        // Write the negotiation data that we collected to the path provided.
+        if (this.dataPaths != null && this.negotiationData != null) {
+            File sessionFile = this.dataPaths.get(0);
+            if (DEBUG_SAVE_TREE && !this.isLearn) {
+                String sessionName = sessionFile.getName();
+                saveTreeToLogs("full_".concat(sessionName), this.MCTS.toStringOriginal());
+                saveTreeToLogs("curr_".concat(sessionName), this.MCTS.toString());
+            }
+            try {
+                this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot());
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.writerWithDefaultPrettyPrinter().writeValue(sessionFile, this.negotiationData);
+
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to write negotiation data to disk", e);
+            }
+        }
+
+        // Log the final outcome and terminate
+        getReporter().log(Level.INFO, "Final outcome:" + info);
+        terminate();
+    }
+
+    private void saveTreeToLogs(String fileName, String content) throws IOException {
+        FileWriter fullTreeFileWriter = new FileWriter("logs/log_" + fileName + ".txt");
+        fullTreeFileWriter.write(content);
+        fullTreeFileWriter.close();
+    }
+
+    private void runAgentPhase(Inform info) throws IOException, StateRepresentationException {
+        // Advance the round number if a round-based deadline is set.
+        if (progress instanceof ProgressRounds) {
+            progress = ((ProgressRounds) progress).advance();
+        }
+        if (info instanceof YourTurn) {
+            // The info notifies us that it is our turn
+            YourTurn myTurnInfo = (YourTurn) info;
+            myTurn(myTurnInfo);
+        }
+
+    }
+
+    private void runOpponentPhase(Inform info) {
+        // The info object is an action that is performed by an agent.
+        Action action = ((ActionDone) info).getAction();
+
+        // Check if this is not our own action
+        if (!this.me.equals(action.getActor())) {
+            // Check if we already know who we are playing against.
+            if (this.opponentName == null) {
+                // The part behind the last _ is always changing, so we must cut it off.
+                String fullOpponentName = action.getActor().getName();
+                int lastIndexOf = fullOpponentName.lastIndexOf("_");
+                // int index = lastIndexOf == -1 ? fullOpponentName.length() : lastIndexOf;
+                int index = lastIndexOf;
+                this.opponentName = fullOpponentName.substring(0, index);
+
+                // Add name of the opponent to the negotiation data
+                this.negotiationData.setOpponentName(this.opponentName);
+                getReporter().log(Level.INFO, "VS. " + this.opponentName);
+            }
+            // Process the action of the opponent.
+            processAction(action);
+        }
+    }
+
+    private void runSetupPhase(Inform info)
+            throws IOException, JsonParseException, JsonMappingException, DeploymentException, Exception {
+        // info is a Settings object that is passed at the start of a negotiation
+        Settings settings = (Settings) info;
+        // Needs to run
+        this.initializeVariables(settings);
+
+        if (this.isLearn) {
+            // We are in the learning step: We execute the learning and notify when we are
+            // done. REMEMBER that there is a deadline of 60 seconds for this step.
+            this.runLearnPhase();
+        } else {
+            this.initializeTree(settings);
+        }
+    }
+
+    private void initializeTree(Settings settings) throws DeploymentException, Exception {
+        // We are in the negotiation step.
+
+        // Create a new NegotiationData object to store information on this negotiation.
+        // See 'NegotiationData.java'.
+        this.negotiationData = new NegotiationData().setConfiguration(config);
+        // Obtain our utility space, i.e. the problem we are negotiating and our
+        // preferences over it.
+        try {
+            this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(), getReporter());
+            this.uSpace = ((UtilitySpace) profileint.getProfile());
+            // Our stuff
+
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+
+        if (this.persistentState.getCurrentBelief() == null) {
+            Domain domain = this.uSpace.getDomain();
+            AllBidsList bidspace = new AllBidsList(domain);
+            List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
+
+            for (int cnt = 0; cnt < this.numOpponentCopies; cnt++) {
+                listOfOpponents.add(new AntagonisticOpponentPolicy(this.uSpace));
+                listOfOpponents.add(new SelfishOpponentPolicy(domain));
+                listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
+                listOfOpponents.add(new HardLinerOpponentPolicy(domain));
+                listOfOpponents.add(new ConcederOpponentPolicy(domain));
+                listOfOpponents.add(new BoulwareOpponentPolicy(domain));
+            }
+            listOfOpponents = listOfOpponents.stream().map(opponent -> opponent.setBidspace(bidspace))
+                    .collect(Collectors.toList());
+
+            Configurator configurator = this.mapper.convertValue(config, Configurator.class)
+                    .setUtilitySpace(this.uSpace).setListOfOpponents(listOfOpponents).setMe(this.me).build();
+
+            this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
+                    configurator.getWidener(), this.progress);
+
+        } else {
+            this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress);
+        }
+
+        if (this.MCTS == null) {
+            throw new Exception("Failed to instantiate the tree.");
+        }
+    }
+
+    private void initializeVariables(Settings settings) throws IOException, JsonParseException, JsonMappingException {
+        // Protocol that is initiate for the agent
+        this.protocol = settings.getProtocol().getURI().getPath();
+        this.getReporter().log(Level.INFO, protocol);
+
+        // ID of my agent
+        this.me = settings.getID();
+
+        // The progress object keeps track of the deadline
+        this.progress = settings.getProgress();
+
+        this.isLearn = "Learn".equals(protocol);
+
+        // Parameters for the agent (can be passed through the GeniusWeb GUI, or a
+        // JSON-file)
+        this.parameters = settings.getParameters();
+        if (this.parameters.containsKey("simulationTime")) {
+            this.simulationTime = ((Number) this.parameters.get("simulationTime")).longValue();
+        }
+        if (this.parameters.containsKey("numOpponentCopies")) {
+            this.numOpponentCopies = ((Number) this.parameters.get("numOpponentCopies")).longValue();
+        }
+        this.config = (HashMap<String, Object>) this.parameters.get("config");
+
+        // The PersistentState is loaded here (see 'PersistenData,java')
+        if (this.parameters.containsKey("persistentstate")) {
+            UUID fileLocation = UUID.fromString((String) this.parameters.get("persistentstate"));
+            this.persistentPath = new FileLocation(fileLocation).getFile();
+        }
+        if (this.persistentPath != null && this.persistentPath.exists()) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            this.persistentState = objectMapper.readValue(this.persistentPath, PersistentState.class);
+        } else {
+            this.persistentState = new PersistentState();
+        }
+
+        // The negotiation data paths are converted here from List<String> to List<File>
+        // for improved usage. For safety reasons, this is more comprehensive than
+        // normally.
+        if (DEBUG_LEARN) {
+            System.out.println("WTF " + protocol);
+            System.out.println("WTF " + this.parameters.get("negotiationdata").toString());
+            System.out.println("WTF " + this.parameters.get("persistentstate").toString());
+        }
+
+        if (this.parameters.containsKey("negotiationdata")) {
+            this.dataPaths = new ArrayList<>();
+            List<Object> dataPaths_raw = this.parameters.get("negotiationdata", List.class);
+            for (Object path : (List<Object>) dataPaths_raw) {
+                FileLocation tmpPath = path instanceof FileLocation ? (FileLocation) path
+                        : new FileLocation(UUID.fromString((String) path));
+                this.dataPaths.add(tmpPath.getFile());
+            }
         }
     }
 
@@ -392,9 +407,11 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     /**
      * send our next offer
      * 
+     * @param myTurnInfo
+     * 
      * @throws StateRepresentationException
      */
-    protected void myTurn() throws IOException, StateRepresentationException {
+    protected void myTurn(YourTurn myTurnInfo) throws IOException, StateRepresentationException {
         if (this.lastReceivedBid != null) {
             if (DEBUG_IN_TOURNAMENT == false) {
                 System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
@@ -483,24 +500,25 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      * This persistent state is passed to the agent again in future negotiation
      * session. REMEMBER that there is a deadline of 60 seconds for this step.
      */
-    protected void learn() {
+    protected void runLearnPhase() {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // Iterate through the negotiation data file paths
-        for (File dataPath : this.dataPaths)
+        for (File dataPath : this.dataPaths) {
             try {
                 // Load the negotiation data object of a previous negotiation
                 NegotiationData negotiationData = objectMapper.readValue(dataPath, NegotiationData.class);
-
                 // Process the negotiation data in our persistent state
                 this.persistentState.update(negotiationData);
             } catch (IOException e) {
                 throw new RuntimeException("Negotiation data provided to learning step does not exist", e);
             }
+        }
 
         // Write the persistent state object to file
         try {
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.persistentPath, this.persistentState);
+            this.getConnection().send(new LearningDone(me));
         } catch (IOException e) {
             throw new RuntimeException("Failed to write persistent state to disk", e);
         }
