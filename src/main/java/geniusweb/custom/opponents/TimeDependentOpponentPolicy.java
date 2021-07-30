@@ -28,7 +28,7 @@ import tudelft.utilities.immutablelist.ImmutableList;
 public class TimeDependentOpponentPolicy extends AbstractPolicy {
 
     // private ProfileInterface profileint = null;
-    private LinearAdditive utilspace = null; // last received space
+    // private LinearAdditive utilspace = null; // last received space
     // private PartyId me;
     // private Progress progress;
     private ExtendedUtilSpace extendedspace;
@@ -39,25 +39,18 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
 
     public TimeDependentOpponentPolicy(Domain domain) {
         super(domain, "TimeDependent");
-        this.utilspace = (LinearAdditive) this.getUtilitySpace();
-        this.extendedspace = new ExtendedUtilSpace(this.utilspace);
-        // this.maxBid = this.extendedspace.
+        this.extendedspace = new ExtendedUtilSpace((LinearAdditive) this.getUtilitySpace());
     }
-
+    
     @JsonCreator
     public TimeDependentOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("e") double e) {
         super(utilitySpace, name);
-        this.utilspace = (LinearAdditive) utilspace;
         this.e = e;
+        this.extendedspace = new ExtendedUtilSpace((LinearAdditive) this.getUtilitySpace());
     }
 
     @Override
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
-        // if(lastReceivedBid==null){
-        // ImmutableList<Bid> bids = this.extendedspace.getBids(BigDecimal.ONE);
-        // Bid selectedBid = bids.get(this.getRandom().nextInt(bids.size().intValue()));
-        // return new Offer(this.getPartyId(), selectedBid);
-        // }
         return this.myTurn(lastReceivedBid, state);
     }
 
@@ -71,8 +64,8 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
         Action myAction;
         boolean isLastReceivedIsBiggerThanOwnOffer = false;
         if (lastReceivedBid != null) {
-            BigDecimal lastReceivedUtility = this.utilspace.getUtility(lastReceivedBid);
-            isLastReceivedIsBiggerThanOwnOffer = lastReceivedUtility.compareTo(this.utilspace.getUtility(bid)) >= 0;
+            BigDecimal lastReceivedUtility = this.getUtilitySpace().getUtility(lastReceivedBid);
+            isLastReceivedIsBiggerThanOwnOffer = lastReceivedUtility.compareTo(this.getUtilitySpace().getUtility(bid)) >= 0;
         }
         if (isLastReceivedIsBiggerThanOwnOffer) {
             myAction = new Accept(this.getPartyId(), lastReceivedBid);
@@ -100,10 +93,6 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
                     : alternativeOptions;
             return alternativeOptions.get(0l);
         }
-        // pick a random one.
-        // if(options.size().intValue() < 1){
-        // System.out.println(options.size().intValue());;
-        // }
         return options.get(new Random().nextInt(options.size().intValue()));
 
     }

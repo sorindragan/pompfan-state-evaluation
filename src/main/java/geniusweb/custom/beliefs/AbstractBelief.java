@@ -31,9 +31,8 @@ import geniusweb.custom.state.AbstractState;
         @Type(value = UniformBelief.class, name = "UniformBelief") })
 public abstract class AbstractBelief {
 
-    List<AbstractPolicy> opponents = new ArrayList<AbstractPolicy>();
-    List<Double> probabilities = new ArrayList<Double>();
-
+    List<AbstractPolicy> opponents = null;
+    List<Double> probabilities = null;
 
     // @JsonProperty("opponentProbabilities")
     // @JsonDeserialize(keyUsing = AbstractPolicyDeserializer.class)
@@ -47,6 +46,8 @@ public abstract class AbstractBelief {
         for (int i = 0; i < opponents.size(); i++) {
             this.opponentProbabilities.put(opponents.get(i), probabilities.get(i));
         }
+        this.opponents = this.getOpponentProbabilities().keySet().stream().collect(Collectors.toList());
+        this.probabilities = this.getOpponentProbabilities().values().stream().collect(Collectors.toList());
         this.distance = distance;
     }
 
@@ -66,6 +67,7 @@ public abstract class AbstractBelief {
             this.opponentProbabilities.put(opponent, uniformProb);
         }
         this.opponents = this.getOpponentProbabilities().keySet().stream().collect(Collectors.toList());
+        this.probabilities = this.getOpponentProbabilities().values().stream().collect(Collectors.toList());
         this.distance = distance;
     }
 

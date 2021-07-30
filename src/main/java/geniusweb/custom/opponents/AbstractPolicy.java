@@ -56,18 +56,20 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
     private PartyId partyId;
 
     @JsonIgnore
-    private final Random random = new Random();
+    private Random random = null;
 
     public AbstractPolicy(Domain domain, String name) {
         super();
         this.setDomain(domain);
         this.setName(name);
-        this.setPartyId(new PartyId("Opponent_" + name));
+        this.setPartyId(new PartyId("Simulated_" + name));
+        this.setBidspace(new AllBidsList(this.getDomain()));
+        this.setRandom(new Random());
         Entry<HashMap<String, ValueSetUtilities>, Map<String, BigDecimal>> preferencePairs = this
                 .initRandomUtilityProfile(domain, name);
-        this.utilitySpace = new LinearAdditiveUtilitySpace(domain, name, preferencePairs.getKey(),
-                preferencePairs.getValue(), null);
-        this.setBidspace(new AllBidsList(this.getDomain()));
+        this.setUtilitySpace(new LinearAdditiveUtilitySpace(domain, name, preferencePairs.getKey(),
+                preferencePairs.getValue(), null));
+
     }
 
     public AbstractPolicy(UtilitySpace uSpace, String name) {
@@ -75,8 +77,9 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
         this.setDomain(uSpace.getDomain());
         this.setName(name);
         this.setPartyId(new PartyId("Opponent_" + name));
-        this.utilitySpace = uSpace;
-        // this;
+        this.setUtilitySpace(uSpace);
+        this.setBidspace(new AllBidsList(this.getDomain()));
+        this.setRandom(new Random());
     }
 
     public String getId() {
@@ -90,8 +93,8 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
     private Entry<HashMap<String, ValueSetUtilities>, Map<String, BigDecimal>> initRandomUtilityProfile(Domain domain,
             String name) {
         List<String> issues = new ArrayList<String>(domain.getIssues());
-        List<BigDecimal> allInts = random.ints(issues.size(), 0, 100).boxed().map(String::valueOf).map(BigDecimal::new)
-                .collect(Collectors.toList());
+        List<BigDecimal> allInts = this.getRandom().ints(issues.size(), 0, 100).boxed().map(String::valueOf)
+                .map(BigDecimal::new).collect(Collectors.toList());
         // MathContext mc = new MathContext(5);
         BigDecimal sumOfInts = allInts.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
         Map<String, BigDecimal> issueWeights = IntStream.range(0, issues.size()).boxed().collect(
@@ -175,7 +178,7 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
     }
 
     public Random getRandom() {
-        return random;
+        return this.random;
     }
 
     public PartyId getPartyId() {
@@ -206,6 +209,10 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
     @Override
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
         return this.chooseAction(lastReceivedBid, state);
+    }
+
+    public void setRandom(Random random) {
+        this.random = random;
     }
 
 }
