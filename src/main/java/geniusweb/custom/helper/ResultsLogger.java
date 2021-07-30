@@ -149,9 +149,10 @@ public class ResultsLogger {
                 this.utility = this.getAggreeBid() != null ? utilitySpace.getUtility(this.getAggreeBid()).doubleValue()
                         : 0.0;
             } catch (IOException e) {
+                // TODO: Better error handling -- consistent return of error utility.
+                this.utility = -1.0;
                 throw new IllegalStateException(e);
             } catch (DeploymentException e) {
-                this.utility = -1.0;
                 e.printStackTrace();
                 return null;
             } catch (IllegalArgumentException e) {

@@ -88,7 +88,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private Long simulationTime = 500l; // TODO: BUG if increased
     private static final boolean DEBUG_LEARN = true;
     private static boolean DEBUG_OFFER = false;
-    private static boolean DEBUG_SAVE_TREE = true;
+    private static boolean DEBUG_SAVE_TREE = false;
     private static boolean DEBUG_IN_TOURNAMENT = true;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -154,7 +154,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         // Write the negotiation data that we collected to the path provided.
         if (this.dataPaths != null && this.negotiationData != null) {
             File sessionFile = this.dataPaths.get(0);
-            if (DEBUG_SAVE_TREE && !this.isLearn) {
+            if (DEBUG_SAVE_TREE) {
                 String sessionName = sessionFile.getName();
                 saveTreeToLogs("full_".concat(sessionName), this.MCTS.toStringOriginal());
                 saveTreeToLogs("curr_".concat(sessionName), this.MCTS.toString());
@@ -225,7 +225,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         if (this.isLearn) {
             // We are in the learning step: We execute the learning and notify when we are
             // done. REMEMBER that there is a deadline of 60 seconds for this step.
-            this.runLearnPhase();
+            this.runLearnPhase(info);
         } else {
             this.initializeTree(settings);
         }
@@ -300,7 +300,14 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         if (this.parameters.containsKey("numOpponentCopies")) {
             this.numOpponentCopies = ((Number) this.parameters.get("numOpponentCopies")).longValue();
         }
-        this.config = (HashMap<String, Object>) this.parameters.get("config");
+
+        if (this.parameters.containsKey("config")) {
+            this.config = (HashMap<String, Object>) this.parameters.get("config");
+        } else {
+            this.config = new HashMap<String, Object>();
+            // TODO: Default parameters
+            this.config.put("confBidDistance", "UtilityBidDistance");
+        }
 
         // The PersistentState is loaded here (see 'PersistenData,java')
         if (this.parameters.containsKey("persistentstate")) {
@@ -318,9 +325,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         // for improved usage. For safety reasons, this is more comprehensive than
         // normally.
         if (DEBUG_LEARN) {
-            System.out.println("WTF " + protocol);
-            System.out.println("WTF " + this.parameters.get("negotiationdata").toString());
-            System.out.println("WTF " + this.parameters.get("persistentstate").toString());
+            System.out.println("DEBUG_LEARN: Protocol " + protocol);
+            System.out.println("DEBUG_LEARN: Persistent-Data:  " + this.parameters.get("persistentstate").toString());
+            System.out.println("DEBUG_LEARN: Negotiation-Data: " + this.parameters.get("negotiationdata").toString());
         }
 
         if (this.parameters.containsKey("negotiationdata")) {
@@ -491,8 +498,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      * process previously stored data and use it to update our persistent state.
      * This persistent state is passed to the agent again in future negotiation
      * session. REMEMBER that there is a deadline of 60 seconds for this step.
+     * @param info
      */
-    protected void runLearnPhase() {
+    protected void runLearnPhase(Inform info) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // Iterate through the negotiation data file paths
@@ -508,11 +516,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         }
 
         // Write the persistent state object to file
-        try {
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.persistentPath, this.persistentState);
-            this.getConnection().send(new LearningDone(me));
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to write persistent state to disk", e);
+        if (this.dataPaths.size() >= 0) {
+            try {
+                objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.persistentPath, this.persistentState);
+                this.getConnection().send(new LearningDone(me));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to write persistent state to disk", e);
+            }
         }
     }
 }
