@@ -121,8 +121,8 @@ public class PersistentState {
   public Tree reconstructTree(PartyId me, UtilitySpace utilitySpace, Progress progress) {
     AbstractBelief belief = this.getCurrentBelief();
     AbstractState<?> startState = this.getRootNode().getState();
-    Configurator configurator = this.mapper.convertValue(this.getConfiguration(), Configurator.class)
-        .setUtilitySpace(utilitySpace).setListOfOpponents(belief.getOpponents()).setMe(me).build();
+    Configurator configurator = this.getConfiguration() != null ? this.mapper.convertValue(this.getConfiguration(), Configurator.class) : new Configurator();
+    configurator =  configurator.setUtilitySpace(utilitySpace).setListOfOpponents(belief.getOpponents()).setMe(me).build();
     AbstractWidener widener = configurator.getWidener();
     Tree mcts = new Tree(utilitySpace, belief, startState, widener, progress);
     return mcts;

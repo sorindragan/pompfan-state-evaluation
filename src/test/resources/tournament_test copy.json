@@ -11,10 +11,10 @@
 							// 	"e74c1346-1022-438e-887f-26e0ab6b398d"
 							// ],
 							"isLearn": true,
-							"numOpponentCopies": 100,
+							"numParticles": 100,
 							"simulationTime": 250,
 							"config": {
-								"confBidDistance": "UtilityBidDistance",
+								"confComparer": "UtilityBidDistance",
 								"confBelief": "ParticleFilterBelief",
 								"confEvaluator": "Last2BidsProductUtilityEvaluator",
 								"confState": "HistoryState",
@@ -89,10 +89,10 @@
 											// 	"e74c1346-1022-438e-887f-26e0ab6b398d"
 											// ],
 											"isLearn": true,
-											"numOpponentCopies": 100,
+											"numParticles": 100,
 											"simulationTime": 250,
 											"config": {
-												"confBidDistance": "UtilityBidDistance",
+												"confComparer": "UtilityBidDistance",
 												"confBelief": "ParticleFilterBelief",
 												"confEvaluator": "Last2BidsProductUtilityEvaluator",
 												"confState": "HistoryState",

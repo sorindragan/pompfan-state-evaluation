@@ -8,10 +8,10 @@
 						"parameters": {
 							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 							"isLearn": true,
-							"numOpponentCopies": 100,
+							"numParticlesPerOpponent": 100,
 							"simulationTime": 100,
 							"config": {
-								"confBidDistance": "UtilityBidDistance",
+								"confComparer": "UtilityBidDistance",
 								"confBelief": "ParticleFilterBelief",
 								"confEvaluator": "Last2BidsProductUtilityEvaluator",
 								"confState": "HistoryState",
@@ -84,10 +84,10 @@
 											"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 											"negotiationdata": [],
 											"isLearn": true,
-											"numOpponentCopies": 100,
+											"numParticlesPerOpponent": 100,
 											"simulationTime": 250,
 											"config": {
-												"confBidDistance": "UtilityBidDistance",
+												"confComparer": "UtilityBidDistance",
 												"confBelief": "ParticleFilterBelief",
 												"confEvaluator": "Last2BidsProductUtilityEvaluator",
 												"confState": "HistoryState",

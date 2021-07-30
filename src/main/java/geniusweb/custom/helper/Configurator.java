@@ -33,12 +33,22 @@ import geniusweb.custom.wideners.ProgressiveWideningStrategy;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class Configurator {
-    private String confBidDistance = "UtilityBidDistance";
-    private String confBelief = "ParticleFilterWithAcceptBelief";
-    private String confEvaluator = "Last2BidsProductUtilityEvaluator";
-    private String confInitState = "HistoryState";
-    private String confExplorer = "RandomOwnExplorerPolicy";
-    private String confWidener = "ProgressiveWideningStrategy";
+
+    /**
+     *
+     */
+    public static final String DEFAULT_COMPARER = "UtilityBidDistance";
+    public static final String DEFAULT_BELIEF = "ParticleFilterWithAcceptBelief";
+    public static final String DEFAULT_EVALUATOR = "Last2BidsProductUtilityEvaluator";
+    public static final String DEFAULT_STATE = "HistoryState";
+    public static final String DEFAULT_EXPLORER_POLICY = "RandomOwnExplorerPolicy";
+    public static final String DEFAULT_WIDENING_STRATEGY = "ProgressiveWideningStrategy";
+    private String confComparer = DEFAULT_COMPARER;
+    private String confBelief = DEFAULT_BELIEF;
+    private String confEvaluator = DEFAULT_EVALUATOR;
+    private String confInitState = DEFAULT_STATE;
+    private String confExplorer = DEFAULT_EXPLORER_POLICY;
+    private String confWidener = DEFAULT_WIDENING_STRATEGY;
     private HashMap<String, HashMap<String, Object>> confExtra = new HashMap<String, HashMap<String, Object>>();
 
     private UtilitySpace uSpace = null;
@@ -51,6 +61,13 @@ public class Configurator {
     private AbstractState<?> State = null;
     private AbstractOwnExplorationPolicy Explorer = null;
     private AbstractWidener Widener = null;
+
+    public Configurator() {
+        this.confExtra.put("widener", new HashMap<String, Object>());
+        this.confExtra.put("comparer", new HashMap<String, Object>());
+        this.confExtra.put("explorer", new HashMap<String, Object>());
+        this.confExtra.put("widener", new HashMap<String, Object>());
+    }
 
     public HashMap<String, HashMap<String, Object>> getConfExtra() {
         return confExtra;
@@ -95,12 +112,12 @@ public class Configurator {
         return this;
     }
 
-    public String getConfBidDistance() {
-        return confBidDistance;
+    public String getConfComparer() {
+        return confComparer;
     }
 
-    public void setConfBidDistance(String confBidDistance) {
-        this.confBidDistance = confBidDistance;
+    public void setConfComparer(String confBidDistance) {
+        this.confComparer = confBidDistance;
     }
 
     public String getConfBelief() {
@@ -145,7 +162,7 @@ public class Configurator {
 
     public Configurator build() {
         // this.BidDistance = ;
-        return buildBidDistance(this.confBidDistance, this.uSpace)
+        return buildBidDistance(this.confComparer, this.uSpace)
                 .buildBelief(this.confBelief, this.listOfOpponents, this.getBidDistance())
                 .buildInitState(this.confEvaluator, this.confInitState, this.uSpace)
                 .buildExplorer(this.confExplorer, this.me, this.uSpace)
@@ -153,8 +170,8 @@ public class Configurator {
     }
 
     private Configurator buildBidDistance(String confBidDistance, UtilitySpace uSpace) {
-        switch (this.confBidDistance) {
-        case "UtilityBidDistance":
+        switch (this.confComparer) {
+        case DEFAULT_COMPARER:
             this.setBidDistance(new UtilityBidDistance(uSpace));
             break;
 
@@ -171,7 +188,7 @@ public class Configurator {
         case "ParticleFilterBelief":
             this.setBelief(new ParticleFilterBelief(listOfOpponents, distance));
             break;
-        case "ParticleFilterWithAcceptBelief":
+        case DEFAULT_BELIEF:
             this.setBelief(new ParticleFilterWithAcceptBelief(listOfOpponents, distance));
             break;
         default:
@@ -184,8 +201,8 @@ public class Configurator {
     @SuppressWarnings("unchecked")
     private Configurator buildInitState(String confEvalutator, String confState, UtilitySpace uSpace) {
         switch (confState) {
-        case "HistoryState":
-            if (confEvalutator.equals("Last2BidsProductUtilityEvaluator")) {
+        case DEFAULT_STATE:
+            if (confEvalutator.equals(DEFAULT_EVALUATOR)) {
                 this.setEvaluator(new Last2BidsProductUtilityEvaluator(uSpace));
             } else if (confEvalutator.equals("Last2BidsMeanUtilityEvaluator")) {
                 this.setEvaluator(new Last2BidsMeanUtilityEvaluator(uSpace));
@@ -234,7 +251,7 @@ public class Configurator {
 
     private Configurator buildWidener(String confWidener, HashMap<String, Object> params) {
         switch (confWidener) {
-        case "ProgressiveWideningStrategy":
+        case DEFAULT_WIDENING_STRATEGY:
             this.setWidener(new ProgressiveWideningStrategy(this.getExplorer(), params));
             break;
         case "MaxWidthWideningStrategy":
@@ -299,6 +316,17 @@ public class Configurator {
 
     public void setWidener(AbstractWidener widener) {
         Widener = widener;
+    }
+
+    public static HashMap<String, Object> generateDefaultConfig() {
+        HashMap<String, Object> tmp = new HashMap<String, Object>();
+        tmp.put("confComparer", DEFAULT_COMPARER);
+        tmp.put("confBelief", DEFAULT_BELIEF);
+        tmp.put("confEvaluator", DEFAULT_EVALUATOR);
+        tmp.put("confState", DEFAULT_STATE);
+        tmp.put("confExplorer", DEFAULT_EXPLORER_POLICY);
+        tmp.put("confWidener", DEFAULT_WIDENING_STRATEGY);
+        return tmp;
     }
 
 }

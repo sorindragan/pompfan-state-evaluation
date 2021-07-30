@@ -7,7 +7,7 @@
 						"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
 						"parameters": {
 							"config": {
-								"confBidDistance": "UtilityBidDistance",
+								"confComparer": "UtilityBidDistance",
 								"confBelief": "ParticleFilterBelief",
 								"confEvaluator": "Last2BidsProductUtilityEvaluator",
 								"confState": "HistoryState",

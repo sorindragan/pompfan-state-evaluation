@@ -25,10 +25,10 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
 
     public ProgressiveWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy, HashMap<String, Object> params) {
         super(ownExplorationStrategy);
-        this.k_a = (Double) params.get("k_a");
-        this.a_a = (Double) params.get("a_a");
-        this.k_b = (Double) params.get("k_b");
-        this.a_b = (Double) params.get("a_b");
+        this.k_a = (Double) params.getOrDefault("k_a", 42.0);
+        this.a_a = (Double) params.getOrDefault("a_a", 0.42);
+        this.k_b = (Double) params.getOrDefault("k_b", 42.0);
+        this.a_b = (Double) params.getOrDefault("a_b", 0.42);
     }
 
     @Override

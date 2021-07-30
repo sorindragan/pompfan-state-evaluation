@@ -12,7 +12,7 @@
 									"negotiationdata": [
 										"e74c1346-1022-438e-887f-26e0ab6b398d"
 									],
-									"confBidDistance": "UtilityBidDistance",
+									"confComparer": "UtilityBidDistance",
 									"confBelief": "UniformBelief",
 									"confEvaluator": "Last2BidsProductUtilityEvaluator",
 									"confState": "HistoryState",

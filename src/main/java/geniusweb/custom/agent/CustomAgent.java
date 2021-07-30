@@ -84,8 +84,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     private static final int NUM_SIMULATIONS = 100;
     private static final int MAX_WIDTH = 10;
-    private Long SIMULATION_TIME = 250l; // TODO: BUG if increased
-    private Long simulationTime = 500l; // TODO: BUG if increased
+    private Long simulationTime = 500l; // Done: BUG if increased
     private static final boolean DEBUG_LEARN = true;
     private static boolean DEBUG_OFFER = false;
     private static boolean DEBUG_SAVE_TREE = false;
@@ -236,7 +235,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
 
         // Create a new NegotiationData object to store information on this negotiation.
         // See 'NegotiationData.java'.
-        this.negotiationData = new NegotiationData().setConfiguration(config);
+        this.negotiationData = new NegotiationData().setConfiguration(this.config);
         // Obtain our utility space, i.e. the problem we are negotiating and our
         // preferences over it.
         try {
@@ -264,8 +263,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             listOfOpponents = listOfOpponents.stream().map(opponent -> opponent.setBidspace(bidspace))
                     .collect(Collectors.toList());
 
-            Configurator configurator = this.mapper.convertValue(config, Configurator.class)
-                    .setUtilitySpace(this.uSpace).setListOfOpponents(listOfOpponents).setMe(this.me).build();
+            Configurator configurator = this.config != null ? this.mapper.convertValue(config, Configurator.class)
+                    : new Configurator();
+            configurator = configurator.setUtilitySpace(this.uSpace).setListOfOpponents(listOfOpponents).setMe(this.me)
+                    .build();
 
             this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
                     configurator.getWidener(), this.progress);
@@ -297,16 +298,14 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         if (this.parameters.containsKey("simulationTime")) {
             this.simulationTime = ((Number) this.parameters.get("simulationTime")).longValue();
         }
-        if (this.parameters.containsKey("numOpponentCopies")) {
-            this.numOpponentCopies = ((Number) this.parameters.get("numOpponentCopies")).longValue();
+        if (this.parameters.containsKey("numParticlesPerOpponent")) {
+            this.numOpponentCopies = ((Number) this.parameters.get("numParticlesPerOpponent")).longValue();
         }
 
         if (this.parameters.containsKey("config")) {
             this.config = (HashMap<String, Object>) this.parameters.get("config");
         } else {
-            this.config = new HashMap<String, Object>();
-            // TODO: Default parameters
-            this.config.put("confBidDistance", "UtilityBidDistance");
+            this.config = Configurator.generateDefaultConfig();
         }
 
         // The PersistentState is loaded here (see 'PersistenData,java')
@@ -498,6 +497,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      * process previously stored data and use it to update our persistent state.
      * This persistent state is passed to the agent again in future negotiation
      * session. REMEMBER that there is a deadline of 60 seconds for this step.
+     * 
      * @param info
      */
     protected void runLearnPhase(Inform info) {

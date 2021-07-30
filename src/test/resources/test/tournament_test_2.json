@@ -6,10 +6,10 @@
 					{
 						"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
 						"parameters": {
-							"numOpponentCopies": 100,
+							"numParticles": 100,
 							"simulationTime": 500,
 							"config": {
-								"confBidDistance": "UtilityBidDistance",
+								"confComparer": "UtilityBidDistance",
 								"confBelief": "ParticleFilterBelief",
 								"confEvaluator": "Last2BidsProductUtilityEvaluator",
 								"confState": "HistoryState",

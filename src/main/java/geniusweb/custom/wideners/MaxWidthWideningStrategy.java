@@ -15,7 +15,7 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
 
     public MaxWidthWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy, HashMap<String, Object> params) {
         super(ownExplorationStrategy);
-        this.maxWidth = (Integer) params.get("maxWidth");
+        this.maxWidth = (Integer) params.getOrDefault("maxWidth", 42);
     }
 
     public Integer getMaxWidth() {
