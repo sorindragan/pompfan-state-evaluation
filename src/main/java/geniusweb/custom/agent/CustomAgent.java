@@ -1,26 +1,11 @@
 package geniusweb.custom.agent; // TODO: change name
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-
-import javax.websocket.DeploymentException;
-
-import geniusweb.actions.FileLocation;
-
-import java.util.UUID;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
+import geniusweb.actions.FileLocation;
 import geniusweb.actions.LearningDone;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
@@ -75,11 +60,22 @@ import geniusweb.profileconnection.ProfileInterface;
 import geniusweb.progress.Progress;
 import geniusweb.progress.ProgressRounds;
 import geniusweb.references.Parameters;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import javax.websocket.DeploymentException;
 import tudelft.utilities.logging.Reporter;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CustomAgent extends DefaultParty { // TODO: change name
 
@@ -113,8 +109,8 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private Boolean isLearn = false;
     private HashMap<String, Object> config;
 
-    public CustomAgent() { // TODO: change name
-    }
+    public CustomAgent() {
+    } // TODO: change name
 
     public CustomAgent(Reporter reporter) { // TODO: change name
         super(reporter); // for debugging
@@ -126,7 +122,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      * further below and in the other java files in this directory. It does,
      * however, not hurt to read through this code to have a better understanding of
      * what is going on.
-     * 
+     *
      * @param info information object for agent
      */
     @Override
@@ -167,7 +163,6 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot());
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.writerWithDefaultPrettyPrinter().writeValue(sessionFile, this.negotiationData);
-
             } catch (IOException e) {
                 throw new RuntimeException("Failed to write negotiation data to disk", e);
             }
@@ -194,7 +189,6 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             YourTurn myTurnInfo = (YourTurn) info;
             myTurn(myTurnInfo);
         }
-
     }
 
     private void runOpponentPhase(Inform info) {
@@ -275,7 +269,6 @@ public class CustomAgent extends DefaultParty { // TODO: change name
 
             this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
                     configurator.getWidener(), this.progress);
-
         } else {
             this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress);
         }
@@ -356,7 +349,6 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             this.profileint = null;
         }
         this.MCTS = null;
-
     }
 
     /*
@@ -373,7 +365,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
 
     /**
      * Processes an Action performed by the opponent.
-     * 
+     *
      * @param action
      */
     protected void processAction(Action action) {
@@ -389,7 +381,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     /**
      * This method is called when the negotiation has finished. It can process the
      * final agreement.
-     * 
+     *
      * @param agreements
      */
     protected void processAgreements(Agreements agreements) {
@@ -406,9 +398,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
 
     /**
      * send our next offer
-     * 
+     *
      * @param myTurnInfo
-     * 
+     *
      * @throws StateRepresentationException
      */
     protected void myTurn(YourTurn myTurnInfo) throws IOException, StateRepresentationException {
@@ -469,7 +461,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
 
     /**
      * The method checks if a bid is good.
-     * 
+     *
      * @param bid the bid to check
      * @return true iff bid is good for us.
      */
