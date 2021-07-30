@@ -44,9 +44,9 @@
 			{
 				"Team": [
 					{
-						"partyref": "classpath:geniusweb.exampleparties.boulware.Boulware",
+						"partyref": "classpath:geniusweb.exampleparties.conceder.Conceder",
 						"parameters": {
-							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9ab112"
+							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9ab111"
 						}
 					}
 				]
@@ -55,10 +55,10 @@
 		"reuseTeams": false,
 		"profileslists": [
 			{
-				"ProfileList": ["file:src/test/resources/flightbooking1.json"]
+				"ProfileList": ["file:src/test/resources/party1.json"]
 			},
 			{
-				"ProfileList": ["file:src/test/resources/flightbooking2.json"]
+				"ProfileList": ["file:src/test/resources/party2.json"]
 			}
 		],
 		"teamsPerSession": 2,
@@ -66,11 +66,11 @@
 			"SAOPSettings": {
 				"participants": [],
 				"deadline": {
-					"deadlinetime": { "durationms": 5000 }
+					"deadlinetime": { "durationms": 25000 }
 				}
 			}
 		},
-		"numberTournaments": 1,
+		"numberTournaments": 2,
 		"learnSettings": {
 			"LearnSettings": {
 				"participants": [
@@ -112,7 +112,7 @@
 					}
 				],
 				"deadline": {
-					"deadlinerounds": { "rounds": 100, "durationms": 5000 }
+					"deadlinetime": {"durationms": 5000 }
 				}
 			}
 		}

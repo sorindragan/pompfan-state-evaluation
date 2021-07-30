@@ -184,13 +184,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 // }
                 this.getReporter().log(Level.INFO, protocol);
                 ;
-                if ("Learn".equals(protocol)) {
+                if (this.isLearn) {
                     // We are in the learning step: We execute the learning and notify when we are
                     // done. REMEMBER that there is a deadline of 60 seconds for this step.
                     System.out.println("WTF " + protocol);
                     System.out.println("WTF " + this.parameters.get("negotiationdata").toString());
                     System.out.println("WTF " + this.parameters.get("persistentstate").toString());
-                    if (this.parameters.containsKey("negotiationdata") && this.isLearn) {
+                    if (this.parameters.containsKey("negotiationdata")) {
                         this.dataPaths = new ArrayList<>();
                         List<?> dataPaths_raw = (List<?>) this.parameters.get("negotiationdata");
                         for (String path : (List<String>) dataPaths_raw) {
@@ -206,7 +206,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                     System.out.println("WTF " + protocol);
                     System.out.println("WTF " + this.parameters.get("negotiationdata").toString());
                     System.out.println("WTF " + this.parameters.get("persistentstate").toString());
-                    if (this.parameters.containsKey("negotiationdata") && this.isLearn) {
+                    if (this.parameters.containsKey("negotiationdata")) {
                         this.dataPaths = new ArrayList<>();
                         List<?> dataPaths_raw = (List<?>) this.parameters.get("negotiationdata");
                         for (FileLocation path : (List<FileLocation>) dataPaths_raw) {
