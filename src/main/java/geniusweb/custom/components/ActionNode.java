@@ -33,7 +33,9 @@ public class ActionNode extends Node {
             // further exploration after an accept.
             
             Accept ourAcceptanceAction = (Accept) lastAgentAction;
+
             AbstractState<?> newState = state.updateState(ourAcceptanceAction, time);
+
             child = (BeliefNode) this.getChildren().stream().filter(childNode -> childNode.getState().equals(newState))
                     .findFirst().orElse(null);
 
@@ -65,7 +67,8 @@ public class ActionNode extends Node {
             this.addChild(child);
             return child;
         }
-        return null;
+        // !! be careful here
+        return child;
     }
 
     @JsonIgnore

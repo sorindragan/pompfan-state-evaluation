@@ -48,6 +48,8 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
                         .receiveObservation(simulatedTimeOfObsReceival);
 
                 currRoot = receivedObservationNode;
+                
+
                 if (currRoot == null) {
                     return;
                 }
@@ -56,8 +58,20 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
                 Tree.backpropagate(currRoot, value);
                 return;
             } else {
+                ActionNode oldRoot = (ActionNode) currRoot;
                 // Going down the tree - Belief Node Level
                 currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
+                // Safenet in case of terminal children only
+                // Add a new action node
+                if (currRoot == null) {
+                    Double simulatedTimeOfNewNode = simulatedProgress.get(System.currentTimeMillis());
+                    BeliefNode newChild = (BeliefNode) oldRoot
+                            .receiveObservation(simulatedTimeOfNewNode);
+                    currRoot = newChild;
+                    Double value = currRoot.getState().evaluate();
+                    Tree.backpropagate(currRoot, value);
+                    return;
+                }
             }
         }
         if (currRoot.getChildren().size() < this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {
@@ -82,7 +96,7 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
     }
 
     private int calcProgressiveMaxWidth(Node currRoot, Double k, Double a) {
-        return Double.valueOf(k * Math.pow(currRoot.getVisits(), a)).intValue() + 1;
+        return Math.max(Double.valueOf(k * Math.pow(currRoot.getVisits(), a)).intValue(), 1);
     }
 
 }

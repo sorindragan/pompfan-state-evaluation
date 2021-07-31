@@ -54,7 +54,7 @@ public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
             for (IVPair issueValuePair : bidIssueValues) {
                 representation.computeIfPresent(issueValuePair, (key, val) -> val + 1);
             }
-            return new FrequencyState(this.getUtilitySpace(), this.getOpponent()).init(representation).setRound(time);
+            return new FrequencyState(this.getUtilitySpace(), this.getOpponent()).init(representation).setTime(time);
         }
         throw new StateRepresentationException();
     }

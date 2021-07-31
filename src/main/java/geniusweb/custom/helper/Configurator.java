@@ -212,6 +212,7 @@ public class Configurator {
             }
             IEvalFunction<HistoryState> evaluator1 = (IEvalFunction<HistoryState>) this.getEvaluator();
             this.setState(new HistoryState(this.uSpace, null, evaluator1));
+            this.getInitState().setTime(0.0);
             break;
         case "UtilityState":
             this.setEvaluator(new RandomEvaluator());

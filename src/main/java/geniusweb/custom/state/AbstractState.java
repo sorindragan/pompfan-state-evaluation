@@ -24,7 +24,7 @@ public abstract class AbstractState<T>
     private UtilitySpace utilitySpace;
     private AbstractPolicy opponent;
     private T representation;
-    private Double round;
+    private Double negotiationMoment;
     public Class<T> containerClass;
 
     public AbstractState() {
@@ -37,12 +37,12 @@ public abstract class AbstractState<T>
         this.opponent = opponent;
     }
 
-    public Double getRound() {
-        return round;
+    public Double getTime() {
+        return negotiationMoment;
     }
 
-    public AbstractState<T> setRound(Double currentTime) {
-        this.round = currentTime;
+    public AbstractState<T> setTime(Double currentTime) {
+        this.negotiationMoment = currentTime;
         return this;
     }
 

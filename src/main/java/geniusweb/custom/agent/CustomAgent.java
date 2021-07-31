@@ -1,8 +1,25 @@
 package geniusweb.custom.agent; // TODO: change name
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+
+import javax.websocket.DeploymentException;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.FileLocation;
@@ -10,40 +27,16 @@ import geniusweb.actions.LearningDone;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
 import geniusweb.bidspace.AllBidsList;
-import geniusweb.custom.beliefs.AbstractBelief;
-import geniusweb.custom.beliefs.ParticleFilterBelief;
-import geniusweb.custom.beliefs.ParticleFilterWithAcceptBelief;
-import geniusweb.custom.beliefs.UniformBelief;
 import geniusweb.custom.components.Tree;
-import geniusweb.custom.distances.AbstractBidDistance;
-import geniusweb.custom.distances.UtilityBidDistance;
-import geniusweb.custom.evaluators.IEvalFunction;
-import geniusweb.custom.evaluators.Last2BidsMeanUtilityEvaluator;
-import geniusweb.custom.evaluators.Last2BidsProductUtilityEvaluator;
-import geniusweb.custom.evaluators.RandomEvaluator;
-import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
-import geniusweb.custom.explorers.HighSelfEsteemOwnExplorationPolicy;
-import geniusweb.custom.explorers.RandomNeverAcceptOwnExplorationPolicy;
-import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
-import geniusweb.custom.explorers.SelfishNeverAcceptOwnExplorerPolicy;
 import geniusweb.custom.helper.Configurator;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.opponents.AntagonisticOpponentPolicy;
 import geniusweb.custom.opponents.BoulwareOpponentPolicy;
 import geniusweb.custom.opponents.ConcederOpponentPolicy;
 import geniusweb.custom.opponents.HardLinerOpponentPolicy;
-import geniusweb.custom.opponents.RandomOpponentPolicy;
 import geniusweb.custom.opponents.SelfishOpponentPolicy;
 import geniusweb.custom.opponents.TimeDependentOpponentPolicy;
-import geniusweb.custom.state.AbstractState;
-import geniusweb.custom.state.HistoryState;
 import geniusweb.custom.state.StateRepresentationException;
-import geniusweb.custom.wideners.AbstractWidener;
-import geniusweb.custom.wideners.MaxWidthWideningStrategy;
-import geniusweb.custom.wideners.ProgressiveWideningStrategy;
-import geniusweb.exampleparties.boulware.Boulware;
-import geniusweb.exampleparties.linear.Linear;
-import geniusweb.exampleparties.timedependentparty.TimeDependentParty;
 import geniusweb.inform.ActionDone;
 import geniusweb.inform.Agreements;
 import geniusweb.inform.Finished;
@@ -61,21 +54,6 @@ import geniusweb.profileconnection.ProfileInterface;
 import geniusweb.progress.Progress;
 import geniusweb.progress.ProgressRounds;
 import geniusweb.references.Parameters;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-import javax.websocket.DeploymentException;
 import tudelft.utilities.logging.Reporter;
 
 public class CustomAgent extends DefaultParty { // TODO: change name
@@ -83,8 +61,8 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     /**
      *
      */
-    private static final int NUM_SIMULATIONS = 100;
-    private static final int MAX_WIDTH = 10;
+    // private static final int NUM_SIMULATIONS = 100;
+    // private static final int MAX_WIDTH = 10;
     private Long simulationTime = 500l; // TODO: BUG if increased
     private static final boolean DEBUG_LEARN = true;
     private static boolean DEBUG_OFFER = true;
@@ -92,7 +70,6 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private static boolean DEBUG_IN_TOURNAMENT = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
-    private final Random random = new Random();
     protected ProfileInterface profileint = null;
     private Progress progress;
     private String protocol;
@@ -424,80 +401,53 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             }
         }
         Action action;
+        
+        // STEP: Generate offer!
+        long negotiationEnd = this.progress.getTerminationTime().getTime();
+        long remainingTime = negotiationEnd - System.currentTimeMillis();
 
-        if (isGood(this.lastReceivedBid)) {
-            // If the last received bid is good: create Accept action
-            action = new Accept(me, this.lastReceivedBid);
+        long simTime = this.simulationTime;
+        // System.out.println(simTime <= remainingTime);
+        if (simTime <= remainingTime) {
+            this.MCTS.construct(simTime);
+            // System.out.println(this.MCTS.toString());
+            // DONE: Number of nodes do increase at each tree construction
+            // System.out.println("Nodes Number: ".concat(String.valueOf(this.MCTS.howManyNodes())));
+        }
+        // TODO: consuming the whole tree will result in an error
+        action = this.MCTS.chooseBestAction();
+        
+        if (action == null) {
+            // if action==null we failed to suggest next action.
+            System.err.println("WARNING! Could not produce action!!!");
+            action = new Accept(this.me, lastReceivedBid);
+        }
+        
+        if (action instanceof Offer) {
+            Bid myBid = ((Offer) action).getBid();
+            if (DEBUG_IN_TOURNAMENT == false) {
+                System.out.println("Agent:    Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- "
+                        + myBid.toString());
+            }
+        } else if (action instanceof Accept) {
+            Bid acceptedBid = ((Accept) action).getBid();
+            System.out.println("We ACCEPT: Util=" + String.valueOf(this.uSpace.getUtility(acceptedBid)) + " -- "
+                    + acceptedBid.toString());
+            // if(this.lastReceivedBid.equals(acceptedBid) == false){
+            // System.out.println("BUT needs to be placed as Offer!");
+            // action = new Offer(this.me, acceptedBid);
+            // }
         } else {
-            // STEP: Generate offer!
-            long negotiationEnd = this.progress.getTerminationTime().getTime();
-            long remainingTime = negotiationEnd - System.currentTimeMillis();
-            // long simTime = Math.min(this.simulationTime, );
-            long simTime = this.simulationTime;
-            System.out.println(simTime <= remainingTime);
-            if (simTime <= remainingTime) {
-                this.MCTS.construct(simTime);
-            }
-            action = this.MCTS.chooseBestAction();
-            if (action == null) {
-                // if action==null we failed to suggest next action.
-                System.err.println("WARNING! Could not produce action!!!");
-                action = new Accept(this.me, lastReceivedBid);
-            }
-            if (action instanceof Offer) {
-                Bid myBid = ((Offer) action).getBid();
-                if (DEBUG_IN_TOURNAMENT == false) {
-                    System.out.println("Agent:    Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- "
-                            + myBid.toString());
-                }
-            } else if (action instanceof Accept) {
-                Bid acceptedBid = ((Accept) action).getBid();
-                System.out.println("We ACCEPT: Util=" + String.valueOf(this.uSpace.getUtility(acceptedBid)) + " -- "
-                        + acceptedBid.toString());
-                // if(this.lastReceivedBid.equals(acceptedBid) == false){
-                // System.out.println("BUT needs to be placed as Offer!");
-                // action = new Offer(this.me, acceptedBid);
-                // }
-            } else {
-                System.out.println("Something HAPPENED! " + action.toString());
-            }
-            if (DEBUG_OFFER) {
-                // System.out.println(this.MCTS);
-                System.out.println(action);
-            }
+            System.out.println("Something HAPPENED! " + action.toString());
+        }
+        if (DEBUG_OFFER) {
+            // System.out.println(this.MCTS);
+            System.out.println(action);
         }
 
         // Send action
         getConnection().send(action);
     }
-
-    /**
-     * The method checks if a bid is good.
-     *
-     * @param bid the bid to check
-     * @return true iff bid is good for us.
-     */
-    protected boolean isGood(Bid bid) {
-        if (bid == null)
-            return false;
-
-        // Check if we already know the opponent
-        if (this.persistentState.knownOpponent(this.opponentName)) {
-            // Obtain the average of the max utility that the opponent has offered us in
-            // previous negotiations.
-            Double avgMaxUtility = this.persistentState.getAvgMaxUtility(this.opponentName);
-
-            // Request 5% more than the average max utility offered by the opponent.
-            return this.uSpace.getUtility(bid).doubleValue() > (avgMaxUtility * 1.05);
-        }
-
-        // Check a simple business rule
-        Boolean nearDeadline = progress.get(System.currentTimeMillis()) > 0.95;
-        Boolean acceptable = this.uSpace.getUtility(bid).doubleValue() > 0.7;
-        Boolean good = this.uSpace.getUtility(bid).doubleValue() > 0.9;
-        return (nearDeadline && acceptable) || good;
-    }
-
     /**
      * This method is invoked if the learning phase is started. There is now time to
      * process previously stored data and use it to update our persistent state.

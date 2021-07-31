@@ -52,6 +52,7 @@ public class BeliefNode extends Node {
             System.out.println("Choose...");
             System.out.println(agentAction);
         }
+
         AbstractState<?> newState = state.updateState(agentAction, time);
         
         ActionNode child = (ActionNode) this.getChildren().stream()
@@ -62,7 +63,6 @@ public class BeliefNode extends Node {
             child = (ActionNode) Node.buildNode(Node.NODE_TYPE.ACTION, this, newState, state.getOpponent(),
                     agentAction);
             this.addChild(child);
-            // return child;
         }
         return child;
     }

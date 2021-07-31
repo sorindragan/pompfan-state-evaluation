@@ -55,7 +55,7 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
     }
 
     private Action myTurn(Bid lastReceivedBid, AbstractState<?> state) {
-        Bid bid = makeBid(state.getRound());
+        Bid bid = makeBid(state.getTime());
 
         if (bid == null) {
             // if bid==null we failed to suggest next bid.
