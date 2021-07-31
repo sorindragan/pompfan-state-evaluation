@@ -35,17 +35,18 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
             ArrayList<Bid> bidHistory = new ArrayList<>(((HistoryState) state).getHistory().stream()
                     .map(this::extractBidFromAction).collect(Collectors.toList()));
             int historySize = bidHistory.size();
+            Bid lastOfferedBid = this.getBidsWithinUtil().getExtremeBid(true);
             if (historySize > 3) {
                 Bid lastLastOpponentBid = bidHistory.get(historySize - 3);
                 Bid justLastOpponentBid = bidHistory.get(historySize - 1);
                 difference = this.getUtilitySpace().getUtility(lastLastOpponentBid)
                         .subtract(this.getUtilitySpace().getUtility(justLastOpponentBid)).doubleValue();
                 isConcession = difference > utilGapForConcession ? true : false;
+                lastOfferedBid = bidHistory.get(historySize - 2);
             } else {
                 isConcession = true;
             }
 
-            Bid lastOfferedBid = bidHistory.get(historySize - 2);
             ImmutableList<Bid> options;
             long i;
             // also concede
@@ -54,11 +55,24 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
                 // I did a computationally-expensive ugly workaround
                 options = this.getBidsWithinUtil()
                     .getBids(new Interval(
-                            new BigDecimal(this.getUtilitySpace().getUtility(lastOfferedBid).doubleValue() - difference - utilGapForConcession).
+                            BigDecimal.valueOf(this.getUtilitySpace().getUtility(lastOfferedBid).doubleValue() - difference - utilGapForConcession).
                             min(new BigDecimal("0.0")), this.getUtilitySpace().getUtility(lastOfferedBid)
                         ));
-                // TODO: check if options is empty
-                // TODO: if everything brakes do minbid or max
+                
+                if (options.size().intValue() == 0) {
+                    options = this.getBidsWithinUtil()
+                    .getBids(new Interval(
+                            BigDecimal.valueOf(this.getUtilitySpace().getUtility(lastOfferedBid).doubleValue()
+                                    - 2 * (difference + utilGapForConcession)).min(new BigDecimal("0.0")),
+                            this.getUtilitySpace().getUtility(lastOfferedBid)));
+                }
+
+                // this should not be reached
+                if (options.size().intValue() == 0) {
+                    i = this.getRandom().nextInt(this.getBidspace().size().intValue()); 
+                    return new Offer(this.getPartyId(), this.getBidspace().get(i));
+                }
+
                 i = this.getRandom().nextInt(options.size().intValue());
                 
             }
@@ -66,18 +80,31 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
             else {
                 options = this.getBidsWithinUtil()
                     .getBids(new Interval(this.getUtilitySpace().getUtility(lastOfferedBid),
-                             new BigDecimal(this.getUtilitySpace().getUtility(lastOfferedBid).doubleValue() + difference + utilGapForConcession)
+                             BigDecimal.valueOf(this.getUtilitySpace().getUtility(lastOfferedBid).doubleValue() + difference + utilGapForConcession)
                                        .max(this.getUtilitySpace().getUtility(this.getBidsWithinUtil().getExtremeBid(true)))
                         ));
-                // TODO: check if options is empty
+                
+                if (options.size().intValue() == 0) {
+                    options = this.getBidsWithinUtil()
+                            .getBids(new Interval(this.getUtilitySpace().getUtility(lastOfferedBid),
+                                    this.getUtilitySpace().getUtility(lastOfferedBid)
+                                            .max(this.getUtilitySpace()
+                                                    .getUtility(this.getBidsWithinUtil().getExtremeBid(true)))));
+                }
+
+                // this should not be reached
+                if (options.size().intValue() == 0) {
+                    i = this.getRandom().nextInt(this.getBidspace().size().intValue());
+                    return new Offer(this.getPartyId(), this.getBidspace().get(i));
+                }
+
                 i = this.getRandom().nextInt(options.size().intValue());
                 
             }
             Bid newBid = options.get(i);
             return new Offer(this.getPartyId(), newBid);
         }
-        // TODO: see what other shit is needed
-
+        // ?? something else needed if the state is not a HistoryState
         return null;
     }
 
