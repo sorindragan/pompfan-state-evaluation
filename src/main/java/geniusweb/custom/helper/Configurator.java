@@ -23,6 +23,7 @@ import geniusweb.custom.explorers.RandomOwnExplorerPolicy;
 import geniusweb.custom.explorers.SelfishNeverAcceptOwnExplorerPolicy;
 import geniusweb.custom.explorers.SelfishOwnExplorerPolicy;
 import geniusweb.custom.explorers.SelfishReluctantOwnExplorerPolicy;
+import geniusweb.custom.explorers.TimeConcedingExplorationPolicy;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.HistoryState;
@@ -241,6 +242,9 @@ public class Configurator {
             break;
         case "SelfishReluctantOwnExplorerPolicy":
             this.setExplorer(new SelfishReluctantOwnExplorerPolicy(uSpace, me));
+            break;
+        case "TimeConcedingExplorationPolicy":
+            this.setExplorer(new TimeConcedingExplorationPolicy(uSpace, me));
             break;
         default:
             this.setExplorer(new RandomOwnExplorerPolicy(uSpace, me));

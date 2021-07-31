@@ -17,15 +17,15 @@
 										"confBelief": "ParticleFilterBelief",
 										"confEvaluator": "Last2BidsProductUtilityEvaluator",
 										"confState": "HistoryState",
-										"confExplorer": "RandomOwnExplorerPolicy",
+										"confExplorer": "HighSelfEsteemOwnExplorationPolicy",
 										"confWidener": "ProgressiveWideningStrategy",
 										"confExtra": {
 											"widener": {
 												"maxWidth": 10,
 												"k_a": 4.0,
-												"a_a": 0.2,
+												"a_a": 0.5,
 												"k_b": 4.0,
-												"a_b": 0.2
+												"a_b": 0.5
 											}
 										}
 									}

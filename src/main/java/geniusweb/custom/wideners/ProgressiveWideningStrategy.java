@@ -23,7 +23,8 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
     private Double k_b;
     private Double a_b;
 
-    public ProgressiveWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy, HashMap<String, Object> params) {
+    public ProgressiveWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy,
+            HashMap<String, Object> params) {
         super(ownExplorationStrategy);
         this.k_a = (Double) params.getOrDefault("k_a", 42.0);
         this.a_a = (Double) params.getOrDefault("a_a", 0.42);
@@ -37,11 +38,11 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
 
             // Going down the tree - Action Node Level
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
-            
+
             if (currRoot.getChildren().size() < this.calcProgressiveMaxWidth(currRoot, this.k_b, this.a_b)) {
                 // Widening the Belief level
                 Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
-                
+
                 ActionNode currActionNode = (ActionNode) currRoot;
                 BeliefNode receivedObservationNode = (BeliefNode) currActionNode
                         .receiveObservation(simulatedTimeOfObsReceival);
@@ -50,27 +51,27 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
                 if (currRoot == null) {
                     return;
                 }
-                
+
                 Double value = currRoot.getState().evaluate();
-                Tree.backpropagate(currRoot, value); 
+                Tree.backpropagate(currRoot, value);
                 return;
             } else {
                 // Going down the tree - Belief Node Level
                 currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
             }
         }
-        
         if (currRoot.getChildren().size() < this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {
             // Widening the Action level
             Double simulatedTimeOfActReceival = simulatedProgress.get(System.currentTimeMillis());
             BeliefNode currBeliefNode = (BeliefNode) currRoot;
+
             ActionNode nextActionNode = (ActionNode) currBeliefNode.act(this.getOwnExplorationStrategy(),
-            simulatedTimeOfActReceival);
+                    simulatedTimeOfActReceival);
 
             Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
             BeliefNode beliefNode = (BeliefNode) nextActionNode.receiveObservation(simulatedTimeOfObsReceival);
             currRoot = beliefNode;
-            
+
             if (currRoot == null) {
                 return;
             }

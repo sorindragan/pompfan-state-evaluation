@@ -44,11 +44,12 @@ public class Tree {
     private Progress progress;
     private Double currentTime = 0.0;
     private BeliefNode originalRoot;
-    private Double ACCEPT_SLACK = 0.05;
+    private Double ACCEPT_SLACK = 0.01;
 
     public Tree(UtilitySpace utilitySpace, AbstractBelief belief, AbstractState<?> startState, AbstractWidener widener,
             Progress progress) {
         // this.evaluator = evaluationFunction;
+        this.setUtilitySpace(utilitySpace);
         this.belief = belief;
         this.originalRoot = new BeliefNode(null, startState, null);
         this.setRoot(this.originalRoot);
@@ -193,7 +194,8 @@ public class Tree {
 
             Bid lastOpponentBid = ((Offer) lastOpponentAction).getBid();
             Bid lastAgentBid = action instanceof Accept ? ((Accept) action).getBid() : ((Offer) action).getBid();
-            Double distanceValue = this.getBelief().getDistance().computeDistance(lastOpponentBid, lastAgentBid);
+            Double distanceValue = this.getUtilitySpace().getUtility(lastAgentBid).subtract(this.getUtilitySpace().getUtility(lastOpponentBid)).doubleValue();
+
             if (distanceValue < ACCEPT_SLACK) {
                 action = new Accept(action.getActor(), lastOpponentBid);
                 break;

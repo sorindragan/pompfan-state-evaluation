@@ -66,7 +66,7 @@ public class ResultsLogger {
             Map<PartyId, PartyWithProfile> allParties = sess.getParticipants();
             Map<PartyId, Bid> allAgreements = agreements.getMap();
             List<Result> collectedResults = allParties.keySet().stream()
-                    .map(k -> new Result(this.sessionNum, k, allParties.get(k), allAgreements.get(k)))
+                    .map(k -> new Result(this.sessionNum, k, allParties.get(k), allAgreements.get(k)).setSessionStart(this.startTime).computeUtility())
                     .collect(Collectors.toList());
             results.addAll(collectedResults);
         }
@@ -110,6 +110,7 @@ public class ResultsLogger {
         private Parameters params;
         private ReportToLogger reporter;
         private ProfileRef profile;
+        private String sessionStart;
 
         public Result(Integer sessionNum, PartyId partyId, PartyWithProfile pwp, Bid aggreeBid) {
             this.setAggreeBid(aggreeBid);
@@ -138,6 +139,15 @@ public class ResultsLogger {
 
         public void setPwp(PartyWithProfile pwp) {
             this.pwp = pwp;
+        }
+
+        public String getSessionStart() {
+            return sessionStart;
+        }
+
+        public Result setSessionStart(String sessionStart) {
+            this.sessionStart = sessionStart;
+            return this;
         }
 
         private Result computeUtility() {

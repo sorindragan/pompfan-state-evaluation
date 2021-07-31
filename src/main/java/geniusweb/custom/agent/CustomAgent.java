@@ -85,11 +85,11 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     private static final int NUM_SIMULATIONS = 100;
     private static final int MAX_WIDTH = 10;
-    private Long simulationTime = 500l; // Done: BUG if increased
+    private Long simulationTime = 500l; // TODO: BUG if increased
     private static final boolean DEBUG_LEARN = true;
-    private static boolean DEBUG_OFFER = false;
-    private static boolean DEBUG_SAVE_TREE = false;
-    private static boolean DEBUG_IN_TOURNAMENT = true;
+    private static boolean DEBUG_OFFER = true;
+    private static boolean DEBUG_SAVE_TREE = true;
+    private static boolean DEBUG_IN_TOURNAMENT = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
     private final Random random = new Random();
@@ -151,21 +151,23 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         // object also contains the final agreement (if any).
         Agreements agreements = ((Finished) info).getAgreement();
         processAgreements(agreements);
+        String sessionName = "";
         // Write the negotiation data that we collected to the path provided.
-        if (this.dataPaths != null && this.negotiationData != null) {
+        if (this.negotiationData != null && !this.dataPaths.isEmpty()) {
             File sessionFile = this.dataPaths.get(0);
-            if (DEBUG_SAVE_TREE) {
-                String sessionName = sessionFile.getName();
-                saveTreeToLogs("full_".concat(sessionName), this.MCTS.toStringOriginal());
-                saveTreeToLogs("curr_".concat(sessionName), this.MCTS.toString());
-            }
+            sessionName = sessionFile.getName();
             try {
-                this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot()).setRealHistory(this.MCTS.getRealHistory());
+                this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot())
+                .setRealHistory(this.MCTS.getRealHistory());
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.writerWithDefaultPrettyPrinter().writeValue(sessionFile, this.negotiationData);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to write negotiation data to disk", e);
             }
+        }
+        if (DEBUG_SAVE_TREE) {
+            saveTreeToLogs("full_".concat(sessionName), this.MCTS.toStringOriginal());
+            saveTreeToLogs("curr_".concat(sessionName), this.MCTS.toString());
         }
 
         // Log the final outcome and terminate
@@ -327,7 +329,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         if (DEBUG_LEARN) {
             System.out.println("DEBUG_LEARN: Protocol " + protocol);
             System.out.println("DEBUG_LEARN: Persistent-Data:  " + this.parameters.get("persistentstate").toString());
-            System.out.println("DEBUG_LEARN: Negotiation-Data: " + this.parameters.get("negotiationdata").toString());
+
+            if (this.parameters.containsKey("negotiationdata")) {
+                System.out.println("DEBUG_LEARN: Nego-Data: " + this.parameters.get("negotiationdata").toString());
+            }
         }
 
         if (this.parameters.containsKey("negotiationdata")) {
