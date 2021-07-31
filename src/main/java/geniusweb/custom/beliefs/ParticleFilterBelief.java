@@ -5,18 +5,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
-import geniusweb.actions.Accept;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.custom.distances.AbstractBidDistance;
 import geniusweb.custom.opponents.AbstractPolicy;
+import geniusweb.custom.opponents.AbstractPolicyDeserializer;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.issuevalue.Bid;
 
 public class ParticleFilterBelief extends AbstractBelief {
+    // @JsonProperty("opponentProbabilities")
+    // @JsonDeserialize(keyUsing = AbstractPolicyDeserializer.class)
+    // private Map<AbstractPolicy, Double> opponentProbabilities = new
+    // HashMap<AbstractPolicy, Double>();
 
     public static final int NUMBER_SAMPLES = 100;
     public static final Double SAMENESS_THRESHOLD = 0.1;
@@ -24,12 +30,31 @@ public class ParticleFilterBelief extends AbstractBelief {
 
     List<AbstractPolicy> particles = new ArrayList<>();
 
+    @JsonCreator
+    public ParticleFilterBelief(@JsonProperty("opponents") List<AbstractPolicy> opponents,
+            @JsonProperty("probabilities") List<Double> probabilities,
+            @JsonProperty("distance") AbstractBidDistance distance) {
+        super(opponents, probabilities, distance);
+
+    }
+
+    // public Map<AbstractPolicy, Double> getOpponentProbabilities() {
+    // return opponentProbabilities;
+    // }
+
+    // public void setOpponentProbabilities(Map<AbstractPolicy, Double>
+    // opponentProbabilities) {
+    // this.opponentProbabilities = opponentProbabilities;
+    // }
+
+    // @JsonCreator
     public ParticleFilterBelief(List<AbstractPolicy> listOfOpponents, AbstractBidDistance distance) {
         super(listOfOpponents, distance); // particles
 
     }
 
-    public ParticleFilterBelief(HashMap<AbstractPolicy, Double> opponentProbabilities, AbstractBidDistance distance) {
+    // @JsonCreator
+    public ParticleFilterBelief(Map<AbstractPolicy, Double> opponentProbabilities, AbstractBidDistance distance) {
         super(opponentProbabilities, distance); // particles
     }
 
@@ -61,12 +86,12 @@ public class ParticleFilterBelief extends AbstractBelief {
         // DONE: Keep track of real observations and also supply the previous real
         // observation
         Action chosenAction;
-        if (lastAgentAction != null) {   
+        if (lastAgentAction != null) {
             chosenAction = lastOppAction != null
-            ? abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state)
-            : abstractPolicy.chooseAction(lastAgentAction.getBid(), state);
-        }else{
-            // Quickfix: Random action selection if no first own best action.         
+                    ? abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state)
+                    : abstractPolicy.chooseAction(lastAgentAction.getBid(), state);
+        } else {
+            // Quickfix: Random action selection if no first own best action.
             chosenAction = abstractPolicy.chooseAction();
         }
 

@@ -7,9 +7,12 @@
 						"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
 						"parameters": {
 							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
+							// "negotiationdata": [
+							// 	"e74c1346-1022-438e-887f-26e0ab6b398d"
+							// ],
 							"isLearn": true,
-							"numParticlesPerOpponent": 100,
-							"simulationTime": 100,
+							"numParticles": 100,
+							"simulationTime": 250,
 							"config": {
 								"confComparer": "UtilityBidDistance",
 								"confBelief": "ParticleFilterBelief",
@@ -44,9 +47,9 @@
 			{
 				"Team": [
 					{
-						"partyref": "classpath:geniusweb.exampleparties.conceder.Conceder",
+						"partyref": "classpath:geniusweb.exampleparties.boulware.Boulware",
 						"parameters": {
-							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9ab333"
+							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9ab112"
 						}
 					}
 				]
@@ -55,10 +58,10 @@
 		"reuseTeams": false,
 		"profileslists": [
 			{
-				"ProfileList": ["file:src/test/resources/party1.json"]
+				"ProfileList": ["file:src/test/resources/flightbooking1.json"]
 			},
 			{
-				"ProfileList": ["file:src/test/resources/party2.json"]
+				"ProfileList": ["file:src/test/resources/flightbooking2.json"]
 			}
 		],
 		"teamsPerSession": 2,
@@ -66,11 +69,11 @@
 			"SAOPSettings": {
 				"participants": [],
 				"deadline": {
-					"deadlinetime": { "durationms": 10000 }
+					"deadlinetime": { "durationms": 5000 }
 				}
 			}
 		},
-		"numberTournaments": 3,
+		"numberTournaments": 1,
 		"learnSettings": {
 			"LearnSettings": {
 				"participants": [
@@ -82,9 +85,11 @@
 										"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
 										"parameters": {
 											"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
-											"negotiationdata": [],
+											// "negotiationdata": [
+											// 	"e74c1346-1022-438e-887f-26e0ab6b398d"
+											// ],
 											"isLearn": true,
-											"numParticlesPerOpponent": 100,
+											"numParticles": 100,
 											"simulationTime": 250,
 											"config": {
 												"confComparer": "UtilityBidDistance",
@@ -112,7 +117,7 @@
 					}
 				],
 				"deadline": {
-					"deadlinetime": {"durationms": 20000 }
+					"deadlinerounds": { "rounds": 100, "durationms": 5000 }
 				}
 			}
 		}

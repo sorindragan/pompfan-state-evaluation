@@ -1,14 +1,19 @@
 package geniusweb.custom.helper;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import javax.websocket.DeploymentException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import geniusweb.actions.PartyId;
 import geniusweb.inform.Agreements;
@@ -26,51 +31,71 @@ import geniusweb.references.PartyWithProfile;
 import geniusweb.references.ProfileRef;
 import tudelft.utilities.logging.ReportToLogger;
 
-public class ResultsLogger {
+public class ResultsWriter {
     private String startTime;
-    private String endTime;
-    private List<Result> results = new ArrayList<Result>();
     private NegoState state = null;
-    private Integer sessionNum = 0;
+    private FileWriter collectorFile;
+    private final static ObjectMapper jacksonReader = new ObjectMapper();
+    private String settingRef;
 
-    public ResultsLogger(NegoState state, String temporalState) {
+    public ResultsWriter(NegoState state, String startTime, String settingRef, FileWriter collectorFile) {
         super();
         this.state = state;
-        this.setStartTime(temporalState);
-        this.generateResults(this.state);
+        this.setSettingRef(settingRef);
+        this.setStartTime(startTime);
+        this.setCollectorFile(collectorFile);
     }
 
-    public String getEndTime() {
-        return endTime;
+    public String getSettingRef() {
+        return settingRef;
     }
 
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+    public void setSettingRef(String settingRef) {
+        this.settingRef = settingRef;
     }
 
-    private void generateResults(NegoState state) {
-        List<SessionResult> allSessions = new ArrayList<SessionResult>();
-        if (state instanceof SessionState) {
-            SessionState sessionState = (SessionState) state;
-            allSessions.add(sessionState.getResult());
-        }
+    public String getStartTime() {
+        return startTime;
+    }
 
-        if (state instanceof AllPermutationsState) {
-            AllPermutationsState tournamentStates = (AllPermutationsState) state;
-            allSessions.addAll(tournamentStates.getResults());
-        }
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
 
-        for (SessionResult sess : allSessions) {
-            this.sessionNum++;
-            Agreements agreements = sess.getAgreements();
-            Map<PartyId, PartyWithProfile> allParties = sess.getParticipants();
-            Map<PartyId, Bid> allAgreements = agreements.getMap();
-            List<Result> collectedResults = allParties.keySet().stream()
-                    .map(k -> new Result(this.sessionNum, k, allParties.get(k), allAgreements.get(k)))
-                    .collect(Collectors.toList());
-            results.addAll(collectedResults);
-        }
+    public FileWriter getCollectorFile() {
+        return collectorFile;
+    }
 
+    public void setCollectorFile(FileWriter collectorFile) {
+        this.collectorFile = collectorFile;
+    }
+
+    public void writeSession(Integer sessionNum, SessionResult sess, String sessionStart) {
+        Agreements agreements = sess.getAgreements();
+        Map<PartyId, PartyWithProfile> allParties = sess.getParticipants();
+        Map<PartyId, Bid> allAgreements = agreements.getMap();
+        List<Result> collectedResults = allParties.keySet().stream()
+                .map(k -> new Result(sessionNum, k, allParties.get(k), allAgreements.get(k))
+                        .setSessionStart(sessionStart).setTournamentStart(this.getStartTime())
+                        .setSettingFile(this.getSettingRef()).computeUtility())
+                .collect(Collectors.toList());
+        List<String> jsonLines = collectedResults.stream().filter(Objects::nonNull).map(t -> {
+            try {
+                return jacksonReader.writeValueAsString(t) + "\n";
+            } catch (JsonProcessingException e) {
+                System.out.println(t);
+                e.printStackTrace();
+                return "";
+            }
+        }).collect(Collectors.toList());
+        jsonLines.stream().filter(t -> t.isEmpty() == false).forEach(t -> {
+            try {
+                this.collectorFile.append(t).flush();
+            } catch (IOException e) {
+                System.out.println(t);
+                e.printStackTrace();
+            }
+        });
     }
 
     public NegoState getState() {
@@ -81,33 +106,20 @@ public class ResultsLogger {
         this.state = state;
     }
 
-    public List<Result> getResults() {
-        return results;
-    }
-
-    public void setResults(List<Result> results) {
-        this.results = results;
-    }
-
-    public String getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(String temporalState) {
-        this.startTime = temporalState;
-    }
-
     public class Result {
 
         private String party;
         private Double utility;
         private PartyWithProfile pwp;
-        private Bid aggreeBid;
         private Map<String, Value> bid;
         private Integer session;
+        private String tournamentStart;
+        private String sessionStart;
+        private String settingFile;
 
         private String version;
         private Parameters params;
+        private Bid aggreeBid;
         private ReportToLogger reporter;
         private ProfileRef profile;
 
@@ -149,16 +161,42 @@ public class ResultsLogger {
                 this.utility = this.getAggreeBid() != null ? utilitySpace.getUtility(this.getAggreeBid()).doubleValue()
                         : 0.0;
             } catch (IOException e) {
-                // TODO: Better error handling -- consistent return of error utility.
-                this.utility = -1.0;
                 throw new IllegalStateException(e);
             } catch (DeploymentException e) {
+                this.utility = -1.0;
                 e.printStackTrace();
                 return null;
             } catch (IllegalArgumentException e) {
                 this.reporter.log(Level.WARNING, "Couldn't create profile from: " + this.profile.getURI());
                 return null;
             }
+            return this;
+        }
+
+        public String getSettingFile() {
+            return settingFile;
+        }
+
+        public Result setSettingFile(String settingFile) {
+            this.settingFile = settingFile;
+            return this;
+        }
+
+        public String getTournamentStart() {
+            return tournamentStart;
+        }
+
+        public Result setTournamentStart(String tournamentStart) {
+            this.tournamentStart = tournamentStart;
+            return this;
+        }
+
+        public String getSessionStart() {
+            return sessionStart;
+        }
+
+        public Result setSessionStart(String sessionStart) {
+            this.sessionStart = sessionStart;
             return this;
         }
 

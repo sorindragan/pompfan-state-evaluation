@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
-import geniusweb.custom.components.Opponent;
-import geniusweb.custom.evaluators.EvaluationFunctionInterface;
+import geniusweb.custom.evaluators.IEvalFunction;
 import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
@@ -17,23 +18,27 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class HistoryState extends AbstractState<ArrayList<Action>> {
     private double DISCOUNT_RATE = 0.95;
-    public EvaluationFunctionInterface<HistoryState> evaluator;
+    public IEvalFunction<HistoryState> evaluator;
+
+    public HistoryState() {
+        super();
+    }
 
     public HistoryState(UtilitySpace utilitySpace, AbstractPolicy opponent,
-            EvaluationFunctionInterface<? extends HistoryState> evaluator) {
+            IEvalFunction<? extends HistoryState> evaluator) {
         super(utilitySpace, opponent);
         this.setHistory(new ArrayList<>());
         this.setEvaluator(evaluator);
     }
 
-    public EvaluationFunctionInterface<? extends HistoryState> getEvaluator() {
+    public IEvalFunction<? extends HistoryState> getEvaluator() {
         return evaluator;
     }
 
     @SuppressWarnings("unchecked")
-    public void setEvaluator(EvaluationFunctionInterface<? extends HistoryState> evaluator) {
+    public void setEvaluator(IEvalFunction<? extends HistoryState> evaluator) {
         // this.evaluator = (EvaluationFunctionInterface<HistoryState>) evaluator;
-        this.evaluator = (EvaluationFunctionInterface<HistoryState>) evaluator;
+        this.evaluator = (IEvalFunction<HistoryState>) evaluator;
     }
 
     public ArrayList<Action> getHistory() {
@@ -45,6 +50,7 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
     }
 
     @Override
+    @JsonIgnore
     public String getStringRepresentation() {
         return this.getHistory().stream().map(Object::toString).collect(Collectors.joining("->"));
     }

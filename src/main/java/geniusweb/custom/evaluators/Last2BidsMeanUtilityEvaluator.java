@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
@@ -17,13 +19,28 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 /**
  * MeanUtilityEvaluator
  */
-public class Last2BidsMeanUtilityEvaluator implements EvaluationFunctionInterface<HistoryState> {
+public class Last2BidsMeanUtilityEvaluator implements IEvalFunction<HistoryState> {
 
     private UtilitySpace utilitySpace;
+
+    public Last2BidsMeanUtilityEvaluator() {
+        super();
+    }
+
+    public UtilitySpace getUtilitySpace() {
+        return utilitySpace;
+    }
+
+    public void setUtilitySpace(UtilitySpace utilitySpace) {
+        this.utilitySpace = utilitySpace;
+    }
 
     public Last2BidsMeanUtilityEvaluator(UtilitySpace utilitySpace) {
         super();
         this.utilitySpace = utilitySpace;
+        if (this.getUtilitySpace() == null) {
+            System.out.println("Something is wrong");
+        }
     }
 
     @Override

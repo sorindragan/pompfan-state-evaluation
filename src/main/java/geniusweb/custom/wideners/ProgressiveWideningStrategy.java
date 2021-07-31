@@ -1,6 +1,7 @@
 package geniusweb.custom.wideners;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.stream.Collector;
 
 import geniusweb.actions.Accept;
@@ -22,13 +23,12 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
     private Double k_b;
     private Double a_b;
 
-    public ProgressiveWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy, Double k_a, Double a_a,
-            Double k_b, Double a_b) {
+    public ProgressiveWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy, HashMap<String, Object> params) {
         super(ownExplorationStrategy);
-        this.k_a = k_a;
-        this.a_a = a_a;
-        this.k_b = k_b;
-        this.a_b = a_b;
+        this.k_a = (Double) params.getOrDefault("k_a", 42.0);
+        this.a_a = (Double) params.getOrDefault("a_a", 0.42);
+        this.k_b = (Double) params.getOrDefault("k_b", 42.0);
+        this.a_b = (Double) params.getOrDefault("a_b", 0.42);
     }
 
     @Override

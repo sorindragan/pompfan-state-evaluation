@@ -1,6 +1,7 @@
 package geniusweb.custom.wideners;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.stream.Collector;
 
 import geniusweb.actions.Accept;
@@ -15,22 +16,23 @@ import geniusweb.custom.state.StateRepresentationException;
 import geniusweb.issuevalue.Bid;
 import geniusweb.progress.Progress;
 
-public class ProgressiveWideningStrategy extends AbstractWidener {
+public class ProgressiveWideningStrategySmallDomains extends AbstractWidener {
 
+    
     private Double k_a;
     private Double a_a;
     private Double k_b;
     private Double a_b;
-
-    public ProgressiveWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy, Double k_a, Double a_a,
-            Double k_b, Double a_b) {
+    
+    public ProgressiveWideningStrategySmallDomains(AbstractOwnExplorationPolicy ownExplorationStrategy, HashMap<String, Object> params) {
         super(ownExplorationStrategy);
-        this.k_a = k_a;
-        this.a_a = a_a;
-        this.k_b = k_b;
-        this.a_b = a_b;
+        this.k_a = (Double) params.get("k_a");
+        this.a_a = (Double) params.get("a_a");
+        this.k_b = (Double) params.get("k_b");
+        this.a_b = (Double) params.get("a_b");
     }
-
+    
+    
     @Override
     public void widen(Progress simulatedProgress, Node currRoot) throws StateRepresentationException {
         while (currRoot.getChildren().size() == this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {

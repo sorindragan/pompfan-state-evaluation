@@ -43,6 +43,11 @@
 		</dependency>
 		<dependency>
 			<groupId>geniusweb</groupId>
+			<artifactId>opponentmodel</artifactId>
+			<version>${geniusweb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>geniusweb</groupId>
 			<artifactId>profileconnection</artifactId>
 			<version>${geniusweb.version}</version>
 		</dependency>

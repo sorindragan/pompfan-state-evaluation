@@ -10,8 +10,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import jsonlines
 # %%
-filename = "log_tournament_newest.json"
+filename = "log_tournament_results.jsonl"
 # filename = "log_tournament_xx_xx_xxxx_xx_xx.json" # Something else
 curr_dir = pathlib.Path(__file__)
 log_dir = curr_dir.parent.parent / "logs"
@@ -20,11 +21,10 @@ assert file_to_analyse.exists(), f"File {file_to_analyse} does not exist"
 display(f"Found {file_to_analyse} !!!")
 display(f"Start loading file...")
 # %%
-jsonFile = json.load(io.open(file_to_analyse))
-display(jsonFile)
+all_results = list(jsonlines.open(file_to_analyse))
+display(all_results[:4])
 
 # %%
-all_results = jsonFile.get("results")
 df = pd.json_normalize(all_results)
 df["agreed"] = df.utility == 0.0
 df["vs"] = None

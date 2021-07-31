@@ -8,14 +8,18 @@ import geniusweb.actions.Offer;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
+import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class RandomOpponentPolicy extends AbstractPolicy {
 
     private static final float stubborness = 0.95f;
 
+    public RandomOpponentPolicy(UtilitySpace uSpace, String name) {
+        super(uSpace, name);
+    }
+
     public RandomOpponentPolicy(Domain domain) {
         super(domain, "Random");
-
     }
 
     @Override

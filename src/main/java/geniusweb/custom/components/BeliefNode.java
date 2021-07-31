@@ -1,10 +1,14 @@
 package geniusweb.custom.components;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.custom.explorers.AbstractOwnExplorationPolicy;
-import geniusweb.custom.opponents.AbstractPolicy;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.StateRepresentationException;
 import geniusweb.issuevalue.Bid;
@@ -12,18 +16,24 @@ import geniusweb.issuevalue.Bid;
 /**
  * BeliefNode
  */
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class BeliefNode extends Node {
     private static final boolean SIM_DEBUG = false;
-    private Action observation;
 
+    public BeliefNode() {
+        super();
+    }
+
+    @JsonIgnore
     public Action getObservation() {
-        return observation;
+        return this.getStoredAction();
     }
 
     public void setObservation(Action observation) {
-        this.observation = observation;
+        this.setStoredAction(observation);;
     }
 
+    // @JsonCreator
     public BeliefNode(Node parentNode, AbstractState<?> state, Action observation) {
         super(parentNode, state);
         this.setType(Node.NODE_TYPE.BELIEF);
