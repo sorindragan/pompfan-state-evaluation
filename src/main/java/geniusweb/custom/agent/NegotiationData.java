@@ -1,13 +1,14 @@
 package geniusweb.custom.agent; // TODO: change name
 
+import java.util.HashMap;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import geniusweb.actions.Action;
 import geniusweb.custom.beliefs.AbstractBelief;
 import geniusweb.custom.components.BeliefNode;
-import java.lang.module.Configuration;
-import java.util.HashMap;
 
 /**
  * The class hold the negotiation data that is obtain during a negotiation
@@ -25,9 +26,19 @@ public class NegotiationData {
     private AbstractBelief belief;
     private BeliefNode rootNode;
     private HashMap<String, Object> configuration;
+    private List<Action> realHistory;
 
     public HashMap<String, Object> getConfiguration() {
         return configuration;
+    }
+
+    public List<Action> getRealHistory() {
+        return realHistory;
+    }
+
+    public NegotiationData setRealHistory(List<Action> realHistory) {
+        this.realHistory = realHistory;
+        return this;
     }
 
     public NegotiationData setConfiguration(HashMap<String, Object> configuration) {

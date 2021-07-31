@@ -159,7 +159,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 saveTreeToLogs("curr_".concat(sessionName), this.MCTS.toString());
             }
             try {
-                this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot());
+                this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot()).setRealHistory(this.MCTS.getRealHistory());
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.writerWithDefaultPrettyPrinter().writeValue(sessionFile, this.negotiationData);
             } catch (IOException e) {
