@@ -39,7 +39,6 @@
 			}
 		],
 		"deadline": {
-			"deadlinerounds": { "rounds": 100, "durationms": 120000 }
-		}
+			"deadlinetime": {"durationms": 20000 }		}
 	}
 }
