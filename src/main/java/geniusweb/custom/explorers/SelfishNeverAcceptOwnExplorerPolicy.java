@@ -17,7 +17,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 import tudelft.utilities.immutablelist.ImmutableList;
 
 public class SelfishNeverAcceptOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
-    private static final BigDecimal STUBBORNESS = new BigDecimal(0.7);
+    private static final BigDecimal STUBBORNESS = new BigDecimal("0.99");
 
     public SelfishNeverAcceptOwnExplorerPolicy(UtilitySpace utilitySpace, PartyId id) {
         super(utilitySpace, id);

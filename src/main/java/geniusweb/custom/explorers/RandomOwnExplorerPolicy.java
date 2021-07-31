@@ -18,7 +18,7 @@ import tudelft.utilities.immutablelist.ImmutableList;
 
 public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
 
-    private static final BigDecimal STUBBORNESS = new BigDecimal(0.5);
+    private static final BigDecimal STUBBORNESS = new BigDecimal("0.4");
 
     public RandomOwnExplorerPolicy(UtilitySpace utilitySpace,  PartyId id) {
         super(utilitySpace, id);
@@ -28,25 +28,23 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
     public Action chooseAction(Bid lastOpponentBid, Bid lastAgentBid, AbstractState<?> state) {
         Action action;
         Bid bid;
-        // if (lastOpponentBid == null) {
-        //     bid = this.getAllBids().getExtremeBid(true);
-        // } else {
+     
         long i = this.getRandom().nextInt(this.getBidspace().size().intValue());
         bid = this.getBidspace().get(i);
-        // }
 
         if (lastOpponentBid == null) {
             return new Offer(this.getPartyId(), bid);
         }
-        action = isGood(bid) ? new Offer(this.getPartyId(), bid) : new Accept(this.getPartyId(), lastOpponentBid);
+        action = shouldAccept(bid, lastOpponentBid) ? new Accept(this.getPartyId(), lastOpponentBid) : new Offer(this.getPartyId(), bid);
         return action;
     }
 
-    private boolean isGood(Bid bid) {
+    private boolean shouldAccept(Bid bid, Bid oppBid) {
         if (bid == null)
             return false;
         BigDecimal sample = this.getUtilitySpace().getUtility(bid);
-        return sample.compareTo(this.getSTUBBORNESS()) >= 0 ? true : false;
+        BigDecimal target = this.getUtilitySpace().getUtility(oppBid);
+        return (sample.doubleValue() <= target.doubleValue()) && (target.doubleValue() >= STUBBORNESS.doubleValue());
     }
 
     @Override

@@ -45,7 +45,7 @@ public class PW extends AbstractWidener {
                     // BeliefNode receivedObservationNode = (BeliefNode) currActionNode
                     //         .receiveObservation(simulatedTimeOfObsReceival);
                     // currRoot = receivedObservationNode;
-                    // TODO: For non-history state evaluation, we might need the last two bids.
+                    // JUNK: For non-history state evaluation, we might need the last two bids.
                     // Action opponentAction = ((BeliefNode) currRoot).getObservation();
                     // Action agentAction = ((ActionNode) currRoot.getParent()).getAction();
                     // Double value = currRoot.getState().evaluate();

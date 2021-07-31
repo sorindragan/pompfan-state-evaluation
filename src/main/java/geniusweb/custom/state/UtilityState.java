@@ -54,13 +54,11 @@ public class UtilityState extends AbstractState<Map<PartyId, BigDecimal>> {
 
     @Override
     public Double computeStateDistance(Map<PartyId, BigDecimal> otherState) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Double evaluate() {
-        // TODO Auto-generated method stub
         return null;
     }
 

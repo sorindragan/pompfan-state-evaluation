@@ -34,7 +34,6 @@ public class ValueApproximationPolicy extends AbstractPolicy {
 
     @Override
     public Action chooseAction() {
-        // TODO Auto-generated method stub
         return null;
     }
 

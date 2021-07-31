@@ -40,7 +40,7 @@ public class ParticleFilterBelief extends AbstractBelief {
             List<Bid> candidateObservations = new ArrayList<>();
             for (int i = 0; i < ParticleFilterBelief.NUMBER_SAMPLES; i++) {
                 // Monte Carlo Sampling
-                // This should be in a loop -- We need to try multiple actions to get an
+                // This is in a loop -- we need to try multiple actions to get an
                 // understanding of whether the opponent could generate the real obs.
                 Bid sampledBid = this.sample(lastAgentAction, lastOppAction, state, abstractPolicy);
 
@@ -49,7 +49,7 @@ public class ParticleFilterBelief extends AbstractBelief {
             Double weightOpponentLikelihood = candidateObservations.parallelStream().filter(Objects::nonNull)
                     .mapToDouble(obs -> this.getDistance().computeDistance(obs, realObservation.getBid()))
                     .map(val -> Math.abs(val)).sum();
-            // DONE: Maybe check the size because abstractpolicies might be overridden --
+            // DONE: Check the size because abstractpolicies might be overridden --
             // Not a problem!
             this.getOpponentProbabilities().put(abstractPolicy, 1 / (weightOpponentLikelihood + EPSILON));
         }
@@ -72,33 +72,4 @@ public class ParticleFilterBelief extends AbstractBelief {
 
         return chosenAction instanceof Offer ? ((Offer) chosenAction).getBid() : null;
     }
-
-    // @Override
-    // public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAction,
-    // AbstractState<?> state) {
-
-    // for (AbstractPolicy abstractPolicy :
-    // this.getOpponentProbabilities().keySet()) {
-    // List<Bid> candidateObservations = new ArrayList<>();
-    // for (int i = 0; i < ParticleFilterBelief.NUMBER_SAMPLES; i++) {
-    // // Monte Carlo Sampling
-    // // This should be in a loop -- We need to try multiple actions to get an
-    // understanding of whether the opponent could generate the real obs.
-    // Action chosenAction = abstractPolicy.chooseAction(lastAction.getBid(),
-    // state);
-    // if (chosenAction instanceof Offer) {
-    // candidateObservations.add(((Offer) chosenAction).getBid());
-    // }
-    // }
-    // boolean hasAnyMatch = candidateObservations.parallelStream().anyMatch(obs ->
-    // this.getDistance().computeDistance(obs, realObservation.getBid()) <
-    // SAMENESS_THRESHOLD);
-    // if (hasAnyMatch) {
-    // particles.add(abstractPolicy);
-    // }
-    // }
-
-    // return new ParticleFilterBelief(particles, this.getDistance());
-    // }
-
 }

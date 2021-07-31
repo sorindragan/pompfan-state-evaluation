@@ -12,6 +12,7 @@ import geniusweb.bidspace.Interval;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.state.HistoryState;
 import geniusweb.issuevalue.Bid;
+import geniusweb.opponentmodel.OpponentModel;
 import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import tudelft.utilities.immutablelist.ImmutableList;
@@ -23,7 +24,6 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
 
     public OwnUtilityTFTOpponentPolicy(UtilitySpace uSpace) {
         super(uSpace, "OwnUtilTFT");
-        // TODO Auto-generated constructor stub
         this.setBidsWithinUtil(new BidsWithUtility((LinearAdditive) this.getUtilitySpace()));
     }
 
@@ -98,5 +98,4 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
     public void setBidsWithinUtil(BidsWithUtility bidsWithinUtil) {
         this.bidsWithinUtil = bidsWithinUtil;
     }
-
 }

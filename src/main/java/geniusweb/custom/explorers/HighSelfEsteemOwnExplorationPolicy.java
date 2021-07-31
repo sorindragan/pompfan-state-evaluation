@@ -31,7 +31,8 @@ public class HighSelfEsteemOwnExplorationPolicy extends AbstractOwnExplorationPo
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
         Action action;
         Bid bid;
-        // TODO: progressively raise the percentages of accepts
+        // progressively raise the percentages of accepts from 0 to 10 pcent
+        double acceptProbability = state.getRound() * 10;
         
         
         if (lastReceivedBid == null) {
@@ -45,9 +46,9 @@ public class HighSelfEsteemOwnExplorationPolicy extends AbstractOwnExplorationPo
         }
         action = new Offer(this.getPartyId(), bid);
         
-        // 2pcent of the time we do accepts
+        // pcent of the time we do accepts
         long i = this.getRandom().nextInt(100);
-        if (i > 98) {
+        if (i > (100 - acceptProbability)) {
             action = new Accept(this.getPartyId(), lastReceivedBid);
         }
 
@@ -55,10 +56,7 @@ public class HighSelfEsteemOwnExplorationPolicy extends AbstractOwnExplorationPo
     }
 
     @Override
-    protected void init() {
-        // TODO Auto-generated method stub
-
-    }
+    protected void init() {assert true;}
 
     public BidsWithUtility getBidutils() {
         return bidutils;

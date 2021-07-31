@@ -30,7 +30,6 @@ public class ProgressiveWideningOwnExplorationStrategy extends AbstractOwnExplor
 
     @Override
     protected void init() {
-        // TODO Auto-generated method stub
 
     }
 

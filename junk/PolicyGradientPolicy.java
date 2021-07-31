@@ -34,13 +34,11 @@ public class PolicyGradientPolicy extends AbstractPolicy {
 
     @Override
     public Action chooseAction() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Action chooseAction(Bid lastAgentBid) {
-        // TODO Auto-generated method stub
         return null;
     }
 

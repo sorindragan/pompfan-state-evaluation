@@ -1,11 +1,5 @@
 package geniusweb.custom.distances;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
 import geniusweb.issuevalue.Bid;
 import geniusweb.profile.utilityspace.UtilitySpace;
 

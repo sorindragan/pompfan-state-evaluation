@@ -37,7 +37,7 @@ public class Tree {
 
     private AbstractBelief belief;
 
-    private AbstractWidener widener; // The action we choose to simulate (expand new node).
+    private AbstractWidener widener; // Used for the action we choose to simulate (expand new node).
     private static Double C = Math.sqrt(2); // TODO: Make it hyperparam
     private ActionNode lastBestActionNode;
     private List<Action> realHistory;
@@ -81,22 +81,6 @@ public class Tree {
         node.setValue(node.getValue() + value);
     }
 
-    // public Double evaluate(AbstractState<?> state, Action opponentAction, Action
-    // agentAction) { // TODO: Not needed
-    // // anymore?
-    // Bid lastBid = ((Offer) opponentAction).getBid();
-    // Bid secondTolastBid = ((Offer) agentAction).getBid();
-    // return this.evaluator.evaluate(state, lastBid, secondTolastBid);
-    // }
-
-    // public static Node selectFavoriteChild(List<Node>
-    // candidatesChildrenForAdoption) {
-    // // True Random - Alt.: Proportional to the visits
-    // Node adoptedChild = candidatesChildrenForAdoption
-    // .get(Tree.random.nextInt(candidatesChildrenForAdoption.size()));
-    // return adoptedChild;
-    // }
-
     public static Node selectFavoriteChild(List<Node> candidatesChildrenForAdoption) {
         // True Random - Alt.: Proportional to the visits
         Node adoptedChild = candidatesChildrenForAdoption.stream().filter(child -> child.getIsTerminal() == false)
@@ -132,6 +116,7 @@ public class Tree {
         }
         List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream()
                 .filter(node -> node.getIsTerminal() == false).collect(Collectors.toList());
+        
         if (rootCandidates.size() == 0) {
             // Quickfix: by doing nothing!
             return this;
@@ -147,23 +132,18 @@ public class Tree {
                 .filter(node -> ((Offer) ((BeliefNode) node).getObservation()).getBid() == closestBid).findFirst()
                 .get();
         this.root = (BeliefNode) nextRoot;
-        // try {
-        // } catch (Exception e) {
-        // e.printStackTrace();
-        // System.exit(0);
-
-        // }
+        
         return this;
     }
 
     public void construct(Long simulationTime) throws StateRepresentationException {
         Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime),
                 System.currentTimeMillis());
-        int currIter = 0;
+        // int currIter = 0;
         // System.out.println(simulatedProgress.getTerminationTime());
         while (simulatedProgress.isPastDeadline(System.currentTimeMillis()) == false) {
             this.simulate(simulatedProgress);
-            currIter++;
+            // currIter++;
             // System.out.println(currIter);
         }
     }
@@ -176,6 +156,7 @@ public class Tree {
             this.lastBestActionNode = (ActionNode) oldestChildren.stream()
                     .max(Comparator.comparing(node -> node.getValue())).get();
             action = lastBestActionNode.getAction();
+            
             if (this.realHistory.size() == 0) {
                 this.realHistory.add(action);
                 return action;
