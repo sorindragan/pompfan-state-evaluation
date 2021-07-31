@@ -9,18 +9,29 @@
 								"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
 								"parameters": {
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
-									"negotiationdata": [
-										"e74c1346-1022-438e-887f-26e0ab6b398d"
-									],
-									"confComparer": "UtilityBidDistance",
-									"confBelief": "UniformBelief",
-									"confEvaluator": "Last2BidsProductUtilityEvaluator",
-									"confState": "HistoryState",
-									"confExplorer": "RandomOwnExplorerPolicy",
-									"confWidener": "MaxWidthWideningStrategy"
+									"isLearn": true,
+									"numParticlesPerOpponent": 100,
+									"simulationTime": 100,
+									"config": {
+										"confComparer": "UtilityBidDistance",
+										"confBelief": "ParticleFilterBelief",
+										"confEvaluator": "Last2BidsProductUtilityEvaluator",
+										"confState": "HistoryState",
+										"confExplorer": "RandomOwnExplorerPolicy",
+										"confWidener": "ProgressiveWideningStrategy",
+										"confExtra": {
+											"widener": {
+												"maxWidth": 10,
+												"k_a": 4.0,
+												"a_a": 0.2,
+												"k_b": 4.0,
+												"a_b": 0.2
+											}
+										}
+									}
 								}
 							},
-							"profile": "file:src/test/resources/flightbooking1.json"
+							"profile": "file:src/test/resources/party1.json"
 						}
 					]
 				}
@@ -38,16 +49,15 @@
 									]
 								}
 							},
-							"profile": "file:src/test/resources/flightbooking2.json"
+							"profile": "file:src/test/resources/party2.json"
 						}
 					]
 				}
 			}
 		],
 		"deadline": {
-			"deadlinerounds": {
-				"rounds": 100,
-				"durationms": 10000
+			"deadline": {
+				"deadlinetime": {"durationms": 20000 }
 			}
 		}
 	}

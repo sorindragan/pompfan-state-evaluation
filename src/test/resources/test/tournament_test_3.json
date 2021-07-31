@@ -49,10 +49,10 @@
 		"reuseTeams": false,
 		"profileslists": [
 			{
-				"ProfileList": ["file:src/test/resources/flightbooking1.json"]
+				"ProfileList": ["file:src/test/resources/party1.json"]
 			},
 			{
-				"ProfileList": ["file:src/test/resources/flightbooking2.json"]
+				"ProfileList": ["file:src/test/resources/party2.json"]
 			}
 		],
 		"teamsPerSession": 2,
