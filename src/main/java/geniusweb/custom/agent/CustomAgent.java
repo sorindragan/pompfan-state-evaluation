@@ -506,6 +506,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
 
         // Iterate through the negotiation data file paths
         for (File dataPath : this.dataPaths) {
+            if (!dataPath.exists()) {
+                getReporter().log(Level.WARNING, "File: ".concat(dataPath.toString()).concat(" does not exist!"));
+                continue;
+            }
             try {
                 // Load the negotiation data object of a previous negotiation
                 NegotiationData negotiationData = objectMapper.readValue(dataPath, NegotiationData.class);
