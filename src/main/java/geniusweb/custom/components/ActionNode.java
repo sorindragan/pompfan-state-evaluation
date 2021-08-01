@@ -39,7 +39,7 @@ public class ActionNode extends Node {
             child = (BeliefNode) this.getChildren().stream().filter(childNode -> childNode.getState().equals(newState))
                     .findFirst().orElse(null);
 
-            if(child==null){
+            if(child==null && lastOpponentAction!=null){
                 child = (BeliefNode) Node.buildNode(Node.NODE_TYPE.BELIEF, this, newState, state.getOpponent(),
                         new Accept(lastOpponentAction.getActor(), ourAcceptanceAction.getBid()));
                 this.addChild(child);
@@ -67,7 +67,6 @@ public class ActionNode extends Node {
             this.addChild(child);
             return child;
         }
-        // !! be careful here
         return child;
     }
 

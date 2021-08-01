@@ -48,6 +48,7 @@ public class BeliefNode extends Node {
         Bid lastOpponentBid = lastOpponentAction instanceof Offer ? ((Offer) lastOpponentAction).getBid() : null;
 
         Action agentAction = strategy.chooseAction(lastOpponentBid, lastOwnBid, state);
+        
         if (SIM_DEBUG) {
             System.out.println("Choose...");
             System.out.println(agentAction);
