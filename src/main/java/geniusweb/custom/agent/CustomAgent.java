@@ -9,10 +9,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import javax.websocket.DeploymentException;
 
@@ -26,17 +24,10 @@ import geniusweb.actions.FileLocation;
 import geniusweb.actions.LearningDone;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
-import geniusweb.bidspace.AllBidsList;
 import geniusweb.custom.components.Tree;
 import geniusweb.custom.helper.Configurator;
 import geniusweb.custom.opponents.AbstractPolicy;
-import geniusweb.custom.opponents.AntagonisticOpponentPolicy;
-import geniusweb.custom.opponents.BoulwareOpponentPolicy;
-import geniusweb.custom.opponents.ConcederOpponentPolicy;
-import geniusweb.custom.opponents.HardLinerOpponentPolicy;
-import geniusweb.custom.opponents.OwnUtilityTFTOpponentPolicy;
-import geniusweb.custom.opponents.SelfishOpponentPolicy;
-import geniusweb.custom.opponents.TimeDependentOpponentPolicy;
+import geniusweb.custom.opponents.OpponentParticleCreator;
 import geniusweb.custom.state.StateRepresentationException;
 import geniusweb.inform.ActionDone;
 import geniusweb.inform.Agreements;
@@ -45,7 +36,6 @@ import geniusweb.inform.Inform;
 import geniusweb.inform.Settings;
 import geniusweb.inform.YourTurn;
 import geniusweb.issuevalue.Bid;
-import geniusweb.issuevalue.Domain;
 import geniusweb.party.Capabilities;
 import geniusweb.party.DefaultParty;
 import geniusweb.profile.Profile;
@@ -62,12 +52,12 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     /**
      *
      */
-    // private static final int NUM_SIMULATIONS = 100;
-    // private static final int MAX_WIDTH = 10;
-    private Long simulationTime = 500l;
-    private static final boolean DEBUG_LEARN = true;
-    private static boolean DEBUG_OFFER = true;
-    private static boolean DEBUG_SAVE_TREE = true;
+    private static final int NUM_SIMULATIONS = 100;
+    private static final int MAX_WIDTH = 10;
+    private Long simulationTime = 500l; // TODO: BUG if increased
+    private static final boolean DEBUG_LEARN = false;
+    private static boolean DEBUG_OFFER = false;
+    private static boolean DEBUG_SAVE_TREE = false;
     private static boolean DEBUG_IN_TOURNAMENT = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -83,7 +73,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private String opponentName;
     private Tree MCTS;
     private ObjectMapper mapper = new ObjectMapper();
-    private Long numOpponentCopies = 10l;
+    private Long numParticlesPerOpponent = 10l;
     private Boolean isLearn = false;
     private HashMap<String, Object> config;
 
@@ -136,7 +126,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             sessionName = sessionFile.getName();
             try {
                 this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot())
-                .setRealHistory(this.MCTS.getRealHistory());
+                        .setRealHistory(this.MCTS.getRealHistory());
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.writerWithDefaultPrettyPrinter().writeValue(sessionFile, this.negotiationData);
             } catch (IOException e) {
@@ -228,22 +218,8 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             throw new IllegalStateException(e);
         }
 
-        if (this.persistentState.getCurrentBelief() == null) {
-            Domain domain = this.uSpace.getDomain();
-            AllBidsList bidspace = new AllBidsList(domain);
-            List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
-
-            for (int cnt = 0; cnt < this.numOpponentCopies; cnt++) {
-                listOfOpponents.add(new AntagonisticOpponentPolicy(this.uSpace));
-                listOfOpponents.add(new SelfishOpponentPolicy(domain));
-                listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
-                listOfOpponents.add(new HardLinerOpponentPolicy(domain));
-                listOfOpponents.add(new ConcederOpponentPolicy(domain));
-                listOfOpponents.add(new BoulwareOpponentPolicy(domain));
-                listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(this.uSpace));  
-            }
-            listOfOpponents = listOfOpponents.stream().map(opponent -> opponent.setBidspace(bidspace))
-                    .collect(Collectors.toList());
+        if (this.persistentState.getCurrentBelief() == null) {          
+            List<AbstractPolicy> listOfOpponents = OpponentParticleCreator.generateOpponentParticles(this.uSpace, this.numParticlesPerOpponent);
 
             Configurator configurator = this.config != null ? this.mapper.convertValue(config, Configurator.class)
                     : new Configurator();
@@ -253,13 +229,15 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
                     configurator.getWidener(), this.progress);
         } else {
-            this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress);
+            this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress, this.opponentName, this.numParticlesPerOpponent);
         }
 
         if (this.MCTS == null) {
             throw new Exception("Failed to instantiate the tree.");
         }
     }
+
+
 
     private void initializeVariables(Settings settings) throws IOException, JsonParseException, JsonMappingException {
         // Protocol that is initiate for the agent
@@ -281,7 +259,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             this.simulationTime = ((Number) this.parameters.get("simulationTime")).longValue();
         }
         if (this.parameters.containsKey("numParticlesPerOpponent")) {
-            this.numOpponentCopies = ((Number) this.parameters.get("numParticlesPerOpponent")).longValue();
+            this.numParticlesPerOpponent = ((Number) this.parameters.get("numParticlesPerOpponent")).longValue();
         }
 
         if (this.parameters.containsKey("config")) {
@@ -403,7 +381,12 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             }
         }
         Action action;
-        
+        // if (this.opponentName == null) {
+        //     Bid bid = new BidsWithUtility((LinearAdditive) this.uSpace).getExtremeBid(true);
+        //     action = new Offer(this.me, bid);
+        //     this.MCTS.getRealHistory().add(action);
+
+        // }
         // STEP: Generate offer!
         long negotiationEnd = this.progress.getTerminationTime().getTime();
         long remainingTime = negotiationEnd - System.currentTimeMillis();

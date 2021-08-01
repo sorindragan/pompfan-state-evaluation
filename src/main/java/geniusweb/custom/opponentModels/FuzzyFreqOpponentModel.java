@@ -24,23 +24,30 @@ import geniusweb.opponentmodel.FrequencyOpponentModel;
 public class FuzzyFreqOpponentModel extends FrequencyOpponentModel implements IFuzzyModel {
 
     private static final int SLACK = 3;
-    private Map<String, Map<Value, Integer>> bidFrequencies = null;
+    @JsonIgnore
     private Map<String, List<Value>> bidFreqAsList = null;
+    @JsonIgnore
     private Integer initBidCount = 0;
+    @JsonIgnore
     private Map<String, Map<Value, Long>> sumIssVals = new HashMap<String, Map<Value, Long>>();
     @JsonIgnore
     private Random random = new Random();
+    @JsonIgnore
     private int numGenerations = 10;
     private PartyId partyId;
     private List<Action> newHistory;
 
+    public FuzzyFreqOpponentModel() {
+        super();
+    }
+
     public FuzzyFreqOpponentModel(PartyId actor, List<Action> realHistoryActions) {
         super();
-        this.partyId = actor;
+        this.setPartyId(actor);;
         this.setInitBidCount(realHistoryActions.size());
-        this.numGenerations = Math.max(0, this.getInitBidCount() + (this.random.nextInt(SLACK) - (2 * SLACK)));
-        this.newHistory = this.generateHistory();
-        this.bidFrequencies = this.genNewFreqModel(this.newHistory);
+        this.setNumGenerations(Math.max(0, this.getInitBidCount() + (this.random.nextInt(SLACK) - (2 * SLACK))));;
+        this.setNewHistory(this.generateHistory());
+        this.setBidFrequencies(this.genNewFreqModel(this.getNewHistory()));;
 
     }
 
@@ -48,8 +55,6 @@ public class FuzzyFreqOpponentModel extends FrequencyOpponentModel implements IF
         if (this.getDomain() == null) {
             throw new IllegalStateException("domain is not initialized");
         }
-        // Map<String, Map<Value, Integer>> newFreqs = new HashMap<String, Map<Value,
-        // Integer>>();
         Map<String, List<Value>> newFreqs = new HashMap<String, List<Value>>();
         for (Action action : realHistoryActions) {
             if (!(action instanceof Offer))
@@ -124,10 +129,6 @@ public class FuzzyFreqOpponentModel extends FrequencyOpponentModel implements IF
         return bidFreqAsList;
     }
 
-    public void setBidFrequencies(Map<String, List<Value>> bidFrequencies) {
-        this.bidFreqAsList = bidFrequencies;
-    }
-
     public Map<String, Map<Value, Long>> getSumIssVals() {
         return sumIssVals;
     }
@@ -158,5 +159,24 @@ public class FuzzyFreqOpponentModel extends FrequencyOpponentModel implements IF
 
     public void setPartyId(PartyId partyId) {
         this.partyId = partyId;
+    }
+
+    public void setBidFrequencies(Map<String, Map<Value, Integer>> bidFrequencies) {
+    }
+
+    public Map<String, List<Value>> getBidFreqAsList() {
+        return bidFreqAsList;
+    }
+
+    public void setBidFreqAsList(Map<String, List<Value>> bidFreqAsList) {
+        this.bidFreqAsList = bidFreqAsList;
+    }
+
+    public List<Action> getNewHistory() {
+        return newHistory;
+    }
+
+    public void setNewHistory(List<Action> newHistory) {
+        this.newHistory = newHistory;
     }
 }
