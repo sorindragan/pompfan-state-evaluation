@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import geniusweb.actions.Accept;
@@ -20,8 +21,9 @@ import geniusweb.profile.utilityspace.UtilitySpace;
  * MeanUtilityEvaluator
  */
 public class Last2BidsMeanUtilityEvaluator implements IEvalFunction<HistoryState> {
-
+    @JsonBackReference
     private UtilitySpace utilitySpace;
+
 
     public Last2BidsMeanUtilityEvaluator() {
         super();

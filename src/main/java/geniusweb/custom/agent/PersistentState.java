@@ -38,7 +38,7 @@ public class PersistentState {
   private Integer negotiations = 0;
   private Map<String, Double> avgMaxUtilityOpponent = new HashMap<String, Double>();
   private Map<String, Integer> opponentEncounters = new HashMap<String, Integer>();
-  private Map<String, AbstractBelief> currentBelief;
+  private Map<String, AbstractBelief> allOpponentBeliefs = new HashMap<String, AbstractBelief>();
   private HashMap<String, Object> configuration;
   private BeliefNode rootNode;
 
@@ -101,11 +101,11 @@ public class PersistentState {
   }
 
   public Map<String, AbstractBelief> getCurrentBelief() {
-    return currentBelief;
+    return allOpponentBeliefs;
   }
 
   public void setCurrentBelief(Map<String, AbstractBelief> currentBelief) {
-    this.currentBelief = currentBelief;
+    this.allOpponentBeliefs = currentBelief;
   }
 
   public Double getAvgMaxUtility(String opponent) {

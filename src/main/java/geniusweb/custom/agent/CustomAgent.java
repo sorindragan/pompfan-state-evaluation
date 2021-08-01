@@ -55,9 +55,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private static final int NUM_SIMULATIONS = 100;
     private static final int MAX_WIDTH = 10;
     private Long simulationTime = 500l; // TODO: BUG if increased
-    private static final boolean DEBUG_LEARN = false;
-    private static boolean DEBUG_OFFER = false;
-    private static boolean DEBUG_SAVE_TREE = false;
+    private static final boolean DEBUG_LEARN = true;
+    private static boolean DEBUG_OFFER = true;
+    private static boolean DEBUG_SAVE_TREE = true;
     private static boolean DEBUG_IN_TOURNAMENT = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -274,8 +274,12 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             this.persistentPath = new FileLocation(fileLocation).getFile();
         }
         if (this.persistentPath != null && this.persistentPath.exists()) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            this.persistentState = objectMapper.readValue(this.persistentPath, PersistentState.class);
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                this.persistentState = objectMapper.readValue(this.persistentPath, PersistentState.class);
+            } catch (Exception e) {
+                System.out.println("sdfsdfsdfsdf");
+            }
         } else {
             this.persistentState = new PersistentState();
         }
@@ -455,6 +459,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 NegotiationData negotiationData = objectMapper.readValue(dataPath, NegotiationData.class);
                 // Process the negotiation data in our persistent state
                 this.persistentState.update(negotiationData);
+                if (DEBUG_IN_TOURNAMENT) {
+                    System.out.println(this.persistentState);
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Negotiation data provided to learning step does not exist", e);
             }

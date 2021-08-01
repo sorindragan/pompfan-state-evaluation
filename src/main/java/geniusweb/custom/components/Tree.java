@@ -9,6 +9,9 @@ import java.util.Random;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
@@ -23,6 +26,7 @@ import geniusweb.custom.wideners.AbstractWidener;
 import geniusweb.deadline.DeadlineTime;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
+import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.progress.Progress;
 import geniusweb.progress.ProgressFactory;
@@ -34,6 +38,7 @@ public class Tree {
     private BeliefNode root;
     private static Random random = new Random(42);
     private Domain domain;
+    @JsonManagedReference
     private UtilitySpace utilitySpace;
 
     private AbstractBelief belief;

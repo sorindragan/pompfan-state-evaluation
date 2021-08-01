@@ -2,6 +2,9 @@ package geniusweb.custom.beliefs;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
@@ -11,6 +14,14 @@ import geniusweb.custom.state.AbstractState;
 import geniusweb.issuevalue.Bid;
 
 public class ParticleFilterWithAcceptBelief extends ParticleFilterBelief {
+
+    @JsonCreator
+    public ParticleFilterWithAcceptBelief(@JsonProperty("opponents") List<AbstractPolicy> opponents,
+            @JsonProperty("probabilities") List<Double> probabilities,
+            @JsonProperty("distance") AbstractBidDistance distance) {
+        super(opponents, probabilities, distance);
+
+    }
 
     public ParticleFilterWithAcceptBelief(List<AbstractPolicy> listOfOpponents, AbstractBidDistance distance) {
         super(listOfOpponents, distance);

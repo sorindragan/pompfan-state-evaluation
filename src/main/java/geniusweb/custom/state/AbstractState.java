@@ -1,6 +1,8 @@
 package geniusweb.custom.state;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -21,6 +23,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
         @Type(value = UtilityState.class) })
 public abstract class AbstractState<T>
         implements Comparable<AbstractState<T>>, CosineSimilarity, L2Distance, ExactSame<T> {
+    @JsonBackReference
     private UtilitySpace utilitySpace;
     private AbstractPolicy opponent;
     private T representation;
