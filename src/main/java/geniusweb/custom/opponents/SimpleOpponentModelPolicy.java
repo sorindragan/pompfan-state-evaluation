@@ -49,6 +49,7 @@ public class SimpleOpponentModelPolicy extends AbstractPolicy {
         return this.chooseAction(lastReceivedBid, state);
     }
     
+    //TODO: refactor others
     @Override
     public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
 

@@ -89,9 +89,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private static final int NUM_SIMULATIONS = 100;
     private static final int MAX_WIDTH = 10;
     private Long simulationTime = 500l; // TODO: BUG if increased
-    private static final boolean DEBUG_LEARN = true;
-    private static boolean DEBUG_OFFER = true;
-    private static boolean DEBUG_SAVE_TREE = true;
+    private static final boolean DEBUG_LEARN = false;
+    private static boolean DEBUG_OFFER = false;
+    private static boolean DEBUG_SAVE_TREE = false;
     private static boolean DEBUG_IN_TOURNAMENT = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -416,12 +416,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             }
         }
         Action action;
-        if (this.opponentName == null) {
-            Bid bid = new BidsWithUtility((LinearAdditive) this.uSpace).getExtremeBid(true);
-            action = new Offer(this.me, bid);
-            this.MCTS.getRealHistory().add(action);
+        // if (this.opponentName == null) {
+        //     Bid bid = new BidsWithUtility((LinearAdditive) this.uSpace).getExtremeBid(true);
+        //     action = new Offer(this.me, bid);
+        //     this.MCTS.getRealHistory().add(action);
 
-        } else if (isGood(this.lastReceivedBid)) {
+        // } 
+        if (isGood(this.lastReceivedBid)) {
             // If the last received bid is good: create Accept action
             action = new Accept(me, this.lastReceivedBid);
         } else {
