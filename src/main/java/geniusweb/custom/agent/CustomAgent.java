@@ -34,6 +34,7 @@ import geniusweb.custom.opponents.AntagonisticOpponentPolicy;
 import geniusweb.custom.opponents.BoulwareOpponentPolicy;
 import geniusweb.custom.opponents.ConcederOpponentPolicy;
 import geniusweb.custom.opponents.HardLinerOpponentPolicy;
+import geniusweb.custom.opponents.OwnUtilityTFTOpponentPolicy;
 import geniusweb.custom.opponents.SelfishOpponentPolicy;
 import geniusweb.custom.opponents.TimeDependentOpponentPolicy;
 import geniusweb.custom.state.StateRepresentationException;
@@ -63,7 +64,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     // private static final int NUM_SIMULATIONS = 100;
     // private static final int MAX_WIDTH = 10;
-    private Long simulationTime = 500l; // TODO: BUG if increased
+    private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = true;
     private static boolean DEBUG_OFFER = true;
     private static boolean DEBUG_SAVE_TREE = true;
@@ -239,6 +240,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 listOfOpponents.add(new HardLinerOpponentPolicy(domain));
                 listOfOpponents.add(new ConcederOpponentPolicy(domain));
                 listOfOpponents.add(new BoulwareOpponentPolicy(domain));
+                listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(this.uSpace));  
             }
             listOfOpponents = listOfOpponents.stream().map(opponent -> opponent.setBidspace(bidspace))
                     .collect(Collectors.toList());
@@ -407,15 +409,15 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         long remainingTime = negotiationEnd - System.currentTimeMillis();
 
         long simTime = this.simulationTime;
-        // System.out.println(simTime <= remainingTime);
         if (simTime <= remainingTime) {
             this.MCTS.construct(simTime);
             // System.out.println(this.MCTS.toString());
             // DONE: Number of nodes do increase at each tree construction
             // System.out.println("Nodes Number: ".concat(String.valueOf(this.MCTS.howManyNodes())));
         }
-        // TODO: consuming the whole tree will result in an error
         action = this.MCTS.chooseBestAction();
+        // Consuming the whole tree will result in an error
+        // So accept | proposing old bids also possible
         
         if (action == null) {
             // if action==null we failed to suggest next action.

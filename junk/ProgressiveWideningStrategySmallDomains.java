@@ -42,9 +42,9 @@ public class ProgressiveWideningStrategySmallDomains extends AbstractWidener {
             if (currRoot.getChildren().size() < this.calcProgressiveMaxWidth(currRoot, this.k_b, this.a_b)) {
                 // Widening the Belief level
                 Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
-                // TODO: Instead of creating new nodes it happens that we always select the
+                // DONE: Instead of creating new nodes it happens that we always select the
                 // existing because the state we generate are already in some nodes
-                // Maybe solved by adding continuous state space like time
+                // Might still be problematic in small domains
                 
                 ActionNode currActionNode = (ActionNode) currRoot;
                 BeliefNode receivedObservationNode = (BeliefNode) currActionNode

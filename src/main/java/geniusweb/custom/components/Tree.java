@@ -39,7 +39,7 @@ public class Tree {
     private AbstractBelief belief;
 
     private AbstractWidener widener; // Used for the action we choose to simulate (expand new node).
-    private static Double C = Math.sqrt(2); // TODO: Make it hyperparam
+    private static Double C = Math.sqrt(2); // ? Maybe make it hyperparam
     private ActionNode lastBestActionNode;
     private List<Action> realHistory;
     private Progress progress;
@@ -143,7 +143,7 @@ public class Tree {
             System.out.println(this.belief);
         }
 
-        // TODO: yet another thing :)
+        // !! yet another thing that could generate unwanted behaviour
         if (this.lastBestActionNode == null) {
             // Quickfix: by doing nothing!
             return this;
@@ -186,6 +186,11 @@ public class Tree {
 
         List<Node> oldestChildren = this.root.getChildren();
         Action action = null;
+
+        if (oldestChildren.isEmpty()) {
+            return action;
+        }
+        
         do {
             this.lastBestActionNode = (ActionNode) oldestChildren.stream()
                     .max(Comparator.comparing(node -> node.getValue())).get();
