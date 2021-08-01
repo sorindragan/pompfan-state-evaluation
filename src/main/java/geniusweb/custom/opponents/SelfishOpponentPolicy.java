@@ -50,18 +50,14 @@ public class SelfishOpponentPolicy extends AbstractPolicy {
 
     @Override
     public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
-        Action action;
-        Offer offer = (Offer) this.chooseAction();
-        action = isGood(lastReceivedBid) ? new Accept(this.getPartyId(), lastReceivedBid) : offer;
+        long i = this.getRandom().nextInt(this.possibleBids.size().intValue());
+        Bid bid = this.possibleBids.get(BigInteger.valueOf(i));
+        Offer offer = new Offer(this.getPartyId(), bid);
+        Action action = isGood(lastReceivedBid) ? new Accept(this.getPartyId(), lastReceivedBid) : offer;
         return action;
     }
 
-    // @Override
-    // public Action chooseAction() {
-    //     long i = this.getRandom().nextInt(this.getPossibleBids().size().intValue());
-    //     Bid bid = this.getPossibleBids().get(BigInteger.valueOf(i));
-    //     return new Offer(this.getPartyId(), bid);
-    // }
+    
 
     private boolean isGood(Bid bid) {
         if (bid == null)

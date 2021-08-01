@@ -49,9 +49,15 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
         this.extendedspace = new ExtendedUtilSpace((LinearAdditive) this.getUtilitySpace());
     }
 
+
+    @Override
+    public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
+        return this.myTurn(lastReceivedBid, state);
+    }
+    
     @Override
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
-        return this.myTurn(lastReceivedBid, state);
+        return this.chooseAction(lastReceivedBid, state);
     }
 
     private Action myTurn(Bid lastReceivedBid, AbstractState<?> state) {

@@ -49,7 +49,7 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
     }
 
     @Override
-    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
+    public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
         Number selectionPoint = Math.floor(this.getRecordedBehavior().size() * state.getTime());
         int selectedIdx = selectionPoint.intValue();
         if (selectedIdx >= this.getRecordedBehavior().size()) {
@@ -82,6 +82,11 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
         Bid resultBid = new Bid(issuevalues);
 
         return new Offer(this.getPartyId(), resultBid);
+    }
+
+    @Override
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
+        return this.chooseAction(lastReceivedBid, state);
     }
 
     private boolean isGood(Bid bid) {

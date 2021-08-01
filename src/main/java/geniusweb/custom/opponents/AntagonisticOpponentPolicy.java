@@ -58,6 +58,14 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
         return new Offer(this.getPartyId(), bid);
     }
 
+    @Override
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
+        return this.chooseAction(lastReceivedBid, state);
+    }
 
+    @Override
+    public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
+        return this.chooseAction();
+    }
 
 }

@@ -19,16 +19,10 @@ import geniusweb.custom.state.AbstractState;
 import geniusweb.issuevalue.Bid;
 
 public class ParticleFilterBelief extends AbstractBelief {
-    // @JsonProperty("opponentProbabilities")
-    // @JsonDeserialize(keyUsing = AbstractPolicyDeserializer.class)
-    // private Map<AbstractPolicy, Double> opponentProbabilities = new
-    // HashMap<AbstractPolicy, Double>();
 
     public static final int NUMBER_SAMPLES = 100;
     public static final Double SAMENESS_THRESHOLD = 0.1;
     private static final Double EPSILON = 0.001;
-
-    List<AbstractPolicy> particles = new ArrayList<>();
 
     @JsonCreator
     public ParticleFilterBelief(@JsonProperty("opponents") List<AbstractPolicy> opponents,
@@ -38,14 +32,6 @@ public class ParticleFilterBelief extends AbstractBelief {
 
     }
 
-    // public Map<AbstractPolicy, Double> getOpponentProbabilities() {
-    // return opponentProbabilities;
-    // }
-
-    // public void setOpponentProbabilities(Map<AbstractPolicy, Double>
-    // opponentProbabilities) {
-    // this.opponentProbabilities = opponentProbabilities;
-    // }
 
     // @JsonCreator
     public ParticleFilterBelief(List<AbstractPolicy> listOfOpponents, AbstractBidDistance distance) {

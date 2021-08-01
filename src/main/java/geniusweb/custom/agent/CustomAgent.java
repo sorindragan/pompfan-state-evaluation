@@ -60,6 +60,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private Long simulationTime = 500l; // TODO: BUG if increased
     private static final boolean DEBUG_LEARN = true;
     private static boolean DEBUG_OFFER = false;
+    private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
     private static boolean DEBUG_IN_TOURNAMENT = false;
     private Bid lastReceivedBid = null;
@@ -98,7 +99,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     @Override
     public void notifyChange(Inform info) {
-        System.out.println("DEBUG_PERSIST: ===========INFO========== " + info.getClass().getName());
+        System.out.println("===========INFO========== " + info.getClass().getName());
         // System.out.println("DEBUG_PERSIST: " + info.toString());
         // if (DEBUG_IN_TOURNAMENT == false) {
         // }
@@ -160,16 +161,20 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 // Add name of the opponent to the negotiation data
                 this.negotiationData.setOpponentName(this.opponentName);
                 // System.out.println();
-                getReporter().log(Level.INFO, "DEBUG_PERSIST: Opp -> " + this.opponentName.toString());
                 if (this.persistentState.getAllOpponentBeliefs().containsKey(this.opponentName)) {
-                    System.out.println("DEBUG_PERSIST: Load -> " + this.me);
-                    System.out.println("DEBUG_PERSIST: Load VS ->" + this.opponentName);
-                    System.out.println("DEBUG_PERSIST: Load ->" + this.persistentState.getAllOpponentBeliefs().toString());
-                    this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress, this.opponentName,
-                    this.numParticlesPerOpponent);
+                    if (DEBUG_PERSIST)
+                        System.out.println("DEBUG_PERSIST: Load -> " + this.me);
+                    if (DEBUG_PERSIST)
+                        System.out.println("DEBUG_PERSIST: Load VS ->" + this.opponentName);
+                    if (DEBUG_PERSIST)
+                        System.out.println(
+                                "DEBUG_PERSIST: Load ->" + this.persistentState.getAllOpponentBeliefs().toString());
+                    this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress,
+                            this.opponentName, this.numParticlesPerOpponent);
                     System.out.println("DEBUG_PERSIST: Trust->" + this.MCTS.getBelief().toString());
-                    
-                } 
+
+                }
+
             }
             // Process the action of the opponent.
             processAction(action);
@@ -202,8 +207,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot())
                         .setRealHistory(this.MCTS.getRealHistory());
 
-                System.out.println("DEBUG_PERSIST: End -> " + this.me);
-                System.out.println("DEBUG_PERSIST: End -> " + this.negotiationData.getBelief());
+                if (DEBUG_PERSIST)
+                    System.out.println("DEBUG_PERSIST: End -> " + this.me);
+                if (DEBUG_PERSIST)
+                    System.out.println("DEBUG_PERSIST: End -> " + this.negotiationData.getBelief());
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.writerWithDefaultPrettyPrinter().writeValue(sessionFile, this.negotiationData);
@@ -243,7 +250,8 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-        System.out.println("DEBUG_PERSIST: Opp -> " + this.opponentName);
+        if (DEBUG_PERSIST)
+            System.out.println("DEBUG_PERSIST: Opp -> " + this.opponentName);
 
         List<AbstractPolicy> listOfOpponents = OpponentParticleCreator.generateOpponentParticles(this.uSpace,
                 this.numParticlesPerOpponent);
@@ -252,8 +260,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 : new Configurator();
         configurator = configurator.setUtilitySpace(this.uSpace).setListOfOpponents(listOfOpponents).setMe(this.me)
                 .build();
-        System.out.println("DEBUG_PERSIST: Init -> " + this.me);
-        System.out.println("DEBUG_PERSIST: Init -> " + configurator.getBelief().toString());
+        if (DEBUG_PERSIST)
+            System.out.println("DEBUG_PERSIST: Init -> " + this.me);
+        if (DEBUG_PERSIST)
+            System.out.println("DEBUG_PERSIST: Init -> " + configurator.getBelief().toString());
         this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
                 configurator.getWidener(), this.progress);
 

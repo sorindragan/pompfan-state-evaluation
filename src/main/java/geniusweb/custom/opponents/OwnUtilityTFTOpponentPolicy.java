@@ -28,6 +28,16 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
     }
 
     @Override
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
+        return this.chooseAction(lastReceivedBid, state);
+    }
+
+    @Override
+    public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
+        return this.chooseAction(state);
+    }
+
+    @Override
     public Action chooseAction(AbstractState<?> state) {
         boolean isConcession = false;
         if (state instanceof HistoryState) {
@@ -54,42 +64,20 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
                 // I need something like getBidNearUtility ffs
                 // I did a computationally-expensive ugly workaround
                 options = this.getBidsWithinUtil()
-                    .getBids(new Interval(
-                            BigDecimal.valueOf(this.getUtilitySpace().getUtility(lastOfferedBid).doubleValue() - difference - utilGapForConcession).
-                            min(new BigDecimal("0.0")), this.getUtilitySpace().getUtility(lastOfferedBid)
-                        ));
-                
+                        .getBids(new Interval(
+                                BigDecimal.valueOf(this.getUtilitySpace().getUtility(lastOfferedBid).doubleValue()
+                                        - difference - utilGapForConcession).min(new BigDecimal("0.0")),
+                                this.getUtilitySpace().getUtility(lastOfferedBid)));
+
                 if (options.size().intValue() == 0) {
                     options = this.getBidsWithinUtil()
-                    .getBids(new Interval(
-                            BigDecimal.valueOf(this.getUtilitySpace().getUtility(lastOfferedBid).doubleValue()
-                                    - 2 * (difference + utilGapForConcession)).min(new BigDecimal("0.0")),
-                            this.getUtilitySpace().getUtility(lastOfferedBid)));
-                }
-
-                // this should not be reached
-                if (options.size().intValue() == 0) {
-                    i = this.getRandom().nextInt(this.getBidspace().size().intValue()); 
-                    return new Offer(this.getPartyId(), this.getBidspace().get(i));
-                }
-
-                i = this.getRandom().nextInt(options.size().intValue());
-                
-            }
-            // don't concede
-            else {
-                options = this.getBidsWithinUtil()
-                    .getBids(new Interval(this.getUtilitySpace().getUtility(lastOfferedBid),
-                             BigDecimal.valueOf(this.getUtilitySpace().getUtility(lastOfferedBid).doubleValue() + difference + utilGapForConcession)
-                                       .max(this.getUtilitySpace().getUtility(this.getBidsWithinUtil().getExtremeBid(true)))
-                        ));
-                
-                if (options.size().intValue() == 0) {
-                    options = this.getBidsWithinUtil()
-                            .getBids(new Interval(this.getUtilitySpace().getUtility(lastOfferedBid),
-                                    this.getUtilitySpace().getUtility(lastOfferedBid)
-                                            .max(this.getUtilitySpace()
-                                                    .getUtility(this.getBidsWithinUtil().getExtremeBid(true)))));
+                            .getBids(
+                                    new Interval(
+                                            BigDecimal
+                                                    .valueOf(this.getUtilitySpace().getUtility(lastOfferedBid)
+                                                            .doubleValue() - 2 * (difference + utilGapForConcession))
+                                                    .min(new BigDecimal("0.0")),
+                                            this.getUtilitySpace().getUtility(lastOfferedBid)));
                 }
 
                 // this should not be reached
@@ -99,7 +87,31 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
                 }
 
                 i = this.getRandom().nextInt(options.size().intValue());
-                
+
+            }
+            // don't concede
+            else {
+                options = this.getBidsWithinUtil()
+                        .getBids(new Interval(this.getUtilitySpace().getUtility(lastOfferedBid), BigDecimal
+                                .valueOf(this.getUtilitySpace().getUtility(lastOfferedBid).doubleValue() + difference
+                                        + utilGapForConcession)
+                                .max(this.getUtilitySpace().getUtility(this.getBidsWithinUtil().getExtremeBid(true)))));
+
+                if (options.size().intValue() == 0) {
+                    options = this.getBidsWithinUtil().getBids(new Interval(
+                            this.getUtilitySpace().getUtility(lastOfferedBid),
+                            this.getUtilitySpace().getUtility(lastOfferedBid).max(
+                                    this.getUtilitySpace().getUtility(this.getBidsWithinUtil().getExtremeBid(true)))));
+                }
+
+                // this should not be reached
+                if (options.size().intValue() == 0) {
+                    i = this.getRandom().nextInt(this.getBidspace().size().intValue());
+                    return new Offer(this.getPartyId(), this.getBidspace().get(i));
+                }
+
+                i = this.getRandom().nextInt(options.size().intValue());
+
             }
             Bid newBid = options.get(i);
             return new Offer(this.getPartyId(), newBid);
