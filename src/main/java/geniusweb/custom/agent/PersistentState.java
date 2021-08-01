@@ -97,15 +97,7 @@ public class PersistentState {
   }
 
   public void addBelief(String opponent, AbstractBelief abstractBelief) {
-    this.getCurrentBelief().put(opponent, abstractBelief);
-  }
-
-  public Map<String, AbstractBelief> getCurrentBelief() {
-    return allOpponentBeliefs;
-  }
-
-  public void setCurrentBelief(Map<String, AbstractBelief> currentBelief) {
-    this.allOpponentBeliefs = currentBelief;
+    this.getAllOpponentBeliefs().put(opponent, abstractBelief);
   }
 
   public Double getAvgMaxUtility(String opponent) {
@@ -127,7 +119,7 @@ public class PersistentState {
   }
 
   public Tree reconstructTree(PartyId me, UtilitySpace utilitySpace, Progress progress, String opponent, Long numParticlesPerOpponent) {
-    Map<String, AbstractBelief> allBeliefs = this.getCurrentBelief();
+    Map<String, AbstractBelief> allBeliefs = this.getAllOpponentBeliefs();
     AbstractBelief belief = allBeliefs.get(opponent); 
     List<AbstractPolicy> listOfOpponents;
     if (belief == null) {
@@ -147,5 +139,13 @@ public class PersistentState {
 
   public void save(File destination) throws JsonGenerationException, JsonMappingException, IOException {
     mapper.writerWithDefaultPrettyPrinter().writeValue(destination, this);
+  }
+
+  public Map<String, AbstractBelief> getAllOpponentBeliefs() {
+    return allOpponentBeliefs;
+  }
+
+  public void setAllOpponentBeliefs(Map<String, AbstractBelief> allOpponentBeliefs) {
+    this.allOpponentBeliefs = allOpponentBeliefs;
   }
 }
