@@ -186,15 +186,17 @@ public class Tree {
 
         List<Node> oldestChildren = this.root.getChildren();
         Action action = null;
-
-        if (oldestChildren.isEmpty()) {
-            return action;
-        }
         
         do {
+
+            if (oldestChildren.isEmpty()) {
+                return null;
+            }
+
             this.lastBestActionNode = (ActionNode) oldestChildren.stream()
                     .max(Comparator.comparing(node -> node.getValue())).get();
-            action = lastBestActionNode.getAction();
+            action = lastBestActionNode.getAction();     
+        
 
             if (this.realHistory.size() == 0) {
                 this.realHistory.add(action);
