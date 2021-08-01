@@ -201,10 +201,12 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         if (this.isLearn) {
             // We are in the learning step: We execute the learning and notify when we are
             // done. REMEMBER that there is a deadline of 60 seconds for this step.
-            System.out.println("DEBUG_LEARN_PERSISTENCE: Enter learn");
+            if (DEBUG_LEARN)
+                System.out.println("DEBUG_LEARN_PERSISTENCE: Enter learn");
             this.runLearnPhase(info);
         } else {
-            System.out.println("DEBUG_LEARN_PERSISTENCE: Enter tree init");
+            if (DEBUG_LEARN)
+                System.out.println("DEBUG_LEARN_PERSISTENCE: Enter tree init");
             this.initializeTree(settings);
         }
     }
