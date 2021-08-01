@@ -25,6 +25,7 @@ import geniusweb.actions.FileLocation;
 import geniusweb.actions.LearningDone;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
+import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.custom.components.Tree;
 import geniusweb.custom.helper.Configurator;
 import geniusweb.custom.opponents.AbstractPolicy;
@@ -40,6 +41,7 @@ import geniusweb.issuevalue.Bid;
 import geniusweb.party.Capabilities;
 import geniusweb.party.DefaultParty;
 import geniusweb.profile.Profile;
+import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.profileconnection.ProfileConnectionFactory;
 import geniusweb.profileconnection.ProfileInterface;
@@ -96,10 +98,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     @Override
     public void notifyChange(Inform info) {
-        if (DEBUG_IN_TOURNAMENT == false) {
-            System.out.println("RECEIVE INFO");
-            System.out.println(info.getClass().getName());
-        }
+        System.out.println("DEBUG_PERSIST: ===========INFO========== " + info.getClass().getName());
+        // System.out.println("DEBUG_PERSIST: " + info.toString());
+        // if (DEBUG_IN_TOURNAMENT == false) {
+        // }
         try {
             if (info instanceof Settings) {
                 runSetupPhase(info);
@@ -113,77 +115,6 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to handle info", e);
-        }
-    }
-
-    private void runEndPhase(Inform info) throws IOException {
-        // The info is a notification that th negotiation has ended. This Finished
-        // object also contains the final agreement (if any).
-        Agreements agreements = ((Finished) info).getAgreement();
-        processAgreements(agreements);
-        String sessionName = "";
-        // Write the negotiation data that we collected to the path provided.
-        if (this.negotiationData != null && !this.dataPaths.isEmpty()) {
-            File sessionFile = this.dataPaths.get(0);
-            sessionName = sessionFile.getName();
-            try {
-                this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot())
-                        .setRealHistory(this.MCTS.getRealHistory());
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.writerWithDefaultPrettyPrinter().writeValue(sessionFile, this.negotiationData);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to write negotiation data to disk", e);
-            }
-        }
-        if (DEBUG_SAVE_TREE) {
-            saveTreeToLogs("full_".concat(sessionName), this.MCTS.toStringOriginal());
-            saveTreeToLogs("curr_".concat(sessionName), this.MCTS.toString());
-        }
-
-        // Log the final outcome and terminate
-        getReporter().log(Level.INFO, "Final outcome:" + info);
-        terminate();
-    }
-
-    private void saveTreeToLogs(String fileName, String content) throws IOException {
-        FileWriter fullTreeFileWriter = new FileWriter("logs/log_" + fileName + ".txt");
-        fullTreeFileWriter.write(content);
-        fullTreeFileWriter.close();
-    }
-
-    private void runAgentPhase(Inform info) throws IOException, StateRepresentationException {
-        // Advance the round number if a round-based deadline is set.
-        if (progress instanceof ProgressRounds) {
-            progress = ((ProgressRounds) progress).advance();
-        }
-        if (info instanceof YourTurn) {
-            // The info notifies us that it is our turn
-            YourTurn myTurnInfo = (YourTurn) info;
-            myTurn(myTurnInfo);
-        }
-    }
-
-    private void runOpponentPhase(Inform info) {
-        // The info object is an action that is performed by an agent.
-        Action action = ((ActionDone) info).getAction();
-
-        // Check if this is not our own action
-        if (!this.me.equals(action.getActor())) {
-            // Check if we already know who we are playing against.
-            if (this.opponentName == null) {
-                // The part behind the last _ is always changing, so we must cut it off.
-                String fullOpponentName = action.getActor().getName();
-                int lastIndexOf = fullOpponentName.lastIndexOf("_");
-                // int index = lastIndexOf == -1 ? fullOpponentName.length() : lastIndexOf;
-                int index = lastIndexOf;
-                this.opponentName = fullOpponentName.substring(0, index);
-
-                // Add name of the opponent to the negotiation data
-                this.negotiationData.setOpponentName(this.opponentName);
-                getReporter().log(Level.INFO, "VS. " + this.opponentName);
-            }
-            // Process the action of the opponent.
-            processAction(action);
         }
     }
 
@@ -211,6 +142,91 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         }
     }
 
+    private void runOpponentPhase(Inform info) {
+        // The info object is an action that is performed by an agent.
+        Action action = ((ActionDone) info).getAction();
+
+        // Check if this is not our own action
+        if (!this.me.equals(action.getActor())) {
+            // Check if we already know who we are playing against.
+            if (this.opponentName == null) {
+                // The part behind the last _ is always changing, so we must cut it off.
+                String fullOpponentName = action.getActor().getName();
+                int lastIndexOf = fullOpponentName.lastIndexOf("_");
+                // int index = lastIndexOf == -1 ? fullOpponentName.length() : lastIndexOf;
+                int index = lastIndexOf;
+                this.opponentName = fullOpponentName.substring(0, index);
+
+                // Add name of the opponent to the negotiation data
+                this.negotiationData.setOpponentName(this.opponentName);
+                // System.out.println();
+                getReporter().log(Level.INFO, "DEBUG_PERSIST: Opp -> " + this.opponentName.toString());
+                if (this.persistentState.getAllOpponentBeliefs().containsKey(this.opponentName)) {
+                    System.out.println("DEBUG_PERSIST: Load -> " + this.me);
+                    System.out.println("DEBUG_PERSIST: Load VS ->" + this.opponentName);
+                    System.out.println("DEBUG_PERSIST: Load ->" + this.persistentState.getAllOpponentBeliefs().toString());
+                    this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress, this.opponentName,
+                    this.numParticlesPerOpponent);
+                    System.out.println("DEBUG_PERSIST: Trust->" + this.MCTS.getBelief().toString());
+                    
+                } 
+            }
+            // Process the action of the opponent.
+            processAction(action);
+        }
+    }
+
+    private void runAgentPhase(Inform info) throws IOException, StateRepresentationException {
+        // Advance the round number if a round-based deadline is set.
+        if (progress instanceof ProgressRounds) {
+            progress = ((ProgressRounds) progress).advance();
+        }
+        if (info instanceof YourTurn) {
+            // The info notifies us that it is our turn
+            YourTurn myTurnInfo = (YourTurn) info;
+            myTurn(myTurnInfo);
+        }
+    }
+
+    private void runEndPhase(Inform info) throws IOException {
+        // The info is a notification that th negotiation has ended. This Finished
+        // object also contains the final agreement (if any).
+        Agreements agreements = ((Finished) info).getAgreement();
+        processAgreements(agreements);
+        String sessionName = "";
+        // Write the negotiation data that we collected to the path provided.
+        if (this.negotiationData != null && !this.dataPaths.isEmpty()) {
+            File sessionFile = this.dataPaths.get(0);
+            sessionName = sessionFile.getName();
+            try {
+                this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot())
+                        .setRealHistory(this.MCTS.getRealHistory());
+
+                System.out.println("DEBUG_PERSIST: End -> " + this.me);
+                System.out.println("DEBUG_PERSIST: End -> " + this.negotiationData.getBelief());
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.writerWithDefaultPrettyPrinter().writeValue(sessionFile, this.negotiationData);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to write negotiation data to disk", e);
+            }
+        }
+        if (DEBUG_SAVE_TREE) {
+            saveTreeToLogs("full_".concat(sessionName), this.MCTS.toStringOriginal());
+            saveTreeToLogs("curr_".concat(sessionName), this.MCTS.toString());
+        }
+
+        // Log the final outcome and terminate
+        getReporter().log(Level.INFO, "Final outcome:" + info);
+        terminate();
+    }
+
+    private void saveTreeToLogs(String fileName, String content) throws IOException {
+        FileWriter fullTreeFileWriter = new FileWriter("logs/log_" + fileName + ".txt");
+        fullTreeFileWriter.write(content);
+        fullTreeFileWriter.close();
+    }
+
     private void initializeTree(Settings settings) throws DeploymentException, Exception {
         // We are in the negotiation step.
 
@@ -227,22 +243,19 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+        System.out.println("DEBUG_PERSIST: Opp -> " + this.opponentName);
 
-        if (this.persistentState.getAllOpponentBeliefs().containsKey(this.opponentName)) {
-            this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress, this.opponentName,
-                    this.numParticlesPerOpponent);
-        } else {
-            List<AbstractPolicy> listOfOpponents = OpponentParticleCreator.generateOpponentParticles(this.uSpace,
-                    this.numParticlesPerOpponent);
+        List<AbstractPolicy> listOfOpponents = OpponentParticleCreator.generateOpponentParticles(this.uSpace,
+                this.numParticlesPerOpponent);
 
-            Configurator configurator = this.config != null ? this.mapper.convertValue(config, Configurator.class)
-                    : new Configurator();
-            configurator = configurator.setUtilitySpace(this.uSpace).setListOfOpponents(listOfOpponents).setMe(this.me)
-                    .build();
-
-            this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
-                    configurator.getWidener(), this.progress);
-        }
+        Configurator configurator = this.config != null ? this.mapper.convertValue(config, Configurator.class)
+                : new Configurator();
+        configurator = configurator.setUtilitySpace(this.uSpace).setListOfOpponents(listOfOpponents).setMe(this.me)
+                .build();
+        System.out.println("DEBUG_PERSIST: Init -> " + this.me);
+        System.out.println("DEBUG_PERSIST: Init -> " + configurator.getBelief().toString());
+        this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
+                configurator.getWidener(), this.progress);
 
         if (this.MCTS == null) {
             throw new Exception("Failed to instantiate the tree.");
@@ -409,13 +422,13 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             }
         }
         Action action;
-        // if (this.opponentName == null) {
-        // Bid bid = new BidsWithUtility((LinearAdditive)
-        // this.uSpace).getExtremeBid(true);
-        // action = new Offer(this.me, bid);
-        // this.MCTS.getRealHistory().add(action);
-
-        // }
+        if (this.opponentName == null) {
+            Bid bid = new BidsWithUtility((LinearAdditive) this.uSpace).getExtremeBid(true);
+            action = new Offer(this.me, bid);
+            this.MCTS.getRealHistory().add(action);
+            getConnection().send(action);
+            return;
+        }
         // STEP: Generate offer!
         long negotiationEnd = this.progress.getTerminationTime().getTime();
         long remainingTime = negotiationEnd - System.currentTimeMillis();
