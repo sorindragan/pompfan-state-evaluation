@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import javax.websocket.DeploymentException;
@@ -56,8 +57,8 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private static final int MAX_WIDTH = 10;
     private Long simulationTime = 500l; // TODO: BUG if increased
     private static final boolean DEBUG_LEARN = true;
-    private static boolean DEBUG_OFFER = true;
-    private static boolean DEBUG_SAVE_TREE = true;
+    private static boolean DEBUG_OFFER = false;
+    private static boolean DEBUG_SAVE_TREE = false;
     private static boolean DEBUG_IN_TOURNAMENT = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -103,6 +104,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             if (info instanceof Settings) {
                 runSetupPhase(info);
             } else if (info instanceof ActionDone) {
+
                 runOpponentPhase(info);
             } else if (info instanceof YourTurn) {
                 runAgentPhase(info);
@@ -190,13 +192,19 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         // info is a Settings object that is passed at the start of a negotiation
         Settings settings = (Settings) info;
         // Needs to run
+        if (DEBUG_LEARN)
+            System.out.println("DEBUG_LEARN_PERSISTENCE: ========================================= "
+                    .concat(settings.getID().toString()));
+        if (DEBUG_LEARN)
+            System.out.println("DEBUG_LEARN_PERSISTENCE: ".concat(settings.toString()));
         this.initializeVariables(settings);
-
         if (this.isLearn) {
             // We are in the learning step: We execute the learning and notify when we are
             // done. REMEMBER that there is a deadline of 60 seconds for this step.
+            System.out.println("DEBUG_LEARN_PERSISTENCE: Enter learn");
             this.runLearnPhase(info);
         } else {
+            System.out.println("DEBUG_LEARN_PERSISTENCE: Enter tree init");
             this.initializeTree(settings);
         }
     }
@@ -218,8 +226,12 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             throw new IllegalStateException(e);
         }
 
-        if (this.persistentState.getCurrentBelief() == null) {          
-            List<AbstractPolicy> listOfOpponents = OpponentParticleCreator.generateOpponentParticles(this.uSpace, this.numParticlesPerOpponent);
+        if (this.persistentState.getAllOpponentBeliefs().containsKey(this.opponentName)) {
+            this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress, this.opponentName,
+                    this.numParticlesPerOpponent);
+        } else {
+            List<AbstractPolicy> listOfOpponents = OpponentParticleCreator.generateOpponentParticles(this.uSpace,
+                    this.numParticlesPerOpponent);
 
             Configurator configurator = this.config != null ? this.mapper.convertValue(config, Configurator.class)
                     : new Configurator();
@@ -228,16 +240,12 @@ public class CustomAgent extends DefaultParty { // TODO: change name
 
             this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
                     configurator.getWidener(), this.progress);
-        } else {
-            this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress, this.opponentName, this.numParticlesPerOpponent);
         }
 
         if (this.MCTS == null) {
             throw new Exception("Failed to instantiate the tree.");
         }
     }
-
-
 
     private void initializeVariables(Settings settings) throws IOException, JsonParseException, JsonMappingException {
         // Protocol that is initiate for the agent
@@ -269,18 +277,32 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         }
 
         // The PersistentState is loaded here (see 'PersistenData,java')
+
         if (this.parameters.containsKey("persistentstate")) {
+            if (DEBUG_LEARN)
+                System.out.println("DEBUG_LEARN_PERSISTENCE: Found Persistence!");
             UUID fileLocation = UUID.fromString((String) this.parameters.get("persistentstate"));
             this.persistentPath = new FileLocation(fileLocation).getFile();
         }
         if (this.persistentPath != null && this.persistentPath.exists()) {
+            if (DEBUG_LEARN)
+                System.out.println("DEBUG_LEARN_PERSISTENCE: Load Persistence!");
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
                 this.persistentState = objectMapper.readValue(this.persistentPath, PersistentState.class);
             } catch (Exception e) {
-                System.out.println("sdfsdfsdfsdf");
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.protocol);
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.progress);
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.progress.get(System.currentTimeMillis()));
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.config);
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.dataPaths);
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.isLearn);
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.me);
+                e.printStackTrace();
+                throw e;
             }
         } else {
+            System.out.println("DEBUG_LEARN_PERSISTENCE: Create Persistence!");
             this.persistentState = new PersistentState();
         }
 
@@ -379,16 +401,17 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     protected void myTurn(YourTurn myTurnInfo) throws IOException, StateRepresentationException {
         if (this.lastReceivedBid != null) {
             if (DEBUG_IN_TOURNAMENT == false) {
-                System.out.println("blatag: " + progress.get(System.currentTimeMillis()));
+                System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
                 System.out.println("Opponent: Util=" + this.uSpace.getUtility(this.lastReceivedBid) + " -- "
                         + this.lastReceivedBid.toString());
             }
         }
         Action action;
         // if (this.opponentName == null) {
-        //     Bid bid = new BidsWithUtility((LinearAdditive) this.uSpace).getExtremeBid(true);
-        //     action = new Offer(this.me, bid);
-        //     this.MCTS.getRealHistory().add(action);
+        // Bid bid = new BidsWithUtility((LinearAdditive)
+        // this.uSpace).getExtremeBid(true);
+        // action = new Offer(this.me, bid);
+        // this.MCTS.getRealHistory().add(action);
 
         // }
         // STEP: Generate offer!
@@ -400,23 +423,24 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             this.MCTS.construct(simTime);
             // System.out.println(this.MCTS.toString());
             // DONE: Number of nodes do increase at each tree construction
-            // System.out.println("Nodes Number: ".concat(String.valueOf(this.MCTS.howManyNodes())));
+            // System.out.println("Nodes Number:
+            // ".concat(String.valueOf(this.MCTS.howManyNodes())));
         }
         action = this.MCTS.chooseBestAction();
         // Consuming the whole tree will result in an error
         // So accept | proposing old bids also possible
-        
+
         if (action == null) {
             // if action==null we failed to suggest next action.
             System.err.println("WARNING! Could not produce action!!!");
             action = new Accept(this.me, lastReceivedBid);
         }
-        
+
         if (action instanceof Offer) {
             Bid myBid = ((Offer) action).getBid();
             if (DEBUG_IN_TOURNAMENT == false) {
-                System.out.println("Agent:    Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- "
-                        + myBid.toString());
+                System.out.println(
+                        "Agent:    Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- " + myBid.toString());
             }
         } else if (action instanceof Accept) {
             Bid acceptedBid = ((Accept) action).getBid();
@@ -437,6 +461,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         // Send action
         getConnection().send(action);
     }
+
     /**
      * This method is invoked if the learning phase is started. There is now time to
      * process previously stored data and use it to update our persistent state.
@@ -458,17 +483,17 @@ public class CustomAgent extends DefaultParty { // TODO: change name
                 // Load the negotiation data object of a previous negotiation
                 NegotiationData negotiationData = objectMapper.readValue(dataPath, NegotiationData.class);
                 // Process the negotiation data in our persistent state
+                // if (this.persistentState == null) {
+                // System.out.println(this.persistentState);
+                // }
                 this.persistentState.update(negotiationData);
-                if (DEBUG_IN_TOURNAMENT) {
-                    System.out.println(this.persistentState);
-                }
             } catch (IOException e) {
                 throw new RuntimeException("Negotiation data provided to learning step does not exist", e);
             }
         }
 
         // Write the persistent state object to file
-        if (this.dataPaths.size() >= 0) {
+        if (this.dataPaths.size() > 0) {
             try {
                 objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.persistentPath, this.persistentState);
                 this.getConnection().send(new LearningDone(me));
