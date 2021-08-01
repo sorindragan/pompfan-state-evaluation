@@ -32,7 +32,7 @@ public class HighSelfEsteemOwnExplorationPolicy extends AbstractOwnExplorationPo
         Action action;
         Bid bid;
         // progressively raise the percentages of accepts from 0 to 10 pcent
-        double acceptProbability = state.getRound() * 10;
+        double acceptProbability = state.getTime() * 10;
         
         
         if (lastReceivedBid == null) {

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
+import geniusweb.bidspace.AllBidsList;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.issuevalue.Value;
@@ -22,6 +23,7 @@ import geniusweb.opponentmodel.FrequencyOpponentModel;
 import geniusweb.opponentmodel.OpponentModel;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.progress.Progress;
+import tudelft.utilities.immutablelist.AbstractImmutableList;
 
 // TODO: Generic impl. of random generator
 // TODO: Baysian version
@@ -29,7 +31,6 @@ import geniusweb.progress.Progress;
 public class FuzzyBayesianOpponentModel implements UtilitySpace, OpponentModel, IFuzzyModel {
 
     private static final int SLACK = 3;
-    private Map<String, Map<Value, Integer>> bidFrequencies = null;
     private Map<String, List<Value>> bidFreqAsList = null;
     private Integer initBidCount = 0;
     private Map<String, Map<Value, Long>> sumIssVals = new HashMap<String, Map<Value, Long>>();
@@ -41,60 +42,44 @@ public class FuzzyBayesianOpponentModel implements UtilitySpace, OpponentModel, 
 
     public FuzzyBayesianOpponentModel(PartyId actor, List<Action> realHistoryActions) {
         super();
-        this.partyId = actor;
+        this.setPartyId(actor);;
         this.setInitBidCount(realHistoryActions.size());
-        this.numGenerations = Math.max(0, this.getInitBidCount() + (this.random.nextInt(SLACK) - (2 * SLACK)));
-        this.newHistory = this.generateHistory();
-        this.bidFrequencies = this.genNewFreqModel(this.newHistory);
+        this.setNumGenerations(Math.max(0, this.getInitBidCount() + (this.random.nextInt(SLACK) - (2 * SLACK))));;
+        this.setNewHistory(this.genNewFreqModel(realHistoryActions));
+        // this.setBidFrequencies();;
 
     }
 
-    public Map<String, List<Value>> initHistory(List<Action> realHistoryActions) {
-        if (this.getDomain() == null) {
-            throw new IllegalStateException("domain is not initialized");
-        }
-        // Map<String, Map<Value, Integer>> newFreqs = new HashMap<String, Map<Value,
-        // Integer>>();
-        Map<String, List<Value>> newFreqs = new HashMap<String, List<Value>>();
-        for (Action action : realHistoryActions) {
-            if (!(action instanceof Offer))
-                continue;
-
-            Offer offer = (Offer) action;
-            Bid bid = offer.getBid();
-            this.partyId = offer.getActor();
-            for (String issue : this.getDomain().getIssues()) {
-                Value value = bid.getValue(issue);
-                newFreqs.get(issue).add(value);
-            }
-        }
-        for (String issue : newFreqs.keySet()) {
-            List<Value> tmp = newFreqs.get(issue);
-            this.sumIssVals.put(issue, tmp.stream().collect(Collectors.groupingBy(e -> e, Collectors.counting())));
-        }
-        return newFreqs;
+    public List<Action> getNewHistory() {
+        return newHistory;
     }
 
-    public Map<String, Map<Value, Integer>> genNewFreqModel(List<Action> realHistoryActions) {
+    public void setNewHistory(List<Action> newHistory) {
+        this.newHistory = newHistory;
+    }
+
+
+
+    public List<Action> genNewFreqModel(List<Action> realHistoryActions) {
         if (this.getDomain() == null) {
             throw new IllegalStateException("domain is not initialized");
         }
-
-        Map<String, Map<Value, Integer>> newFreqs = new HashMap<String, Map<Value, Integer>>();
+        // cutPoint = 
+        List<Action> newFreqs = new ArrayList<Action>();
         for (Action action : realHistoryActions) {
             if (!(action instanceof Offer))
-                continue;
-
-            Bid bid = ((Offer) action).getBid();
-            for (String issue : this.getDomain().getIssues()) {
-                Map<Value, Integer> freqs = newFreqs.getOrDefault(issue, new HashMap<Value, Integer>());
-                Value value = bid.getValue(issue);
-                if (value != null) {
-                    Integer oldfreq = freqs.getOrDefault(value, 0);
-                    freqs.put(value, oldfreq + 1);
-                }
+            continue;
+            newFreqs.add(action);
+            List<Action> genFreqs = new ArrayList<Action>();
+            for (int i = 0; i < 100; i++) {
+                int selectedIdx = this.getRandom().nextInt(newFreqs.size());
+                genFreqs.add(newFreqs.get(selectedIdx));
             }
+            int selectedIdx = this.getRandom().nextInt(genFreqs.size());
+            newFreqs.remove(newFreqs.size()-1);
+            newFreqs.add(genFreqs.get(selectedIdx));
         }
+        
         return newFreqs;
     }
 

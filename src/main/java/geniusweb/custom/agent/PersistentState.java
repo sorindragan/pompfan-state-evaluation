@@ -8,9 +8,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import geniusweb.actions.PartyId;
 import geniusweb.custom.beliefs.AbstractBelief;
+import geniusweb.custom.beliefs.UniformBelief;
 import geniusweb.custom.components.BeliefNode;
 import geniusweb.custom.components.Tree;
 import geniusweb.custom.helper.Configurator;
+import geniusweb.custom.opponents.AbstractPolicy;
+import geniusweb.custom.opponents.OpponentParticleCreator;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.custom.wideners.AbstractWidener;
 import geniusweb.profile.utilityspace.UtilitySpace;
@@ -18,6 +21,7 @@ import geniusweb.progress.Progress;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,7 +38,7 @@ public class PersistentState {
   private Integer negotiations = 0;
   private Map<String, Double> avgMaxUtilityOpponent = new HashMap<String, Double>();
   private Map<String, Integer> opponentEncounters = new HashMap<String, Integer>();
-  private AbstractBelief currentBelief;
+  private Map<String, AbstractBelief> currentBelief;
   private HashMap<String, Object> configuration;
   private BeliefNode rootNode;
 
@@ -71,7 +75,7 @@ public class PersistentState {
           (avgUtil * encounters + negotiationData.getMaxReceivedUtil()) / (encounters + 1));
     }
 
-    this.setCurrentBelief(negotiationData.getBelief());
+    this.addBelief(opponent, negotiationData.getBelief());
     this.setConfiguration(negotiationData.getConfiguration());
     this.setRootNode(negotiationData.getRootNode());
   }
@@ -92,11 +96,15 @@ public class PersistentState {
     this.configuration = configuration;
   }
 
-  public AbstractBelief getCurrentBelief() {
+  public void addBelief(String opponent, AbstractBelief abstractBelief) {
+    this.getCurrentBelief().put(opponent, abstractBelief);
+  }
+
+  public Map<String, AbstractBelief> getCurrentBelief() {
     return currentBelief;
   }
 
-  public void setCurrentBelief(AbstractBelief currentBelief) {
+  public void setCurrentBelief(Map<String, AbstractBelief> currentBelief) {
     this.currentBelief = currentBelief;
   }
 
@@ -118,13 +126,22 @@ public class PersistentState {
     return opponentEncounters.containsKey(opponent);
   }
 
-  public Tree reconstructTree(PartyId me, UtilitySpace utilitySpace, Progress progress) {
-    AbstractBelief belief = this.getCurrentBelief();
-    AbstractState<?> startState = this.getRootNode().getState();
+  public Tree reconstructTree(PartyId me, UtilitySpace utilitySpace, Progress progress, String opponent, Long numParticlesPerOpponent) {
+    Map<String, AbstractBelief> allBeliefs = this.getCurrentBelief();
+    AbstractBelief belief = allBeliefs.get(opponent); 
+    List<AbstractPolicy> listOfOpponents;
+    if (belief == null) {
+      listOfOpponents = OpponentParticleCreator.generateOpponentParticles(utilitySpace, numParticlesPerOpponent);
+    }else{
+      listOfOpponents = belief.getOpponents();
+    }
     Configurator configurator = this.getConfiguration() != null ? this.mapper.convertValue(this.getConfiguration(), Configurator.class) : new Configurator();
-    configurator =  configurator.setUtilitySpace(utilitySpace).setListOfOpponents(belief.getOpponents()).setMe(me).build();
+    
+    configurator = configurator.setUtilitySpace(utilitySpace).setListOfOpponents(listOfOpponents).setMe(me).build();
     AbstractWidener widener = configurator.getWidener();
-    Tree mcts = new Tree(utilitySpace, belief, startState, widener, progress);
+    AbstractBelief belief2use = belief == null ? configurator.getBelief() : belief;
+    AbstractState<?> startState = configurator.getInitState();
+    Tree mcts = new Tree(utilitySpace, belief2use, startState, widener, progress);
     return mcts;
   }
 

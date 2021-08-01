@@ -28,7 +28,7 @@ public class TimeConcedingExplorationPolicy extends AbstractOwnExplorationPolicy
         Action action;
         Bid bid;
         // progressively open the bounds of explored bids
-        double lowerBound = 1.0 - state.getRound();
+        double lowerBound = 1.0 - state.getTime();
 
         if (lastReceivedBid == null) {
             return new Offer(this.getPartyId(), this.getAllBids().getExtremeBid(true));

@@ -37,7 +37,7 @@ public abstract class AbstractState<T>
         this.opponent = opponent;
     }
 
-    public Double getRound() {
+    public Double getTime() {
         return round;
     }
 
