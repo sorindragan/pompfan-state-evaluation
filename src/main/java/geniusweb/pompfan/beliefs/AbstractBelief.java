@@ -1,6 +1,5 @@
 package geniusweb.pompfan.beliefs;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,19 +10,13 @@ import java.util.stream.IntStream;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import geniusweb.actions.Offer;
 import geniusweb.pompfan.distances.AbstractBidDistance;
 import geniusweb.pompfan.opponents.AbstractPolicy;
-import geniusweb.pompfan.opponents.AbstractPolicyDeserializer;
-import geniusweb.pompfan.opponents.AbstractPolicySerializer;
 import geniusweb.pompfan.state.AbstractState;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
@@ -36,9 +29,6 @@ public abstract class AbstractBelief {
     private List<Double> probabilities = null;
     private Double learnedOpponentBias = 0.05d;
 
-    // @JsonProperty("opponentProbabilities")
-    // @JsonDeserialize(keyUsing = AbstractPolicyDeserializer.class)
-    // @JsonSerialize(keyUsing = AbstractPolicySerializer.class)
     @JsonIgnore
     private Map<AbstractPolicy, Double> opponentProbabilities = new HashMap<AbstractPolicy, Double>();
     private AbstractBidDistance distance;
@@ -85,8 +75,6 @@ public abstract class AbstractBelief {
         return this.opponentProbabilities.keySet().iterator().next();
     }
 
-    // @JsonProperty("opponentProbabilities")
-    // @JsonDeserialize(keyUsing = AbstractPolicyDeserializer.class)
     public Map<AbstractPolicy, Double> getOpponentProbabilities() {
         return opponentProbabilities;
     }
@@ -104,8 +92,6 @@ public abstract class AbstractBelief {
         this.distance = distance;
     }
 
-    // public abstract AbstractBelief updateBeliefs(Offer realObservation, Offer
-    // lastAction, AbstractState<?> state);
     public void setOpponents(List<AbstractPolicy> opponents) {
         this.opponents = opponents;
     }
@@ -129,7 +115,6 @@ public abstract class AbstractBelief {
         return opponents.toString();
     }
 
-    // @JsonIgnore
     public List<AbstractPolicy> getOpponents() {
         return this.opponents;
     }
@@ -139,7 +124,7 @@ public abstract class AbstractBelief {
         Double sliecePerNewOpponent = this.getLearnedOpponentBias()/newOpponents.size();
         List<Double> oldProbsAdjusted = this.getProbabilities().stream().map(e -> e*slicePerOpponent).collect(Collectors.toList());
         List<Double> newProbs = IntStream.range(0, newOpponents.size()).mapToDouble(e -> sliecePerNewOpponent).boxed().collect(Collectors.toList());
-        this.setProbabilities(oldProbsAdjusted);;
+        this.setProbabilities(oldProbsAdjusted);
         this.getOpponents().addAll(newOpponents);
         this.getProbabilities().addAll(newProbs);
         

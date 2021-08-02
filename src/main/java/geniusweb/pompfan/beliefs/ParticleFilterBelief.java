@@ -1,21 +1,18 @@
 package geniusweb.pompfan.beliefs;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.issuevalue.Bid;
 import geniusweb.pompfan.distances.AbstractBidDistance;
 import geniusweb.pompfan.opponents.AbstractPolicy;
-import geniusweb.pompfan.opponents.AbstractPolicyDeserializer;
 import geniusweb.pompfan.state.AbstractState;
 
 public class ParticleFilterBelief extends AbstractBelief {
@@ -49,7 +46,7 @@ public class ParticleFilterBelief extends AbstractBelief {
             List<Bid> candidateObservations = new ArrayList<>();
             for (int i = 0; i < ParticleFilterBelief.NUMBER_SAMPLES; i++) {
                 // Monte Carlo Sampling
-                // This is in a loop -- we need to try multiple actions to get an
+                // This is in a loop in which we try multiple actions to get an
                 // understanding of whether the opponent could generate the real obs.
                 Bid sampledBid = this.sample(lastAgentAction, lastOppAction, state, abstractPolicy);
 
