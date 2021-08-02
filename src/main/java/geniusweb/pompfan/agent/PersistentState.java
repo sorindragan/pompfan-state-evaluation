@@ -1,4 +1,4 @@
-package geniusweb.pompfan.agent; // TODO: change name
+package geniusweb.pompfan.agent; 
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;

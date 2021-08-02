@@ -1,5 +1,5 @@
 {
-	"AllPermutationsLearnSettings": {
+	"AllPermutationsSettings": {
 		"teams": [
 			{
 				"Team": [
@@ -20,7 +20,7 @@
 									"widener": {
 										"maxWidth": "10",
 										"k_a": "2.0",
-										"a_a": "0.5",
+										"a_a": "0.9",
 										"k_b": "1.0",
 										"a_b": "0.5"
 									}
@@ -33,20 +33,48 @@
 			{
 				"Team": [
 					{
-						"partyref": "classpath:geniusweb.exampleparties.conceder.Conceder",
-						"parameters": {
-							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9ab111"
-						}
+						"partyref": "classpath:geniusweb.exampleparties.boulware.Boulware",
+						"parameters": {}
 					}
 				]
 			},
 			{
 				"Team": [
 					{
-						"partyref": "classpath:geniusweb.exampleparties.boulware.Boulware",
-						"parameters": {
-							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9ab111"
-						}
+						"partyref": "classpath:geniusweb.exampleparties.conceder.Conceder",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.hardliner.Hardliner",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.randomparty.RandomParty",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.simpleboa.SimpleBoa",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.timedependentparty.TimeDependentParty",
+						"parameters": {}
 					}
 				]
 			}
@@ -65,37 +93,10 @@
 			"SAOPSettings": {
 				"participants": [],
 				"deadline": {
-					"deadlinetime": { "durationms": 3000 }
+					"deadlinetime": { "durationms": 10000 }
 				}
 			}
 		},
-		"numberTournaments": 2,
-		"learnSettings": {
-			"LearnSettings": {
-				"participants": [
-					{
-						"TeamInfo": {
-							"parties": [
-								{
-									"party": {
-										"partyref": "classpath:geniusweb.pompfan.agent.POMPFANAgent",
-										"parameters": {
-											"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
-											"negotiationdata": [],
-											"numParticlesPerOpponent": "100",
-											"simulationTime": "250"
-										}
-									},
-									"profile": "http://prof1"
-								}
-							]
-						}
-					}
-				],
-				"deadline": {
-					"deadlinetime": { "durationms": 5000 }
-				}
-			}
-		}
+		"numberTournaments": 1
 	}
 }

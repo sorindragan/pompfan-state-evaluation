@@ -100,7 +100,8 @@ public class POMPFANAgent extends DefaultParty { // TODO: change name
      */
     @Override
     public void notifyChange(Inform info) {
-        System.out.println("===========INFO========== " + info.getClass().getName());
+        System.out.println("===========INFO========== ");
+        System.out.println(info.getClass().getName());
         // System.out.println("DEBUG_PERSIST: " + info.toString());
         // if (DEBUG_IN_TOURNAMENT == false) {
         // }
@@ -172,7 +173,8 @@ public class POMPFANAgent extends DefaultParty { // TODO: change name
                                 "DEBUG_PERSIST: Load ->" + this.persistentState.getAllOpponentBeliefs().toString());
                     this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress,
                             this.opponentName, this.numParticlesPerOpponent);
-                    System.out.println("DEBUG_PERSIST: Trust->" + this.MCTS.getBelief().toString());
+                    if (DEBUG_PERSIST)
+                        System.out.println("DEBUG_PERSIST: Trust->" + this.MCTS.getBelief().toString());
 
                 }
 
@@ -293,12 +295,14 @@ public class POMPFANAgent extends DefaultParty { // TODO: change name
         // JSON-file)
         this.parameters = settings.getParameters();
         if (this.parameters.containsKey("simulationTime")) {
-            // this.simulationTime = ((Number) this.parameters.get("simulationTime")).longValue();
+            // this.simulationTime = ((Number)
+            // this.parameters.get("simulationTime")).longValue();
             this.simulationTime = Long.valueOf(((String) this.parameters.get("simulationTime")));
 
         }
         if (this.parameters.containsKey("numParticlesPerOpponent")) {
-            // this.numParticlesPerOpponent = ((Number) this.parameters.get("numParticlesPerOpponent")).longValue();
+            // this.numParticlesPerOpponent = ((Number)
+            // this.parameters.get("numParticlesPerOpponent")).longValue();
             this.numParticlesPerOpponent = Long.valueOf(((String) this.parameters.get("numParticlesPerOpponent")));
 
         }
