@@ -6,12 +6,70 @@
 	"configurations": [
 		{
 			"type": "java",
-			"name": "Tournament Final",
+			"name": "Tournament SimulationTime",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": [
-				"src/test/resources/test/tournament_test_1.json"
+				"src/test/resources/simTime/t0.json",
+				"src/test/resources/simTime/t1.json",
+				"src/test/resources/simTime/t2.json",
+				"src/test/resources/simTime/t3.json",
+				"src/test/resources/simTime/t4.json",
+				"src/test/resources/simTime/t5.json",
+			],
+			"console": "internalConsole"
+		},
+		{
+			"type": "java",
+			"name": "Tournament NumParticles",
+			"request": "launch",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
+			"classPaths": ["$Auto"],
+			"args": [
+				"src/test/resources/numParticles/t0.json",
+				"src/test/resources/numParticles/t1.json",
+				"src/test/resources/numParticles/t2.json",
+				"src/test/resources/numParticles/t3.json",
+				"src/test/resources/numParticles/t4.json",
+				"src/test/resources/numParticles/t5.json",
+			],
+			"console": "internalConsole"
+		},
+		{
+			"type": "java",
+			"name": "Tournament early wideness",
+			"request": "launch",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
+			"classPaths": ["$Auto"],
+			"args": [
+				"src/test/resources/earlySimulation/t0.json",
+				"src/test/resources/earlySimulation/t1.json",
+				"src/test/resources/earlySimulation/t2.json",
+				"src/test/resources/earlySimulation/t3.json",
+				"src/test/resources/earlySimulation/t4.json",
+				"src/test/resources/earlySimulation/t5.json",
+				"src/test/resources/earlySimulation/t6.json",
+				"src/test/resources/earlySimulation/t7.json",
+			],
+			"console": "internalConsole"
+		},
+		{
+			"type": "java",
+			"name": "Tournament later wideness",
+			"request": "launch",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
+			"classPaths": ["$Auto"],
+			"args": [
+				"src/test/resources/laterSimulation/t0.json",
+				"src/test/resources/laterSimulation/t1.json",
+				"src/test/resources/laterSimulation/t2.json",
+				"src/test/resources/laterSimulation/t3.json",
+				"src/test/resources/laterSimulation/t4.json",
+				"src/test/resources/laterSimulation/t5.json",
+				"src/test/resources/laterSimulation/t6.json",
+				"src/test/resources/laterSimulation/t7.json",
+				"src/test/resources/laterSimulation/t8.json",
 			],
 			"console": "internalConsole"
 		},

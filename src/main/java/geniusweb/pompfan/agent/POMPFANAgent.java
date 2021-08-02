@@ -168,7 +168,8 @@ public class POMPFANAgent extends DefaultParty {
                                 "DEBUG_PERSIST: Load ->" + this.persistentState.getAllOpponentBeliefs().toString());
                     this.MCTS = this.persistentState.reconstructTree(this.me, this.uSpace, this.progress,
                             this.opponentName, this.numParticlesPerOpponent);
-                    System.out.println("DEBUG_PERSIST: Trust->" + this.MCTS.getBelief().toString());
+                    if (DEBUG_PERSIST)
+                        System.out.println("DEBUG_PERSIST: Trust->" + this.MCTS.getBelief().toString());
 
                 }
 
@@ -289,12 +290,14 @@ public class POMPFANAgent extends DefaultParty {
         // JSON-file)
         this.parameters = settings.getParameters();
         if (this.parameters.containsKey("simulationTime")) {
-            // this.simulationTime = ((Number) this.parameters.get("simulationTime")).longValue();
+            // this.simulationTime = ((Number)
+            // this.parameters.get("simulationTime")).longValue();
             this.simulationTime = Long.valueOf(((String) this.parameters.get("simulationTime")));
 
         }
         if (this.parameters.containsKey("numParticlesPerOpponent")) {
-            // this.numParticlesPerOpponent = ((Number) this.parameters.get("numParticlesPerOpponent")).longValue();
+            // this.numParticlesPerOpponent = ((Number)
+            // this.parameters.get("numParticlesPerOpponent")).longValue();
             this.numParticlesPerOpponent = Long.valueOf(((String) this.parameters.get("numParticlesPerOpponent")));
 
         }

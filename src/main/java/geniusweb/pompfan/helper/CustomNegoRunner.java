@@ -41,11 +41,13 @@ public class CustomNegoRunner extends NegoRunner {
     private Date startTimeStamp;
 
     public CustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory, Reporter logger,
-            long maxruntime, String settingRef) throws IOException {
+            long maxruntime, String settingRef, Date runTimeStamp) throws IOException {
         super(settings, connectionfactory, logger, maxruntime);
+        // runTimeStamp = new Date();
         this.startTimeStamp = new Date();
-        this.timestampString = new SimpleDateFormat("dd_MM_yyyy_HH_mm").format(this.startTimeStamp);
-        FileWriter collectorFile = new FileWriter("logs/log_tournament_results.jsonl", true);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm");
+        this.timestampString = formatter.format(this.startTimeStamp);
+        FileWriter collectorFile = new FileWriter("eval/tournament_results.jsonl", true);
         this.intermediateWriter = new ResultsWriter(this.getProtocol().getState(),
                 this.tFormatter.format(startTimeStamp), settingRef, collectorFile);
         this.getProtocol().addListener(ev -> this.processSessionEnd(ev));
@@ -113,12 +115,13 @@ public class CustomNegoRunner extends NegoRunner {
 
 
         Integer cnt = 0;
+        Date runStartTime = new Date();
         for (NegoSettings negoSettings : settings) {
             String settingRef = args[0];
             cnt++;
             Reporter logger = new StdOutReporter();
             logger.log(Level.INFO, "Starting Tournament " + cnt);
-            NegoRunner runner = new CustomNegoRunner(negoSettings, new ClassPathConnectionFactory(), logger, 0, settingRef);
+            NegoRunner runner = new CustomNegoRunner(negoSettings, new ClassPathConnectionFactory(), logger, 0, settingRef, runStartTime);
             runner.run();
         }
 

@@ -1,0 +1,102 @@
+{
+	"AllPermutationsSettings": {
+		"teams": [
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.pompfan.agent.POMPFANAgent",
+						"parameters": {
+							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
+							"numParticlesPerOpponent": "100",
+							"simulationTime": "600",
+							"config": {
+								"confComparer": "UtilityBidDistance",
+								"confBelief": "ParticleFilterBelief",
+								"confEvaluator": "Last2BidsProductUtilityEvaluator",
+								"confState": "HistoryState",
+								"confExplorer": "HighSelfEsteemOwnExplorationPolicy",
+								"confWidener": "ProgressiveWideningStrategy",
+								"confExtra": {
+									"widener": {
+										"maxWidth": "10",
+										"k_a": "2.0",
+										"a_a": "0.5",
+										"k_b": "1.0",
+										"a_b": "0.5"
+									}
+								}
+							}
+						}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.boulware.Boulware",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.conceder.Conceder",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.hardliner.Hardliner",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.randomparty.RandomParty",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.simpleboa.SimpleBoa",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.timedependentparty.TimeDependentParty",
+						"parameters": {}
+					}
+				]
+			}
+		],
+		"reuseTeams": false,
+		"profileslists": [
+			{
+				"ProfileList": ["file:src/test/resources/party1.json"]
+			},
+			{
+				"ProfileList": ["file:src/test/resources/party2.json"]
+			}
+		],
+		"teamsPerSession": 2,
+		"sessionsettings": {
+			"SAOPSettings": {
+				"participants": [],
+				"deadline": {
+					"deadlinetime": { "durationms": 10000 }
+				}
+			}
+		},
+		"numberTournaments": 1
+	}
+}
