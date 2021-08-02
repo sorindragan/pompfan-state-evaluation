@@ -8,7 +8,7 @@
 			"type": "java",
 			"name": "Tournament Final",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": [
 				"src/test/resources/test/tournament_test_1.json"
@@ -19,7 +19,7 @@
 			"type": "java",
 			"name": "Tournament Flight",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/tournament_flight.json",
 			"console": "internalConsole"
@@ -28,7 +28,7 @@
 			"type": "java",
 			"name": "Tournament Party",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/tournament_party.json",
 			"console": "internalConsole"
@@ -37,7 +37,7 @@
 			"type": "java",
 			"name": "Tournament Test",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/tournament_test.json",
 			"console": "internalConsole"
@@ -46,7 +46,7 @@
 			"type": "java",
 			"name": "Test",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/settingsTest.json",
 			"console": "internalConsole"
@@ -55,7 +55,7 @@
 			"type": "java",
 			"name": "Test Learn",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/settingsTestLearn.json",
 			"console": "internalConsole"
@@ -64,7 +64,7 @@
 			"type": "java",
 			"name": "vs. TimeDependentParty",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/settingsTimeDependent.json",
 			"console": "internalConsole"
@@ -73,7 +73,7 @@
 			"type": "java",
 			"name": "vs. Boulware",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/settingsBoulware.json",
 			"console": "internalConsole"
@@ -82,7 +82,7 @@
 			"type": "java",
 			"name": "vs. Conceder",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/settingsConceder.json",
 			"console": "internalConsole"
@@ -91,7 +91,7 @@
 			"type": "java",
 			"name": "vs. SimpleBoa",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/settingsSimpleBoa.json",
 			"console": "internalConsole"
@@ -100,7 +100,7 @@
 			"type": "java",
 			"name": "vs. Linear",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/settingsLinear.json",
 			"console": "internalConsole"
@@ -109,7 +109,7 @@
 			"type": "java",
 			"name": "vs. Hardliner",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": ["$Auto"],
 			"args": "src/test/resources/settingsHardliner.json",
 			"console": "internalConsole"
@@ -118,7 +118,7 @@
 			"type": "java",
 			"name": "vs. Random",
 			"request": "launch",
-			"mainClass": "geniusweb.custom.helper.CustomNegoRunner",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": [
 				"./libs/simplerunner-1.6.1-jar-with-dependencies.jar",
 				"./libs/boulware-1.6.1.jar",

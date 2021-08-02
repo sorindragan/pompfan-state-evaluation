@@ -4,7 +4,7 @@
 			{
 				"Team": [
 					{
-						"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
+						"partyref": "classpath:geniusweb.pompfan.agent.POMPFANAgent",
 						"parameters": {
 							"numParticles": 100,
 							"simulationTime": 500,

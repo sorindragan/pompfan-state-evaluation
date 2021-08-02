@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>geniusweb.exampleparties</groupId>
-	<artifactId>olusorin</artifactId> <!-- TODO: change name -->
+	<groupId>geniusweb.pompfan</groupId>
+	<artifactId>pompfan</artifactId>
 	<version>1.6.1</version> <!-- must equal ${geniusweb.version} -->
 	<packaging>jar</packaging>
 
@@ -16,7 +16,7 @@
 		<jackson-2-version>2.9.6</jackson-2-version>
 		<geniusweb.version>1.6.1</geniusweb.version>
 		<dl4j-master.version>1.0.0-M1</dl4j-master.version>
-		<agent.target>geniusweb.custom.agent.CustomAgent</agent.target>
+		<agent.target>geniusweb.pompfan.agent.POMPFANAgent</agent.target>
 	</properties>
 
 	<distributionManagement>
@@ -278,7 +278,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>${agent.target}</mainClass> <!-- TODO: change name -->
+							<mainClass>${agent.target}</mainClass> 
 						</manifest>
 					</archive>
 				</configuration>
@@ -311,7 +311,7 @@
 						<manifest>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-							<mainClass>${agent.target}</mainClass> <!-- TODO: change name -->
+							<mainClass>${agent.target}</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

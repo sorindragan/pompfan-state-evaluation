@@ -6,7 +6,7 @@
 					"parties": [
 						{
 							"party": {
-								"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
+								"partyref": "classpath:geniusweb.pompfan.agent.POMPFANAgent",
 								"parameters": {
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"negotiationdata": [

@@ -4,7 +4,7 @@
 			{
 				"Team": [
 					{
-						"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
+						"partyref": "classpath:geniusweb.pompfan.agent.POMPFANAgent",
 						"parameters": {
 							"config": {
 								"confComparer": "UtilityBidDistance",
@@ -93,7 +93,7 @@
 			"SAOPSettings": {
 				"participants": [
 					{
-						"partyref": "classpath:geniusweb.custom.agent.CustomAgent",
+						"partyref": "classpath:geniusweb.pompfan.agent.POMPFANAgent",
 						"parameters": {}
 					}
 				],
