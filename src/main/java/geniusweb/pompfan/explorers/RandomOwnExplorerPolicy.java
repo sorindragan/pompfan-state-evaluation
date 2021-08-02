@@ -1,20 +1,14 @@
 package geniusweb.pompfan.explorers;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
-import geniusweb.bidspace.BidsWithUtility;
-import geniusweb.bidspace.Interval;
 import geniusweb.issuevalue.Bid;
-import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.state.AbstractState;
-import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;
-import tudelft.utilities.immutablelist.ImmutableList;
 
 public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
 

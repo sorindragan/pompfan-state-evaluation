@@ -12,7 +12,6 @@ import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
-import geniusweb.pompfan.opponents.CommonOpponentInterface;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;

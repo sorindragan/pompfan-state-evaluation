@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -18,9 +17,9 @@ import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Value;
 import geniusweb.opponentmodel.FrequencyOpponentModel;
 
-// TODO: Generic impl. of random generator
-// TODO: Baysian version
-// TODO: Time dependant
+// ??: Generic impl. of random generator
+// ??: Baysian version
+// ??: Time dependant
 public class FuzzyFreqOpponentModel extends FrequencyOpponentModel implements IFuzzyModel {
 
     private static final int SLACK = 3;

@@ -16,7 +16,6 @@ import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
-import geniusweb.opponentmodel.FrequencyOpponentModel;
 import geniusweb.pompfan.opponentModels.AbstractOpponentModel;
 import geniusweb.pompfan.opponentModels.WeightedFrequencyOpponentModel;
 import geniusweb.pompfan.state.AbstractState;

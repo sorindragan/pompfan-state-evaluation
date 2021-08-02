@@ -1,7 +1,5 @@
 package geniusweb.pompfan.opponents;
 
-import java.math.BigInteger;
-
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
