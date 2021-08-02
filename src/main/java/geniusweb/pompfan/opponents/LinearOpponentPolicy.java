@@ -30,7 +30,7 @@ public class LinearOpponentPolicy extends TimeDependentOpponentPolicy {
 
     @Override
     public double getE() {
-        return 0.2;
+        return 1;
     }
 
 }

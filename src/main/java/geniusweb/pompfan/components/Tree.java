@@ -33,8 +33,7 @@ import geniusweb.progress.ProgressFactory;
 
 // Tree<T extends AbstractState<?>>
 public class Tree {
-    private static final boolean PARTICLE_DEBUG = false;
-    private static final boolean SIM_DEBUG = true;
+    private static final boolean PARTICLE_DEBUG = true;
     private BeliefNode root;
     private static Random random = new Random(42);
     private Domain domain;
@@ -50,7 +49,8 @@ public class Tree {
     private Progress progress;
     private Double currentTime = 0.0;
     private BeliefNode originalRoot;
-    private Double ACCEPT_SLACK = 0.01;
+    // private Double ACCEPT_SLACK = 0.01;
+    private Double ACCEPT_SLACK = -0.5;
 
     public Tree(UtilitySpace utilitySpace, AbstractBelief belief, AbstractState<?> startState, AbstractWidener widener,
             Progress progress) {
@@ -110,9 +110,12 @@ public class Tree {
         while (node.getParent() != null) {
             node.updateVisits();
             node.setValue(node.getValue() + value);
+            // calculate UCB1
+            node.setValue(UCB1(node));
             node = node.getParent();
         }
         node.updateVisits();
+        // value of the root is not important
         node.setValue(node.getValue() + value);
     }
 
@@ -122,8 +125,10 @@ public class Tree {
             return null;
         }
 
+        // return candidatesChildrenForAdoption.stream().filter(child -> child.getIsTerminal() == false)
+        //         .max(Comparator.comparing(Tree::UCB1)).get();
         return candidatesChildrenForAdoption.stream().filter(child -> child.getIsTerminal() == false)
-                .max(Comparator.comparing(Tree::UCB1)).get();
+                .max(Comparator.comparing(Node::getValue)).get();
 
     }
 
@@ -138,6 +143,7 @@ public class Tree {
                 : null;
         AbstractState<?> stateUpdatedWithRealTime = null;
         if (lastRealAgentAction != null) {
+            // get the real negotiation time
             stateUpdatedWithRealTime = this.lastBestActionNode.getState().setTime(this.currentTime);
         }
         this.belief = this.belief.updateBeliefs(newRealObservation, lastRealAgentAction, lastRealOpponentAction,
@@ -150,7 +156,9 @@ public class Tree {
 
         // !! yet another thing that could generate unwanted behaviour
         if (this.lastBestActionNode == null) {
-            // Quickfix: by doing nothing!
+            // Quickfix: by doing nothing
+            // Startphase
+            System.out.println("START");
             return this;
         }
         List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream()
@@ -158,6 +166,9 @@ public class Tree {
 
         if (rootCandidates.size() == 0) {
             // Quickfix: by doing nothing!
+            System.out.println("LOVING ACCEPTS");
+            // Downgrade the value of accept nodes in order to facilitate exploration by forcing a root change
+            this.lastBestActionNode.setValue(this.lastBestActionNode.getValue() - 1.0);
             return this;
         }
 
@@ -178,12 +189,8 @@ public class Tree {
     public void construct(Long simulationTime) throws StateRepresentationException {
         Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime),
                 System.currentTimeMillis());
-        // int currIter = 0;
-        // System.out.println(simulatedProgress.getTerminationTime());
         while (simulatedProgress.isPastDeadline(System.currentTimeMillis()) == false) {
             this.simulate(simulatedProgress);
-            // currIter++;
-            // System.out.println(currIter);
         }
     }
 
@@ -203,15 +210,14 @@ public class Tree {
             action = lastBestActionNode.getAction();     
         
 
-            if (this.realHistory.size() == 0) {
-                
+            if (this.realHistory.size() == 0) { 
                 return action;
             }
             Action lastOpponentAction = this.realHistory.get(this.realHistory.size() - 1);
 
             Bid lastOpponentBid = ((Offer) lastOpponentAction).getBid();
-            Bid lastAgentBid = action instanceof Accept ? ((Accept) action).getBid() : ((Offer) action).getBid();
-            Double distanceValue = this.getUtilitySpace().getUtility(lastAgentBid)
+            Bid futureAgentBid = action instanceof Accept ? ((Accept) action).getBid() : ((Offer) action).getBid();
+            Double distanceValue = this.getUtilitySpace().getUtility(futureAgentBid)
                     .subtract(this.getUtilitySpace().getUtility(lastOpponentBid)).doubleValue();
 
             if (distanceValue < ACCEPT_SLACK) {
@@ -219,7 +225,7 @@ public class Tree {
                 break;
             }
             if (action instanceof Accept) {
-                // System.out.println("jgfdjhdfhdthz");
+                // not a good enough accept node for this point
                 this.root.getChildren().remove(this.lastBestActionNode);
             }
         } while (action instanceof Accept);

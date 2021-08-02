@@ -20,11 +20,9 @@ public class HighSelfEsteemOwnExplorationPolicy extends AbstractOwnExplorationPo
 
     private BidsWithUtility bidutils;
 
-    // private ExtendedUtilSpace extendedspace;
     public HighSelfEsteemOwnExplorationPolicy(UtilitySpace utilitySpace, PartyId id) {
         super(utilitySpace, id);
         this.bidutils = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
-        // this.extendedspace = new ExtendedUtilSpace((LinearAdditive) utilitySpace);
     }
 
     @Override
@@ -49,6 +47,7 @@ public class HighSelfEsteemOwnExplorationPolicy extends AbstractOwnExplorationPo
         // pcent of the time we do accepts
         long i = this.getRandom().nextInt(100);
         if (i > (100 - acceptProbability)) {
+            // System.out.println(this.getName() +" generated Accept");
             action = new Accept(this.getPartyId(), lastReceivedBid);
         }
 

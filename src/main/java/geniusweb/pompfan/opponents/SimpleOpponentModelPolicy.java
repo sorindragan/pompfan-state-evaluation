@@ -150,14 +150,12 @@ public class SimpleOpponentModelPolicy extends AbstractPolicy {
     @JsonIgnore
     @Override
     public void setUtilitySpace(UtilitySpace utilitySpace) {
-        // TODO Auto-generated method stub
         super.setUtilitySpace(utilitySpace);
     }
 
     @JsonIgnore
     @Override
     public UtilitySpace getUtilitySpace() {
-        // TODO Auto-generated method stub
         return super.getUtilitySpace();
     }
 }

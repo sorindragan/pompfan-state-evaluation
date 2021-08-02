@@ -48,12 +48,17 @@ public class Last2BidsMeanUtilityEvaluator implements IEvalFunction<HistoryState
     @Override
     public Double evaluate(HistoryState state) {
         ArrayList<Action> currState = state.getRepresentation();
-        Action action1 = currState.size() >= 1 ? currState.get(currState.size() - 1) : null;
-        Action action2 = currState.size() >= 2 ? currState.get(currState.size() - 2) : null;
-        Bid bid1 = action1 instanceof Offer ? ((Offer) action1).getBid() : ((Accept) action1).getBid();
-        Bid bid2 = action2 instanceof Offer ? ((Offer) action2).getBid() : ((Accept) action2).getBid();
-        BigDecimal utility1 = action1 != null ? this.utilitySpace.getUtility(bid1) : BigDecimal.ZERO;
-        BigDecimal utility2 = action2 != null ? this.utilitySpace.getUtility(bid2) : BigDecimal.ZERO;
+        Action lastAction = currState.size() >= 1 ? currState.get(currState.size() - 1) : null;
+        Action secondToLastAction = currState.size() >= 2 ? currState.get(currState.size() - 2) : null;
+        Bid lastBid = lastAction instanceof Offer ? ((Offer) lastAction).getBid() : ((Accept) lastAction).getBid();
+        Bid secondToLastBid = secondToLastAction instanceof Offer ? ((Offer) secondToLastAction).getBid()
+                : ((Accept) secondToLastAction).getBid();
+        if (lastAction instanceof Accept) {
+            return state.getUtilitySpace().getUtility(lastBid).doubleValue();
+        }
+        BigDecimal utility1 = lastAction != null ? this.getUtilitySpace().getUtility(lastBid) : BigDecimal.ONE;
+        BigDecimal utility2 = secondToLastAction != null ? this.getUtilitySpace().getUtility(secondToLastBid)
+                : BigDecimal.ONE;
         BigDecimal mean = utility1.add(utility2).divide(new BigDecimal(2));
         return mean.doubleValue();
     }

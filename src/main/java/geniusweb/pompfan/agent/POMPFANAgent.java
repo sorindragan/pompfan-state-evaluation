@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,7 @@ import geniusweb.inform.YourTurn;
 import geniusweb.issuevalue.Bid;
 import geniusweb.party.Capabilities;
 import geniusweb.party.DefaultParty;
+import geniusweb.pompfan.components.Node;
 import geniusweb.pompfan.components.Tree;
 import geniusweb.pompfan.helper.Configurator;
 import geniusweb.pompfan.opponents.AbstractPolicy;
@@ -59,10 +61,9 @@ public class POMPFANAgent extends DefaultParty {
     private static final int MAX_WIDTH = 10;
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = true;
-    private static boolean DEBUG_OFFER = false;
+    private static boolean DEBUG_OFFER = true;
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
-    private static boolean DEBUG_IN_TOURNAMENT = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
     protected ProfileInterface profileint = null;
@@ -83,9 +84,9 @@ public class POMPFANAgent extends DefaultParty {
     private HashMap<String, Object> config;
 
     public POMPFANAgent() {
-    } // TODO: change name
+    }
 
-    public POMPFANAgent(Reporter reporter) { // TODO: change name
+    public POMPFANAgent(Reporter reporter) {
         super(reporter); // for debugging
     }
 
@@ -101,14 +102,10 @@ public class POMPFANAgent extends DefaultParty {
     @Override
     public void notifyChange(Inform info) {
         System.out.println("===========INFO========== " + info.getClass().getName());
-        // System.out.println("DEBUG_PERSIST: " + info.toString());
-        // if (DEBUG_IN_TOURNAMENT == false) {
-        // }
         try {
             if (info instanceof Settings) {
                 runSetupPhase(info);
             } else if (info instanceof ActionDone) {
-
                 runOpponentPhase(info);
             } else if (info instanceof YourTurn) {
                 runAgentPhase(info);
@@ -161,7 +158,6 @@ public class POMPFANAgent extends DefaultParty {
 
                 // Add name of the opponent to the negotiation data
                 this.negotiationData.setOpponentName(this.opponentName);
-                // System.out.println();
                 if (this.persistentState.getAllOpponentBeliefs().containsKey(this.opponentName)) {
                     if (DEBUG_PERSIST)
                         System.out.println("DEBUG_PERSIST: Load -> " + this.me);
@@ -358,7 +354,6 @@ public class POMPFANAgent extends DefaultParty {
                 FileLocation tmpPath = path instanceof FileLocation ? (FileLocation) path
                         : new FileLocation(UUID.fromString((String) path));
                 this.dataPaths.add(tmpPath.getFile());
-                System.out.println(this.dataPaths);
             }
         }
     }
@@ -404,7 +399,14 @@ public class POMPFANAgent extends DefaultParty {
             // negotiation data.
             this.lastReceivedBid = ((Offer) action).getBid();
             this.negotiationData.addBidUtil(this.uSpace.getUtility(this.lastReceivedBid).doubleValue());
+            getReporter().log(Level.INFO, "OPPONENT ACTION");
+            getReporter().log(Level.INFO, this.MCTS.getLastBestActionNode().toString());
+            ArrayList<Node> possibleNextRoots = this.MCTS.getLastBestActionNode().getChildren();
+            possibleNextRoots.sort(Comparator.comparing(Node::getValue, Comparator.reverseOrder()));
+            int maxSlice = possibleNextRoots.size() > 5 ? 5 : possibleNextRoots.size();
+            getReporter().log(Level.INFO, possibleNextRoots.subList(0, maxSlice).toString());
             this.MCTS.receiveRealObservation(action, System.currentTimeMillis());
+
         }
     }
 
@@ -435,7 +437,7 @@ public class POMPFANAgent extends DefaultParty {
      */
     protected void myTurn(YourTurn myTurnInfo) throws IOException, StateRepresentationException {
         if (this.lastReceivedBid != null) {
-            if (DEBUG_IN_TOURNAMENT == false) {
+            if (DEBUG_OFFER == true) {
                 System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
                 System.out.println("Opponent: Util=" + this.uSpace.getUtility(this.lastReceivedBid) + " -- "
                         + this.lastReceivedBid.toString());
@@ -461,10 +463,19 @@ public class POMPFANAgent extends DefaultParty {
             // System.out.println("Nodes Number:
             // ".concat(String.valueOf(this.MCTS.howManyNodes())));
         }
+        getReporter().log(Level.INFO, "AGENT ACTION");
+        getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
+        // getReporter().log(Level.INFO, String.valueOf(this.MCTS.getRoot().getChildren().size()));
+        // ArrayList<Node> sortedChildren = this.MCTS.getRoot().getChildren();
+        // sortedChildren.sort(Comparator.comparing(Node::getValue, Comparator.reverseOrder()));
+        // int maxSlice = sortedChildren.size() > 5 ? 5 : sortedChildren.size();
+        // getReporter().log(Level.INFO, sortedChildren.subList(0, maxSlice).toString());
+        getReporter().log(Level.INFO, String.valueOf(this.MCTS.getBelief().getOpponents().size()));
+
         action = this.MCTS.chooseBestAction();
+        
         // Consuming the whole tree will result in an error
         // So accept | proposing old bids also possible
-
         if (action == null) {
             // if action==null we failed to suggest next action.
             System.err.println("WARNING! Could not produce action!!!");
@@ -473,7 +484,7 @@ public class POMPFANAgent extends DefaultParty {
 
         if (action instanceof Offer) {
             Bid myBid = ((Offer) action).getBid();
-            if (DEBUG_IN_TOURNAMENT == false) {
+            if (DEBUG_OFFER == true) {
                 System.out.println(
                         "Agent:    Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- " + myBid.toString());
             }
@@ -481,16 +492,8 @@ public class POMPFANAgent extends DefaultParty {
             Bid acceptedBid = ((Accept) action).getBid();
             System.out.println("We ACCEPT: Util=" + String.valueOf(this.uSpace.getUtility(acceptedBid)) + " -- "
                     + acceptedBid.toString());
-            // if(this.lastReceivedBid.equals(acceptedBid) == false){
-            // System.out.println("BUT needs to be placed as Offer!");
-            // action = new Offer(this.me, acceptedBid);
-            // }
         } else {
             System.out.println("Something HAPPENED! " + action.toString());
-        }
-        if (DEBUG_OFFER) {
-            // System.out.println(this.MCTS);
-            System.out.println(action);
         }
 
         // Send action
@@ -519,9 +522,6 @@ public class POMPFANAgent extends DefaultParty {
                 // Load the negotiation data object of a previous negotiation
                 NegotiationData negotiationData = objectMapper.readValue(dataPath, NegotiationData.class);
                 // Process the negotiation data in our persistent state
-                // if (this.persistentState == null) {
-                // System.out.println(this.persistentState);
-                // }
                 this.persistentState.update(negotiationData);
             } catch (IOException e) {
                 throw new RuntimeException("Negotiation data provided to learning step does not exist", e);

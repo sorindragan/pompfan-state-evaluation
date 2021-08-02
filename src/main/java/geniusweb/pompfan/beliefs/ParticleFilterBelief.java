@@ -33,13 +33,11 @@ public class ParticleFilterBelief extends AbstractBelief {
     }
 
 
-    // @JsonCreator
     public ParticleFilterBelief(List<AbstractPolicy> listOfOpponents, AbstractBidDistance distance) {
         super(listOfOpponents, distance); // particles
 
     }
 
-    // @JsonCreator
     public ParticleFilterBelief(Map<AbstractPolicy, Double> opponentProbabilities, AbstractBidDistance distance) {
         super(opponentProbabilities, distance); // particles
     }

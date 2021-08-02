@@ -1,4 +1,11 @@
-package geniusweb.pompfan.agent; // TODO: change name
+package geniusweb.pompfan.agent;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -10,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import geniusweb.actions.Action;
 import geniusweb.actions.PartyId;
 import geniusweb.pompfan.beliefs.AbstractBelief;
-import geniusweb.pompfan.beliefs.UniformBelief;
 import geniusweb.pompfan.components.BeliefNode;
 import geniusweb.pompfan.components.Tree;
 import geniusweb.pompfan.helper.Configurator;
@@ -22,12 +28,6 @@ import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.wideners.AbstractWidener;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.progress.Progress;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * This class can hold the persistent state of your agent. You can off course
@@ -206,7 +206,7 @@ public class PersistentState {
   }
 
   public PersistentState learn(){
-    // TODO: All the learning
+    // Future TODO: All the learning
     return this;
   }
 }

@@ -18,7 +18,7 @@ import tudelft.utilities.immutablelist.ImmutableList;
 
 public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
 
-    private static final BigDecimal STUBBORNESS = new BigDecimal("0.4");
+    private static final BigDecimal STUBBORNESS = new BigDecimal("0.8");
 
     public RandomOwnExplorerPolicy(UtilitySpace utilitySpace,  PartyId id) {
         super(utilitySpace, id);
@@ -33,9 +33,18 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
         bid = this.getBidspace().get(i);
 
         if (lastOpponentBid == null) {
-            return new Offer(this.getPartyId(), bid);
+            // start with maxbid
+            return new Offer(this.getPartyId(), this.getAllBids().getExtremeBid(true));
         }
-        action = shouldAccept(bid, lastOpponentBid) ? new Accept(this.getPartyId(), lastOpponentBid) : new Offer(this.getPartyId(), bid);
+
+        if (shouldAccept(bid, lastOpponentBid)) {
+            // System.out.println(this.getName() + " generated Accept");
+            action = new Accept(this.getPartyId(), lastOpponentBid);
+        } else {
+            action = new Offer(this.getPartyId(), bid);
+        }
+
+        // action = shouldAccept(bid, lastOpponentBid) ? new Accept(this.getPartyId(), lastOpponentBid) : new Offer(this.getPartyId(), bid);
         return action;
     }
 

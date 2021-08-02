@@ -79,6 +79,7 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
         int selectedIdx = selectionPoint.intValue();
         if (selectedIdx >= this.getRecordedBehavior().size()) {
             if (isGood(lastReceivedBid)) {
+                // System.out.println(this.getName() + " generated ACCEPT");
                 return new Accept(this.getPartyId(), lastReceivedBid);
             }
 
@@ -112,10 +113,7 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
     }
 
     private boolean isGood(Bid bid) {
-        if (STUBBORNESS.compareTo(this.getUtilitySpace().getUtility(bid)) < 0) {
-            return true;
-        }
-        return false;
+        return (STUBBORNESS.compareTo(this.getUtilitySpace().getUtility(bid)) < 0);
     }
 
     @JsonIgnore
@@ -127,7 +125,6 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
     @JsonIgnore
     @Override
     public void setUtilitySpace(UtilitySpace utilitySpace) {
-        // TODO Auto-generated method stub
         super.setUtilitySpace(utilitySpace);
     }
 

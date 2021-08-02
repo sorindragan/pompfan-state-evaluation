@@ -27,15 +27,8 @@ import tudelft.utilities.immutablelist.ImmutableList;
         @Type(value = HardLinerOpponentPolicy.class), @Type(value = LinearOpponentPolicy.class) })
 public class TimeDependentOpponentPolicy extends AbstractPolicy {
 
-    // private ProfileInterface profileint = null;
-    // private LinearAdditive utilspace = null; // last received space
-    // private PartyId me;
-    // private Progress progress;
     private ExtendedUtilSpace extendedspace;
     private double e = 1.2;
-    // private Settings settings;
-
-    
 
     public TimeDependentOpponentPolicy(Domain domain) {
         super(domain, "TimeDependent");
@@ -64,7 +57,7 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
         Bid bid = makeBid(state.getTime());
 
         if (bid == null) {
-            // if bid==null we failed to suggest next bid.
+            // we failed to suggest next bid.
             return new Accept(this.getPartyId(), lastReceivedBid);
         }
         Action myAction;
@@ -74,6 +67,7 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
             isLastReceivedIsBiggerThanOwnOffer = lastReceivedUtility.compareTo(this.getUtilitySpace().getUtility(bid)) >= 0;
         }
         if (isLastReceivedIsBiggerThanOwnOffer) {
+            // System.out.println(this.getName() + " generated ACCEPT");
             myAction = new Accept(this.getPartyId(), lastReceivedBid);
         } else {
             myAction = new Offer(this.getPartyId(), bid);

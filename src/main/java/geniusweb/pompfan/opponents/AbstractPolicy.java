@@ -124,15 +124,7 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
             DiscreteValue firstValueKey = (DiscreteValue) valueWeights.keySet().toArray()[valueWeights.keySet().size()
                     - 1];
             valueWeights.computeIfPresent(firstValueKey, (key, value) -> value.add(valueRemainder));
-            // System.out.println("valueWeights");
-            // System.out.println(valueWeights);
-            // System.out.println(valueWeights.values().stream().reduce(BigDecimal.ZERO,
-            // BigDecimal::add));
-            // try {
-            // new DiscreteValueSetUtilities(valueWeights);
-            // } catch (Exception e) {
-            // e.printStackTrace();
-            // }
+            
             issueValueWeights.put(issueString, new DiscreteValueSetUtilities(valueWeights));
         }
 

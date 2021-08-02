@@ -268,12 +268,6 @@ public class Configurator {
         return this;
     }
 
-    // @SuppressWarnings("unchecked")
-    // public <T> T get(String paramname, Class<T> classType) {
-    // Class<?> Instance = classType.getClassLoader().loadClass(paramname);
-    // // Instance.getDeclaredConstructor().newInstance(initargs)
-    // return (T) params.get(paramname);
-    // }
     public AbstractBidDistance getBidDistance() {
         return BidDistance;
     }

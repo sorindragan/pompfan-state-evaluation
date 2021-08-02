@@ -12,7 +12,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class RandomOpponentPolicy extends AbstractPolicy {
 
-    private static final float stubborness = 0.95f;
+    private static final float stubborness = 0.98f;
 
     public RandomOpponentPolicy(UtilitySpace uSpace, String name) {
         super(uSpace, name);
@@ -26,12 +26,18 @@ public class RandomOpponentPolicy extends AbstractPolicy {
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
         Action action;
         Offer offer = (Offer) this.chooseAction();
-        action = isGood(offer.getBid()) ? new Accept(this.getPartyId(), lastReceivedBid) : offer;
-        // System.out.println(action);
+        if (isDecent(offer.getBid())) {
+            action = new Accept(this.getPartyId(), lastReceivedBid);
+            // System.out.println(this.getName() + " generated ACCEPT");
+        } else {
+            action = offer;
+        }
+        // action = isDecent(offer.getBid()) ? new Accept(this.getPartyId(), lastReceivedBid) : offer;
+
         return action;
     }
 
-    private boolean isGood(Bid bid) {
+    private boolean isDecent(Bid bid) {
         if (bid == null)
             return false;
 

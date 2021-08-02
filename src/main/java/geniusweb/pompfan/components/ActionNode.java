@@ -10,6 +10,7 @@ import geniusweb.issuevalue.Bid;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.StateRepresentationException;
 
+// GENERAL NOTE: ActionWithBid exists. Should be used. Would simplify the code substantially.
 public class ActionNode extends Node {
     private static final boolean SIM_DEBUG = false;
 
@@ -28,7 +29,6 @@ public class ActionNode extends Node {
         Bid lastOpponentBid = lastOpponentAction != null ? ((Offer) lastOpponentAction).getBid() : null;
 
         if (lastAgentAction instanceof Accept) {
-            // ActionWithBid exists. Should use that. Simplifies the code substantially.
             // This code deals with the action node being an accept. Otherwise it will do
             // further exploration after an accept.
             
@@ -67,6 +67,7 @@ public class ActionNode extends Node {
             this.addChild(child);
             return child;
         }
+        child.setIsResampled(true);
         return child;
     }
 

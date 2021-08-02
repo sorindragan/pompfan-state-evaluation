@@ -32,6 +32,7 @@ public class Node {
     private Double value = 0d;
     private AbstractState<?> state;
     private Boolean isTerminal = false;
+    private Boolean isResampled = false; 
     private Action storedAction = null;
 
     public Node(Node parent, AbstractState<?> state) {
@@ -133,6 +134,14 @@ public class Node {
     public Node setIsTerminal(Boolean isTerminal) {
         this.isTerminal = isTerminal;
         return this;
+    }
+
+    public Boolean getIsResampled() {
+        return isResampled;
+    }
+
+    public void setIsResampled(Boolean isResampled) {
+        this.isResampled = isResampled;
     }
 
     @Override

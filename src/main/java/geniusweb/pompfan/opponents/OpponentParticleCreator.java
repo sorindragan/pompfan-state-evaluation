@@ -18,10 +18,11 @@ public abstract class OpponentParticleCreator {
             listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(uSpace));
             listOfOpponents.add(new AntagonisticOpponentPolicy(uSpace));
             listOfOpponents.add(new SelfishOpponentPolicy(domain));
-            listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
+            // listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
             listOfOpponents.add(new HardLinerOpponentPolicy(domain));
-            listOfOpponents.add(new ConcederOpponentPolicy(domain));
             listOfOpponents.add(new BoulwareOpponentPolicy(domain));
+            listOfOpponents.add(new LinearOpponentPolicy(domain));
+            listOfOpponents.add(new ConcederOpponentPolicy(domain));
         }
         listOfOpponents = listOfOpponents.stream().map(opponent -> opponent.setBidspace(bidspace))
                 .collect(Collectors.toList());
