@@ -11,8 +11,8 @@
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"negotiationdata": ["6d954b42-bff8-46df-9f77-7b92bc0e3337"],
 									"isLearn": true,
-									"numParticles": 100,
-									"simulationTime": 250,
+									"numParticles": "100",
+									"simulationTime": "250",
 									"config": {
 										"confComparer": "UtilityBidDistance",
 										"confBelief": "ParticleFilterBelief",
@@ -22,11 +22,11 @@
 										"confWidener": "ProgressiveWideningStrategy",
 										"confExtra": {
 											"widener": {
-												"maxWidth": 10,
-												"k_a": 4.0,
-												"a_a": 0.2,
-												"k_b": 4.0,
-												"a_b": 0.2
+												"maxWidth": "10",
+												"k_a": "4.0",
+												"a_a": "0.2",
+												"k_b": "4.0",
+												"a_b": "0.2"
 											}
 										}
 									}
