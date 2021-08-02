@@ -29,14 +29,15 @@ df = pd.json_normalize(all_results)
 df["agreed"] = df.utility == 0.0
 df["vs"] = None
 df["vs_utility"] = None
-for i in df["session"].unique():
-    df_subset = df[df["session"] == i]
+for index, df_subset in df.groupby(["session", "tournamentStart", "sessionStart"]):
+    # df_subset = df[df["session"] == i]
+    display(df_subset)
     party1, party2 = df_subset["party"]
     util1, util2 = df_subset["utility"]
-    df.loc[(df.party == party1) & (df.session == i), "vs"] = party2
-    df.loc[(df.party == party2) & (df.session == i), "vs"] = party1
-    df.loc[(df.party == party1) & (df.session == i), "vs_utility"] = util2
-    df.loc[(df.party == party2) & (df.session == i), "vs_utility"] = util1
+    df.loc[(df.party == party1) & (df.session == index[0]) & (df.tournamentStart == index[1]) & (df.sessionStart == index[2]), "vs"] = party2
+    df.loc[(df.party == party2) & (df.session == index[0]) & (df.tournamentStart == index[1]) & (df.sessionStart == index[2]), "vs"] = party1
+    df.loc[(df.party == party1) & (df.session == index[0]) & (df.tournamentStart == index[1]) & (df.sessionStart == index[2]), "vs_utility"] = util2
+    df.loc[(df.party == party2) & (df.session == index[0]) & (df.tournamentStart == index[1]) & (df.sessionStart == index[2]), "vs_utility"] = util1
 
 df.to_csv(file_to_analyse.parent / "data.csv")
 df
@@ -46,7 +47,7 @@ df
 #     # display(grp)
 #     sns.boxplot(data=grp, x="party", y="util")
 fig, ax = plt.subplots(1, 1, figsize=(10, 5))
-ax = sns.boxplot(data=df, x="party", y="utility")
+ax = sns.boxplot(data=df[df.vs == "POMPFANAgent"], x="party", y="vs_utility")
 for tick in ax.get_xticklabels():
     tick.set_rotation(45)
 ax.set_xlabel("Party")

@@ -18,15 +18,15 @@
 								"confBelief": "ParticleFilterBelief",
 								"confEvaluator": "Last2BidsProductUtilityEvaluator",
 								"confState": "HistoryState",
-								"confExplorer": "RandomOwnExplorerPolicy",
+								"confExplorer": "HighSelfEsteemOwnExplorationPolicy",
 								"confWidener": "ProgressiveWideningStrategy",
 								"confExtra": {
 									"widener": {
 										"maxWidth": "10",
-										"k_a": "4.0",
-										"a_a": "0.2",
-										"k_b": "4.0",
-										"a_b": "0.2"
+										"k_a": "2.0",
+										"a_a": "0.5",
+										"k_b": "1.0",
+										"a_b": "0.5"
 									}
 								}
 							}
@@ -90,12 +90,6 @@
 			},
 			{
 				"ProfileList": ["file:src/test/resources/party2.json"]
-			},
-			{
-				"ProfileList": ["file:src/test/resources/party3.json"]
-			},
-			{
-				"ProfileList": ["file:src/test/resources/party4.json"]
 			}
 		],
 		"teamsPerSession": 2,
@@ -103,7 +97,7 @@
 			"SAOPSettings": {
 				"participants": [],
 				"deadline": {
-					"deadlinetime": { "durationms": 15000 }
+					"deadlinetime": { "durationms": 5000 }
 				}
 			}
 		},
