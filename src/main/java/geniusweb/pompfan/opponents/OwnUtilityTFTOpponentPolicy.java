@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import geniusweb.actions.Accept;
@@ -24,17 +25,19 @@ import tudelft.utilities.immutablelist.ImmutableList;
 public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
 
     private static double utilGapForConcession = 0.02;
+    @JsonIgnore
     BidsWithUtility bidsWithinUtil;
 
+    
+    @JsonCreator
+    public OwnUtilityTFTOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace uSpace) {
+        super(uSpace, "OwnUtilTFT");
+        this.setBidsWithinUtil(new BidsWithUtility((LinearAdditive) this.getUtilitySpace()));
+    }
+    
     public OwnUtilityTFTOpponentPolicy(Domain domain, BidsWithUtility bidsWithinUtil) {
         super(domain, "OwnUtilTFT");
         this.bidsWithinUtil = bidsWithinUtil;
-    }
-
-    @JsonCreator
-    public OwnUtilityTFTOpponentPolicy(@JsonProperty("uspace") UtilitySpace uSpace) {
-        super(uSpace, "OwnUtilTFT");
-        this.setBidsWithinUtil(new BidsWithUtility((LinearAdditive) this.getUtilitySpace()));
     }
 
     @Override
@@ -140,10 +143,12 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
         return bid;
     }
 
+    @JsonIgnore
     public BidsWithUtility getBidsWithinUtil() {
         return bidsWithinUtil;
     }
 
+    @JsonIgnore
     public void setBidsWithinUtil(BidsWithUtility bidsWithinUtil) {
         this.bidsWithinUtil = bidsWithinUtil;
     }

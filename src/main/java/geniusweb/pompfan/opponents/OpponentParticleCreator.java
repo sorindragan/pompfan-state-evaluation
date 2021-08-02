@@ -15,6 +15,7 @@ public abstract class OpponentParticleCreator {
         AllBidsList bidspace = new AllBidsList(domain);
         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
         for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
+            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(uSpace));
             listOfOpponents.add(new AntagonisticOpponentPolicy(uSpace));
             listOfOpponents.add(new SelfishOpponentPolicy(domain));
             listOfOpponents.add(new TimeDependentOpponentPolicy(domain));

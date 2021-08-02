@@ -50,14 +50,14 @@ import geniusweb.progress.ProgressRounds;
 import geniusweb.references.Parameters;
 import tudelft.utilities.logging.Reporter;
 
-public class POMPFANAgent extends DefaultParty { // TODO: change name
+public class POMPFANAgent extends DefaultParty {
 
     /**
      *
      */
     private static final int NUM_SIMULATIONS = 100;
     private static final int MAX_WIDTH = 10;
-    private Long simulationTime = 500l; // TODO: BUG if increased
+    private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = true;
     private static boolean DEBUG_OFFER = false;
     private static boolean DEBUG_PERSIST = false;
@@ -358,6 +358,7 @@ public class POMPFANAgent extends DefaultParty { // TODO: change name
                 FileLocation tmpPath = path instanceof FileLocation ? (FileLocation) path
                         : new FileLocation(UUID.fromString((String) path));
                 this.dataPaths.add(tmpPath.getFile());
+                System.out.println(this.dataPaths);
             }
         }
     }
