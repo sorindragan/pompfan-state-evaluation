@@ -50,7 +50,7 @@ import geniusweb.progress.ProgressRounds;
 import geniusweb.references.Parameters;
 import tudelft.utilities.logging.Reporter;
 
-public class CustomAgent extends DefaultParty { // TODO: change name
+public class POMPFANAgent extends DefaultParty { // TODO: change name
 
     /**
      *
@@ -82,10 +82,10 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private Boolean isLearn = false;
     private HashMap<String, Object> config;
 
-    public CustomAgent() {
+    public POMPFANAgent() {
     } // TODO: change name
 
-    public CustomAgent(Reporter reporter) { // TODO: change name
+    public POMPFANAgent(Reporter reporter) { // TODO: change name
         super(reporter); // for debugging
     }
 
@@ -100,7 +100,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     @Override
     public void notifyChange(Inform info) {
-        System.out.println("AAAAAA:===========INFO========== " + info.getClass().getName());
+        System.out.println("===========INFO========== " + info.getClass().getName());
         // System.out.println("DEBUG_PERSIST: " + info.toString());
         // if (DEBUG_IN_TOURNAMENT == false) {
         // }
@@ -385,7 +385,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     /** Provide a description of the agent */
     @Override
     public String getDescription() {
-        return "This is our model Olu-Sorin-3000.";
+        return "Partially Observable MCTS using Particle Filter belief for Automated Negotiation.";
     }
 
     /**
