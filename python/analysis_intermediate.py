@@ -12,10 +12,10 @@ import pandas as pd
 import seaborn as sns
 import jsonlines
 # %%
-filename = "log_tournament_results.jsonl"
+filename = "tournament_results.jsonl"
 # filename = "log_tournament_xx_xx_xxxx_xx_xx.json" # Something else
 curr_dir = pathlib.Path(__file__)
-log_dir = curr_dir.parent.parent / "logs"
+log_dir = curr_dir.parent.parent / "eval"
 file_to_analyse = log_dir / filename
 assert file_to_analyse.exists(), f"File {file_to_analyse} does not exist"
 display(f"Found {file_to_analyse} !!!")
@@ -110,3 +110,5 @@ for idx, ax in zip(groups.index.unique(), axes):
 fig.suptitle(f"Number of non-Agreements")
 fig.tight_layout()
 plt.show()
+
+# %%

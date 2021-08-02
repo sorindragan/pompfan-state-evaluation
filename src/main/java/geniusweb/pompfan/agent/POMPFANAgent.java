@@ -397,12 +397,12 @@ public class POMPFANAgent extends DefaultParty {
             // negotiation data.
             this.lastReceivedBid = ((Offer) action).getBid();
             this.negotiationData.addBidUtil(this.uSpace.getUtility(this.lastReceivedBid).doubleValue());
-            getReporter().log(Level.INFO, "OPPONENT ACTION");
-            getReporter().log(Level.INFO, this.MCTS.getLastBestActionNode().toString());
-            ArrayList<Node> possibleNextRoots = this.MCTS.getLastBestActionNode().getChildren();
-            possibleNextRoots.sort(Comparator.comparing(Node::getValue, Comparator.reverseOrder()));
-            int maxSlice = possibleNextRoots.size() > 5 ? 5 : possibleNextRoots.size();
-            getReporter().log(Level.INFO, possibleNextRoots.subList(0, maxSlice).toString());
+            // getReporter().log(Level.INFO, "OPPONENT ACTION");
+            // if (this.MCTS.getLastBestActionNode()!=null) getReporter().log(Level.INFO, this.MCTS.getLastBestActionNode().toString());
+            // ArrayList<Node> possibleNextRoots = this.MCTS.getLastBestActionNode().getChildren();
+            // possibleNextRoots.sort(Comparator.comparing(Node::getValue, Comparator.reverseOrder()));
+            // int maxSlice = possibleNextRoots.size() > 5 ? 5 : possibleNextRoots.size();
+            // getReporter().log(Level.INFO, possibleNextRoots.subList(0, maxSlice).toString());
             this.MCTS.receiveRealObservation(action, System.currentTimeMillis());
 
         }
@@ -461,14 +461,14 @@ public class POMPFANAgent extends DefaultParty {
             // System.out.println("Nodes Number:
             // ".concat(String.valueOf(this.MCTS.howManyNodes())));
         }
-        getReporter().log(Level.INFO, "AGENT ACTION");
-        getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
+        // getReporter().log(Level.INFO, "AGENT ACTION");
+        // getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
         // getReporter().log(Level.INFO, String.valueOf(this.MCTS.getRoot().getChildren().size()));
         // ArrayList<Node> sortedChildren = this.MCTS.getRoot().getChildren();
         // sortedChildren.sort(Comparator.comparing(Node::getValue, Comparator.reverseOrder()));
         // int maxSlice = sortedChildren.size() > 5 ? 5 : sortedChildren.size();
         // getReporter().log(Level.INFO, sortedChildren.subList(0, maxSlice).toString());
-        getReporter().log(Level.INFO, String.valueOf(this.MCTS.getBelief().getOpponents().size()));
+        // getReporter().log(Level.INFO, String.valueOf(this.MCTS.getBelief().getOpponents().size()));
 
         action = this.MCTS.chooseBestAction();
         

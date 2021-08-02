@@ -161,7 +161,7 @@ public class Configurator {
     }
 
     public Configurator build() {
-        // this.BidDistance = ;
+
         return buildBidDistance(this.confComparer, this.uSpace)
                 .buildBelief(this.confBelief, this.listOfOpponents, this.getBidDistance())
                 .buildInitState(this.confEvaluator, this.confInitState, this.uSpace)
@@ -219,7 +219,7 @@ public class Configurator {
             this.setState(new UtilityState(uSpace, null, evaluator2));
             break;
         default:
-            // TODO: ??
+            // ??
             System.out.println("ERRRR!");
             break;
         }
@@ -262,7 +262,6 @@ public class Configurator {
             this.setWidener(new MaxWidthWideningStrategy(this.getExplorer(), params));
             break;
         default:
-            // this.setExplorer(new RandomOwnExplorerPolicy(uSpace, me));
             break;
         }
         return this;

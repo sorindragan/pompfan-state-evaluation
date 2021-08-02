@@ -42,8 +42,8 @@ public class Tree {
     private Double currentTime = 0.0;
     private BeliefNode originalRoot;
     // TODO
-    // private Double ACCEPT_SLACK = 0.01;
-    private Double ACCEPT_SLACK = -0.5;
+    private Double ACCEPT_SLACK = 0.1;
+    // private Double ACCEPT_SLACK = -0.5;
 
     public Tree(UtilitySpace utilitySpace, AbstractBelief belief, AbstractState<?> startState, AbstractWidener widener,
             Progress progress) {
@@ -209,7 +209,7 @@ public class Tree {
                     .subtract(this.getUtilitySpace().getUtility(lastOpponentBid)).doubleValue();
 
             // if we want to propose something worse than what we received
-            if (distanceValue < ACCEPT_SLACK) {
+            if (distanceValue + ACCEPT_SLACK < 0) {
                 action = new Accept(action.getActor(), lastOpponentBid);
                 break;
             }

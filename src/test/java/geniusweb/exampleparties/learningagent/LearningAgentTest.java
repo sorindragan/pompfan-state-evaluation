@@ -55,8 +55,8 @@ import geniusweb.references.ProtocolRef;
 import geniusweb.references.Reference;
 import tudelft.utilities.listener.DefaultListenable;
 
-public class LearningAgentTest { // TODO: Impl Tests for our agent
-
+public class LearningAgentTest { 
+	// !! Nice to Have: Impl tests for our agent
 	private static final PartyId PARTY1 = new PartyId("party1_1");
 	private static final String SAOP = "SAOP";
 	private static final String LEARN = "Learn";
