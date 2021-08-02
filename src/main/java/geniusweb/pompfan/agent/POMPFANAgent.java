@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import javax.websocket.DeploymentException;
@@ -57,8 +56,6 @@ public class POMPFANAgent extends DefaultParty {
     /**
      *
      */
-    private static final int NUM_SIMULATIONS = 100;
-    private static final int MAX_WIDTH = 10;
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = true;
     private static boolean DEBUG_OFFER = true;
@@ -119,8 +116,10 @@ public class POMPFANAgent extends DefaultParty {
 
     private void runSetupPhase(Inform info)
             throws IOException, JsonParseException, JsonMappingException, DeploymentException, Exception {
-        // info is a Settings object that is passed at the start of a negotiation
+        
+                // info is a Settings object that is passed at the start of a negotiation
         Settings settings = (Settings) info;
+        
         // Needs to run
         if (DEBUG_LEARN)
             System.out.println("DEBUG_LEARN_PERSISTENCE: ========================================= "
@@ -128,6 +127,7 @@ public class POMPFANAgent extends DefaultParty {
         if (DEBUG_LEARN)
             System.out.println("DEBUG_LEARN_PERSISTENCE: ".concat(settings.toString()));
         this.initializeVariables(settings);
+        
         if (this.isLearn) {
             // We are in the learning step: We execute the learning and notify when we are
             // done. REMEMBER that there is a deadline of 60 seconds for this step.
@@ -290,14 +290,10 @@ public class POMPFANAgent extends DefaultParty {
         // JSON-file)
         this.parameters = settings.getParameters();
         if (this.parameters.containsKey("simulationTime")) {
-            // this.simulationTime = ((Number)
-            // this.parameters.get("simulationTime")).longValue();
             this.simulationTime = Long.valueOf(((String) this.parameters.get("simulationTime")));
 
         }
         if (this.parameters.containsKey("numParticlesPerOpponent")) {
-            // this.numParticlesPerOpponent = ((Number)
-            // this.parameters.get("numParticlesPerOpponent")).longValue();
             this.numParticlesPerOpponent = Long.valueOf(((String) this.parameters.get("numParticlesPerOpponent")));
 
         }
@@ -309,7 +305,6 @@ public class POMPFANAgent extends DefaultParty {
         }
 
         // The PersistentState is loaded here (see 'PersistenData,java')
-
         if (this.parameters.containsKey("persistentstate")) {
             if (DEBUG_LEARN)
                 System.out.println("DEBUG_LEARN_PERSISTENCE: Found Persistence!");

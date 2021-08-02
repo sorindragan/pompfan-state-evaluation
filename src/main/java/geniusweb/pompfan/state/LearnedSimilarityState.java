@@ -3,7 +3,6 @@ package geniusweb.pompfan.state;
 import java.util.HashMap;
 
 import geniusweb.actions.Action;
-import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.helper.IVPair;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.profile.utilityspace.UtilitySpace;

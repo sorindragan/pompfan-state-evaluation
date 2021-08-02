@@ -25,7 +25,6 @@ import geniusweb.profile.utilityspace.ValueSetUtilities;
 @JsonSubTypes({ @Type(value = WeightedFrequencyOpponentModel.class)})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public abstract class AbstractOpponentModel implements LinearAdditive, OpponentModel {
-	private static final int DECIMALS = 4; // accuracy of our computations.
 	private static int serial = 1; // counter for auto name generation
     private String id = UUID.randomUUID().toString();
 

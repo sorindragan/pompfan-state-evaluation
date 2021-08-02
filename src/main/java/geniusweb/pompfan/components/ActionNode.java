@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
-import geniusweb.actions.ActionWithBid;
 import geniusweb.actions.Offer;
 import geniusweb.issuevalue.Bid;
 import geniusweb.pompfan.state.AbstractState;
@@ -30,8 +29,8 @@ public class ActionNode extends Node {
 
         if (lastAgentAction instanceof Accept) {
             // This code deals with the action node being an accept. Otherwise it will do
-            // further exploration after an accept.
-            
+            // further exploration after an accept, which does not make sense
+            // as an acccept marks the end of a negotiation
             Accept ourAcceptanceAction = (Accept) lastAgentAction;
 
             AbstractState<?> newState = state.updateState(ourAcceptanceAction, time);
@@ -45,6 +44,7 @@ public class ActionNode extends Node {
                 this.addChild(child);
                 return child;
             }
+            // mark the end of tree branch
             return null;
 
         }
@@ -58,10 +58,12 @@ public class ActionNode extends Node {
         }
         AbstractState<?> newState = state.updateState(observation, time);
 
+        // choose already existent child if new state happens to be identical
         child = (BeliefNode) this.getChildren().stream().filter(childNode -> childNode.getState().equals(newState))
                 .findFirst().orElse(null);
 
         if (child == null) {
+            // create a new node
             child = (BeliefNode) Node.buildNode(Node.NODE_TYPE.BELIEF, this, newState, state.getOpponent(),
                     observation);
             this.addChild(child);

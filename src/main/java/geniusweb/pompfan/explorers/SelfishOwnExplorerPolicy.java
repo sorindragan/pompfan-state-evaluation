@@ -27,7 +27,7 @@ public class SelfishOwnExplorerPolicy extends RandomOwnExplorerPolicy {
     public Action chooseAction(Bid lastOpponentBid, Bid lastAgentBid, AbstractState<?> state) {
         Action action;
         Bid bid;
-        //TODO: same issue as in the Random --- never used
+        //class never used
         if (lastOpponentBid == null) {
             bid = this.getAllBids().getExtremeBid(true);
         } else {

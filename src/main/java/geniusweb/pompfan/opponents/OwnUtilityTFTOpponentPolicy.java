@@ -15,7 +15,6 @@ import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
-import geniusweb.opponentmodel.OpponentModel;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.LinearAdditive;
@@ -74,8 +73,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
             long i;
             // also concede
             if (isConcession) {
-                // I need something like getBidNearUtility ffs
-                // I did a computationally-expensive ugly workaround
+                // I needed something like getBidNearUtility
                 options = this.getBidsWithinUtil()
                         .getBids(new Interval(
                                 BigDecimal.valueOf(this.getUtilitySpace().getUtility(lastOfferedBid).doubleValue()
@@ -129,7 +127,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
             Bid newBid = options.get(i);
             return new Offer(this.getPartyId(), newBid);
         }
-        // ?? something else needed if the state is not a HistoryState
+        // something else needed if the state is not a HistoryState
         return null;
     }
 

@@ -1,39 +1,24 @@
 package geniusweb.pompfan.helper;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.Map.Entry;
-import java.util.stream.Collector;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.datavec.api.records.mapper.RecordMapper;
 import org.datavec.api.records.reader.RecordReader;
 import org.datavec.api.records.reader.impl.collection.ListStringRecordReader;
-import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
 import org.datavec.api.records.reader.impl.transform.TransformProcessRecordReader;
 import org.datavec.api.split.ListStringSplit;
-import org.datavec.api.split.StringSplit;
 import org.datavec.api.transform.TransformProcess;
 import org.datavec.api.transform.schema.Schema;
 import org.datavec.api.transform.schema.Schema.Builder;
-import org.datavec.api.transform.transform.categorical.CategoricalToIntegerTransform;
 import org.datavec.api.writable.Writable;
-import org.deeplearning4j.datasets.iterator.RandomDataSetIterator.Values;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.api.ops.impl.shape.OneHot;
-import org.nd4j.linalg.cpu.nativecpu.NDArray;
-import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
 
 import geniusweb.issuevalue.Bid;
@@ -43,6 +28,7 @@ import geniusweb.issuevalue.Value;
 import geniusweb.issuevalue.ValueSet;
 
 public class IVPair {
+    // incomplete
     String issue;
     Value value;
     private static IVPairMapping ivPairMapping;

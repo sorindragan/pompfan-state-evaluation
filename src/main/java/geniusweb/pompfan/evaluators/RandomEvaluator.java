@@ -4,9 +4,6 @@ import java.util.Random;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import geniusweb.issuevalue.Bid;
-import geniusweb.pompfan.state.AbstractState;
-
 public class RandomEvaluator implements IEvalFunction<Object> {
     @JsonIgnore
     Random random = null;

@@ -30,7 +30,6 @@ public abstract class AbstractBidDistance {
         this.domain = utilitySpace.getDomain();
         this.utilitySpace = utilitySpace;
         this.issues = utilitySpace;
-        // this.issueValues = IVPair.getIssueValueSets(this.domain);
     }
 
     public Domain getDomain() {

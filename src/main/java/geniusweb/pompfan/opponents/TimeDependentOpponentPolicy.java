@@ -80,7 +80,6 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
      *         bid.
      */
     private Bid makeBid(Double currTime) {
-        // double time = progress.get(System.currentTimeMillis());
 
         BigDecimal utilityGoal = getUtilityGoal(currTime, getE(), extendedspace.getMin(), extendedspace.getMax());
         ImmutableList<Bid> options = extendedspace.getBids(utilityGoal);

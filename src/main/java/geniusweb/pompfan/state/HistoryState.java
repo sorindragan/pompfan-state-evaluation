@@ -1,23 +1,16 @@
 package geniusweb.pompfan.state;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
-import geniusweb.actions.Offer;
-import geniusweb.issuevalue.Bid;
-import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.evaluators.IEvalFunction;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class HistoryState extends AbstractState<ArrayList<Action>> {
-    private double DISCOUNT_RATE = 0.95;
     public IEvalFunction<HistoryState> evaluator;
 
     public HistoryState() {
@@ -37,7 +30,6 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
 
     @SuppressWarnings("unchecked")
     public void setEvaluator(IEvalFunction<? extends HistoryState> evaluator) {
-        // this.evaluator = (EvaluationFunctionInterface<HistoryState>) evaluator;
         this.evaluator = (IEvalFunction<HistoryState>) evaluator;
     }
 

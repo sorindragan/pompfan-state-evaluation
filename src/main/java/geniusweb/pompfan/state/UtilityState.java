@@ -3,13 +3,11 @@ package geniusweb.pompfan.state;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
-import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.evaluators.IEvalFunction;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.profile.utilityspace.UtilitySpace;

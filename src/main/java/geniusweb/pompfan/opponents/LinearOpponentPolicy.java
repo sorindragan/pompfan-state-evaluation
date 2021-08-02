@@ -1,19 +1,9 @@
 package geniusweb.pompfan.opponents;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Random;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import geniusweb.actions.Action;
-import geniusweb.bidspace.AllBidsList;
-import geniusweb.exampleparties.boulware.Boulware;
-import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
-import geniusweb.pompfan.state.AbstractState;
 import geniusweb.profile.utilityspace.UtilitySpace;
-import tudelft.utilities.immutablelist.ImmutableList;
 
 public class LinearOpponentPolicy extends TimeDependentOpponentPolicy {
 

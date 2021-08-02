@@ -7,27 +7,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
-import geniusweb.bidspace.AllBidsList;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.issuevalue.Value;
-import geniusweb.opponentmodel.FrequencyOpponentModel;
 import geniusweb.opponentmodel.OpponentModel;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.progress.Progress;
-import tudelft.utilities.immutablelist.AbstractImmutableList;
 
-// TODO: Generic impl. of random generator
-// TODO: Baysian version
-// TODO: Time dependant
+// ??: Generic impl. of random generator
+// ??: Baysian version
+// ??: Time dependant
 public class FuzzyBayesianOpponentModel implements UtilitySpace, OpponentModel, IFuzzyModel {
 
     private static final int SLACK = 3;
@@ -152,37 +147,31 @@ public class FuzzyBayesianOpponentModel implements UtilitySpace, OpponentModel, 
 
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Domain getDomain() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Bid getReservationBid() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public OpponentModel with(Domain domain, Bid resBid) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public OpponentModel with(Action action, Progress progress) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public BigDecimal getUtility(Bid bid) {
-        // TODO Auto-generated method stub
         return null;
     }
 }

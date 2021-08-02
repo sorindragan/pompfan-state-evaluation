@@ -6,14 +6,10 @@ import java.util.stream.Collectors;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.ops.transforms.Transforms;
 
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.issuevalue.Bid;
-import geniusweb.issuevalue.Domain;
-import geniusweb.pompfan.distances.CosineSimilarity;
-import geniusweb.pompfan.distances.L2Distance;
 import geniusweb.pompfan.helper.IVPair;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.profile.utilityspace.UtilitySpace;

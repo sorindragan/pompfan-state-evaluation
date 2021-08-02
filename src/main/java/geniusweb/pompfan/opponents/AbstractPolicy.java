@@ -38,10 +38,6 @@ import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.profile.utilityspace.ValueSetUtilities;
 
-// @JsonSubTypes({ @Type(value = AntagonisticOpponentPolicy.class),
-//         @Type(value = RandomOpponentPolicy.class),
-//         @Type(value = SelfishOpponentPolicy.class),
-//         @Type(value = TimeDependentOpponentPolicy.class) })
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @Type(value = AntagonisticOpponentPolicy.class), @Type(value = RandomOpponentPolicy.class),
         @Type(value = SelfishOpponentPolicy.class), @Type(value = TimeDependentOpponentPolicy.class),
@@ -97,7 +93,6 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
         List<String> issues = new ArrayList<String>(domain.getIssues());
         List<BigDecimal> allInts = this.getRandom().ints(issues.size(), 0, 100).boxed().map(String::valueOf)
                 .map(BigDecimal::new).collect(Collectors.toList());
-        // MathContext mc = new MathContext(5);
         BigDecimal sumOfInts = allInts.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
         Map<String, BigDecimal> issueWeights = IntStream.range(0, issues.size()).boxed().collect(
                 Collectors.toMap(issues::get, index -> allInts.get(index).divide(sumOfInts, 5, RoundingMode.HALF_UP)));
@@ -134,7 +129,6 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
 
     @Override
     public String toString() {
-        // return "PolicyName: " + getName() + " -- " + this.utilitySpace.toString();
         return this.getId().toString();
     }
 

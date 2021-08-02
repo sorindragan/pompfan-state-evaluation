@@ -56,9 +56,9 @@ public class Last2BidsMeanUtilityEvaluator implements IEvalFunction<HistoryState
         if (lastAction instanceof Accept) {
             return state.getUtilitySpace().getUtility(lastBid).doubleValue();
         }
-        BigDecimal utility1 = lastAction != null ? this.getUtilitySpace().getUtility(lastBid) : BigDecimal.ONE;
+        BigDecimal utility1 = lastAction != null ? this.getUtilitySpace().getUtility(lastBid) : BigDecimal.ZERO;
         BigDecimal utility2 = secondToLastAction != null ? this.getUtilitySpace().getUtility(secondToLastBid)
-                : BigDecimal.ONE;
+                : BigDecimal.ZERO;
         BigDecimal mean = utility1.add(utility2).divide(new BigDecimal(2));
         return mean.doubleValue();
     }

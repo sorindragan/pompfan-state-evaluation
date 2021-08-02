@@ -1,15 +1,12 @@
 package geniusweb.pompfan.opponentModels;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,7 +16,6 @@ import geniusweb.actions.Offer;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.DiscreteValue;
 import geniusweb.issuevalue.Domain;
-import geniusweb.issuevalue.Value;
 import geniusweb.opponentmodel.OpponentModel;
 import geniusweb.profile.utilityspace.DiscreteValueSetUtilities;
 import geniusweb.profile.utilityspace.ValueSetUtilities;
@@ -40,11 +36,7 @@ public class WeightedFrequencyOpponentModel extends AbstractOpponentModel {
 
         Set<String> allIssues = this.getDomain().getIssues();
         BigDecimal sum = new BigDecimal(realHistoryActions.size());
-        // Map<Action, Long> actionCounts = realHistoryActions.stream()
-        //         .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        // Map<Action, BigDecimal> actionProbabilities = new HashMap<>();
-        // actionCounts.forEach((action, cnt) -> actionProbabilities.put(action, new BigDecimal(cnt).divide(sum)));
-
+       
         Map<String, Map<DiscreteValue, BigDecimal>> newIssueValFreqs = new HashMap<String, Map<DiscreteValue, BigDecimal>>();
         for (Action action : realHistoryActions) {
             if (!(action instanceof Offer))
@@ -67,7 +59,6 @@ public class WeightedFrequencyOpponentModel extends AbstractOpponentModel {
         // Normalize counts
         newIssueValFreqs.forEach((issue, valueCounts) -> valueCounts
                 .forEach((value, count) -> valueCounts.put(value, count.divide(sum, RoundingMode.HALF_UP))));
-        //
 
         HashMap<String, ValueSetUtilities> issueUtilities = new HashMap<String, ValueSetUtilities>();
         HashMap<String, BigDecimal> issueWeights = new HashMap<String, BigDecimal>();

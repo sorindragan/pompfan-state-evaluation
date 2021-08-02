@@ -23,7 +23,5 @@ public class UtilityBidDistance extends AbstractBidDistance {
     public Double computeDistance(Bid b1, Bid b2) {
         return Math.abs(this.getUtility(b1)-this.getUtility(b2));
     }
-
-
     
 }

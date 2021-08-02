@@ -29,8 +29,8 @@ public class HighSelfEsteemOwnExplorationPolicy extends AbstractOwnExplorationPo
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
         Action action;
         Bid bid;
-        // progressively raise the percentages of accepts from 0 to 10 pcent
-        double acceptProbability = state.getTime() * 10;
+        // progressively raise the percentages of accepts from 0 to 5 pcent
+        double acceptProbability = state.getTime() * 5;
         
         
         if (lastReceivedBid == null) {
@@ -47,7 +47,6 @@ public class HighSelfEsteemOwnExplorationPolicy extends AbstractOwnExplorationPo
         // pcent of the time we do accepts
         long i = this.getRandom().nextInt(100);
         if (i > (100 - acceptProbability)) {
-            // System.out.println(this.getName() +" generated Accept");
             action = new Accept(this.getPartyId(), lastReceivedBid);
         }
 

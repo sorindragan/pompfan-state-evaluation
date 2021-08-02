@@ -12,7 +12,8 @@ import geniusweb.progress.Progress;
 
 public class MaxWidthWideningStrategy extends AbstractWidener {
     private Integer maxWidth;
-    // AT THIS MOMENT THIS IS JUNK
+    // !! AT THIS MOMENT THIS IS JUNK
+    // TODO: This needs to be fixed
 
     public MaxWidthWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy, HashMap<String, Object> params) {
         super(ownExplorationStrategy);
@@ -43,7 +44,7 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
                 currRoot = receivedObservationNode;
                 if (currRoot == null) {
                     return;
-                } //!!!!: finish shit
+                } // !!: finish dealing with exceptions
                 
                 Double value = currRoot.getState().evaluate();
                 Tree.backpropagate(currRoot, value);

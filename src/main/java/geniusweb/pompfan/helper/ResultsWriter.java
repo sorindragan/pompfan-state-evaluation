@@ -2,7 +2,6 @@ package geniusweb.pompfan.helper;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +23,6 @@ import geniusweb.profileconnection.ProfileConnectionFactory;
 import geniusweb.profileconnection.ProfileInterface;
 import geniusweb.protocol.NegoState;
 import geniusweb.protocol.session.SessionResult;
-import geniusweb.protocol.session.SessionState;
-import geniusweb.protocol.tournament.allpermutations.AllPermutationsState;
 import geniusweb.references.Parameters;
 import geniusweb.references.PartyWithProfile;
 import geniusweb.references.ProfileRef;

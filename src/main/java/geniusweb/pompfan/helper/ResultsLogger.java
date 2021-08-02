@@ -152,14 +152,13 @@ public class ResultsLogger {
 
         private Result computeUtility() {
             try {
-                // PartyWithParameters party = pwp.getParty();
                 this.profile = this.getPwp().getProfile();
                 ProfileInterface profileint = ProfileConnectionFactory.create(this.profile.getURI(), this.reporter);
                 UtilitySpace utilitySpace = ((UtilitySpace) profileint.getProfile());
                 this.utility = this.getAggreeBid() != null ? utilitySpace.getUtility(this.getAggreeBid()).doubleValue()
                         : 0.0;
             } catch (IOException e) {
-                // TODO: Better error handling -- consistent return of error utility.
+                // !!: Better error handling -- consistent return of error utility.
                 this.utility = -1.0;
                 throw new IllegalStateException(e);
             } catch (DeploymentException e) {

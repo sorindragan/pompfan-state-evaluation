@@ -9,8 +9,6 @@ public class AbstractPolicyDeserializer extends KeyDeserializer{
 
     @Override
     public AbstractPolicy deserializeKey(String key, DeserializationContext ctxt) throws IOException {
-        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        // ctxt.
         return null;
     }
     

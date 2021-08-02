@@ -2,7 +2,6 @@ package geniusweb.pompfan.components;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import geniusweb.actions.Accept;
@@ -56,11 +55,13 @@ public class BeliefNode extends Node {
 
         AbstractState<?> newState = state.updateState(agentAction, time);
         
+        // choose already present child if the new state happens to be identical
         ActionNode child = (ActionNode) this.getChildren().stream()
                .filter(childNode -> childNode.getState().equals(newState))
                .findFirst().orElse(null);
 
         if (child == null) {
+            // create new node
             child = (ActionNode) Node.buildNode(Node.NODE_TYPE.ACTION, this, newState, state.getOpponent(),
                     agentAction);
             this.addChild(child);

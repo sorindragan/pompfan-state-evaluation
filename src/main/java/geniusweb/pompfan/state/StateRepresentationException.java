@@ -1,5 +1,5 @@
 package geniusweb.pompfan.state;
 
-public class StateRepresentationException extends Exception{
+public class StateRepresentationException extends Exception {
 
 }

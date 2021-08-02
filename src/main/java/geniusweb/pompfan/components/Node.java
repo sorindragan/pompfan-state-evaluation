@@ -153,6 +153,7 @@ public class Node {
                 .append("isTerminal:").append(this.getIsTerminal()).append("]").append("-").append(a).toString();
     }
 
+    // build factory
     public static Node buildNode(NODE_TYPE type, Node parent, AbstractState<?> newState, AbstractPolicy opponent,
             Action lastAction) {
 

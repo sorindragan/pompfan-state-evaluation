@@ -1,6 +1,5 @@
 package geniusweb.pompfan.beliefs;
 
-import java.util.HashMap;
 import java.util.List;
 
 import geniusweb.actions.Offer;

@@ -9,7 +9,4 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @Type(value = Last2BidsProductUtilityEvaluator.class), @Type(value = RandomEvaluator.class) })
 public interface IEvalFunction<T> {
     public Double evaluate(T state);
-    // public Double evaluate(AbstractState<T> state, Bid opponenentBid);
-    // public Double evaluate(AbstractState<T> state, Bid agentBid, Bid
-    // opponenentBid);
 }

@@ -10,9 +10,7 @@ import geniusweb.issuevalue.Bid;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
-/**
- * MeanUtilityEvaluator
- */
+
 public class Last2BidsProductUtilityEvaluator extends Last2BidsMeanUtilityEvaluator {
 
     public Last2BidsProductUtilityEvaluator() {
