@@ -1,4 +1,4 @@
-package geniusweb.pompfan.agent; // TODO: change name
+package geniusweb.pompfan.agent;
 
 import java.util.HashMap;
 import java.util.List;

@@ -67,7 +67,6 @@ public class Configurator {
         this.confExtra.put("widener", new HashMap<String, Object>());
         this.confExtra.put("comparer", new HashMap<String, Object>());
         this.confExtra.put("explorer", new HashMap<String, Object>());
-        this.confExtra.put("widener", new HashMap<String, Object>());
     }
 
     public HashMap<String, HashMap<String, Object>> getConfExtra() {

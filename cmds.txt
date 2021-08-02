@@ -12,4 +12,5 @@ java --class-path "./libs/simplerunner-1.6.1-jar-with-dependencies.jar;./libs/pa
 java --class-path "./libs/simplerunner-1.6.1-jar-with-dependencies.jar;./libs/boulware-1.6.1.jar;./target/classes" geniusweb.simplerunner.NegoRunner src/test/resources/settingsBoulware.json 
 
 
-Tree to short.
+Run command line linux:
+java -cp "./libs/simplerunner-1.6.1-jar-with-dependencies.jar:./libs/partiesserver-1.6.1-jar-with-dependencies.jar:./target/classes" geniusweb.simplerunner.NegoRunner src/test/resources/settingsBoulware.json

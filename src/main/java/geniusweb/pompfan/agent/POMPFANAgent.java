@@ -1,4 +1,4 @@
-package geniusweb.pompfan.agent; // TODO: change name
+package geniusweb.pompfan.agent;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -293,10 +293,14 @@ public class POMPFANAgent extends DefaultParty { // TODO: change name
         // JSON-file)
         this.parameters = settings.getParameters();
         if (this.parameters.containsKey("simulationTime")) {
-            this.simulationTime = ((Number) this.parameters.get("simulationTime")).longValue();
+            // this.simulationTime = ((Number) this.parameters.get("simulationTime")).longValue();
+            this.simulationTime = Long.valueOf(((String) this.parameters.get("simulationTime")));
+
         }
         if (this.parameters.containsKey("numParticlesPerOpponent")) {
-            this.numParticlesPerOpponent = ((Number) this.parameters.get("numParticlesPerOpponent")).longValue();
+            // this.numParticlesPerOpponent = ((Number) this.parameters.get("numParticlesPerOpponent")).longValue();
+            this.numParticlesPerOpponent = Long.valueOf(((String) this.parameters.get("numParticlesPerOpponent")));
+
         }
 
         if (this.parameters.containsKey("config")) {

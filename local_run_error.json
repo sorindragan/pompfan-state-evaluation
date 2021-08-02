@@ -1,0 +1,235 @@
+{
+    "SAOPState": {
+        "actions": [],
+        "connections": [],
+        "progress": null,
+        "settings": {
+            "SAOPSettings": {
+                "participants": [
+                    {
+                        "TeamInfo": {
+                            "parties": [
+                                {
+                                    "party": {
+                                        "partyref": "classpath:geniusweb.pompfan.agent.POMPFANAgent",
+                                        "parameters": {
+                                            "persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
+                                            "isLearn": true,
+                                            "simulationTime": 1000,
+                                            "numParticlesPerOpponent": 100,
+                                            "config": {
+                                                "confComparer": "UtilityBidDistance",
+                                                "confBelief": "ParticleFilterBelief",
+                                                "confEvaluator": "Last2BidsProductUtilityEvaluator",
+                                                "confState": "HistoryState",
+                                                "confExplorer": "RandomOwnExplorerPolicy",
+                                                "confWidener": "ProgressiveWideningStrategy",
+                                                "confExtra": {
+                                                    "widener": {
+                                                        "maxWidth": 10,
+                                                        "k_a": 2.0,
+                                                        "a_a": 0.5,
+                                                        "k_b": 1.0,
+                                                        "a_b": 0.5
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "profile": "file:src/test/resources/party1.json"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "TeamInfo": {
+                            "parties": [
+                                {
+                                    "party": {
+                                        "partyref": "classpath:geniusweb.exampleparties.boulware.Boulware",
+                                        "parameters": {
+                                            "persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
+                                            "negotiationdata": [
+                                                "e74c1346-1022-438e-887f-26e0ab6b398d"
+                                            ]
+                                        }
+                                    },
+                                    "profile": "file:src/test/resources/party2.json"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "deadline": {
+                    "deadlinetime": {
+                        "durationms": 10000
+                    }
+                }
+            }
+        },
+        "error": {
+            "cause": {
+                "cause": {
+                    "cause": null,
+                    "stackTrace": [
+                        {
+                            "methodName": "findClass",
+                            "fileName": "URLClassLoader.java",
+                            "lineNumber": 382,
+                            "className": "java.net.URLClassLoader",
+                            "nativeMethod": false
+                        },
+                        {
+                            "methodName": "loadClass",
+                            "fileName": "ClassLoader.java",
+                            "lineNumber": 418,
+                            "className": "java.lang.ClassLoader",
+                            "nativeMethod": false
+                        },
+                        {
+                            "methodName": "loadClass",
+                            "fileName": "Launcher.java",
+                            "lineNumber": 355,
+                            "className": "sun.misc.Launcher$AppClassLoader",
+                            "nativeMethod": false
+                        },
+                        {
+                            "methodName": "loadClass",
+                            "fileName": "ClassLoader.java",
+                            "lineNumber": 351,
+                            "className": "java.lang.ClassLoader",
+                            "nativeMethod": false
+                        },
+                        {
+                            "methodName": "forName0",
+                            "fileName": "Class.java",
+                            "lineNumber": -2,
+                            "className": "java.lang.Class",
+                            "nativeMethod": true
+                        },
+                        {
+                            "methodName": "forName",
+                            "fileName": "Class.java",
+                            "lineNumber": 264,
+                            "className": "java.lang.Class",
+                            "nativeMethod": false
+                        },
+                        {
+                            "methodName": "instantiate",
+                            "fileName": "ClassPathConnectionFactory.java",
+                            "lineNumber": 75,
+                            "className": "geniusweb.simplerunner.ClassPathConnectionFactory",
+                            "nativeMethod": false
+                        },
+                        {
+                            "methodName": "connect",
+                            "fileName": "ClassPathConnectionFactory.java",
+                            "lineNumber": 34,
+                            "className": "geniusweb.simplerunner.ClassPathConnectionFactory",
+                            "nativeMethod": false
+                        },
+                        {
+                            "methodName": "connect",
+                            "fileName": "ClassPathConnectionFactory.java",
+                            "lineNumber": 106,
+                            "className": "geniusweb.simplerunner.ClassPathConnectionFactory",
+                            "nativeMethod": false
+                        },
+                        {
+                            "methodName": "connect",
+                            "fileName": "SAOP.java",
+                            "lineNumber": 176,
+                            "className": "geniusweb.protocol.session.saop.SAOP",
+                            "nativeMethod": false
+                        },
+                        {
+                            "methodName": "start",
+                            "fileName": "SAOP.java",
+                            "lineNumber": 112,
+                            "className": "geniusweb.protocol.session.saop.SAOP",
+                            "nativeMethod": false
+                        },
+                        {
+                            "methodName": "run",
+                            "fileName": "NegoRunner.java",
+                            "lineNumber": 67,
+                            "className": "geniusweb.simplerunner.NegoRunner",
+                            "nativeMethod": false
+                        },
+                        {
+                            "methodName": "main",
+                            "fileName": "NegoRunner.java",
+                            "lineNumber": 126,
+                            "className": "geniusweb.simplerunner.NegoRunner",
+                            "nativeMethod": false
+                        }
+                    ],
+                    "exception": null,
+                    "message": "geniusweb.exampleparties.boulware.Boulware",
+                    "localizedMessage": "geniusweb.exampleparties.boulware.Boulware",
+                    "suppressed": []
+                },
+                "stackTrace": [
+                    {
+                        "methodName": "instantiate",
+                        "fileName": "ClassPathConnectionFactory.java",
+                        "lineNumber": 82,
+                        "className": "geniusweb.simplerunner.ClassPathConnectionFactory",
+                        "nativeMethod": false
+                    },
+                    {
+                        "methodName": "connect",
+                        "fileName": "ClassPathConnectionFactory.java",
+                        "lineNumber": 34,
+                        "className": "geniusweb.simplerunner.ClassPathConnectionFactory",
+                        "nativeMethod": false
+                    },
+                    {
+                        "methodName": "connect",
+                        "fileName": "ClassPathConnectionFactory.java",
+                        "lineNumber": 106,
+                        "className": "geniusweb.simplerunner.ClassPathConnectionFactory",
+                        "nativeMethod": false
+                    },
+                    {
+                        "methodName": "connect",
+                        "fileName": "SAOP.java",
+                        "lineNumber": 176,
+                        "className": "geniusweb.protocol.session.saop.SAOP",
+                        "nativeMethod": false
+                    },
+                    {
+                        "methodName": "start",
+                        "fileName": "SAOP.java",
+                        "lineNumber": 112,
+                        "className": "geniusweb.protocol.session.saop.SAOP",
+                        "nativeMethod": false
+                    },
+                    {
+                        "methodName": "run",
+                        "fileName": "NegoRunner.java",
+                        "lineNumber": 67,
+                        "className": "geniusweb.simplerunner.NegoRunner",
+                        "nativeMethod": false
+                    },
+                    {
+                        "methodName": "main",
+                        "fileName": "NegoRunner.java",
+                        "lineNumber": 126,
+                        "className": "geniusweb.simplerunner.NegoRunner",
+                        "nativeMethod": false
+                    }
+                ],
+                "message": "Failed to create party connection",
+                "localizedMessage": "Failed to create party connection",
+                "suppressed": []
+            },
+            "stackTrace": [],
+            "party": null,
+            "message": "null:Failed to start up session",
+            "localizedMessage": "null:Failed to start up session",
+            "suppressed": []
+        },
+        "partyprofiles": {}
+    }
+}
