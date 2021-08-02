@@ -1,19 +1,21 @@
 package geniusweb.custom.opponents;
 
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.ActionWithBid;
 import geniusweb.actions.Offer;
-import geniusweb.custom.opponentModels.FuzzyFreqOpponentModel;
 import geniusweb.custom.state.AbstractState;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
@@ -22,20 +24,43 @@ import geniusweb.opponentmodel.FrequencyOpponentModel;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class ImitateOpponentPolicy extends AbstractPolicy {
-    
-    
-    private final BigDecimal STUBBORNESS = new BigDecimal(0.7f);
+
+    public BigDecimal STUBBORNESS = new BigDecimal(new Random().nextDouble());
 
     private List<Action> recordedBehavior;
-    private FrequencyOpponentModel oppModel = new FrequencyOpponentModel();
+    @JsonIgnore
+    private FrequencyOpponentModel oppModel = null;
+
+    @JsonCreator
+    public ImitateOpponentPolicy(@JsonProperty("domain") Domain domain, @JsonProperty("name") String name,
+            @JsonProperty("recordedBehavior") List<Action> realHistoryActions,
+            @JsonProperty("STUBBORNESS") BigDecimal STUBBORNESS) {
+        super(domain, name);
+        this.oppModel = new FrequencyOpponentModel().with(domain, null);
+        populateModel(domain, realHistoryActions);
+
+        this.setUtilitySpace(oppModel);
+        this.setRecordedBehavior(realHistoryActions);
+        // this.STUBBORNESS = STUBBORNESS;
+
+    }
+
+    private void populateModel(Domain domain, List<Action> realHistoryActions) {
+        for (Action action : realHistoryActions) {
+            ActionWithBid a = (ActionWithBid) action;
+            Offer o = new Offer(this.getPartyId(), a.getBid());
+            this.oppModel = this.oppModel.with(o, null);
+        }
+    }
 
     public ImitateOpponentPolicy(Domain domain, String name, List<Action> realHistoryActions) {
         super(domain, name);
+        this.oppModel = new FrequencyOpponentModel().with(domain, null);
         for (Action action : realHistoryActions) {
-            oppModel = oppModel.with(action, null);
+            this.oppModel = this.oppModel.with(action, null);
         }
 
-        this.setUtilitySpace(oppModel);
+        this.setUtilitySpace(this.oppModel);
         this.setRecordedBehavior(realHistoryActions);
 
     }
@@ -57,11 +82,7 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
                 return new Accept(this.getPartyId(), lastReceivedBid);
             }
 
-            ActionWithBid selectedAction = null;
-            do {
-                selectedAction = (ActionWithBid) this.chooseAction();
-            } while (!isGood(selectedAction.getBid()));
-            // Action selectedAction = this.getRecordedBehavior().get(cutPoint.intValue());
+            Action selectedAction = this.getRecordedBehavior().get(this.getRecordedBehavior().size() - 1);
             return selectedAction;
         }
         ActionWithBid selectedAction = (ActionWithBid) this.getRecordedBehavior().get(selectedIdx);
@@ -74,7 +95,8 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
             List<Integer> cnts = valCounts.values().stream().collect(Collectors.toList());
             List<Integer> cumCnts = IntStream.range(0, cnts.size())
                     .map(i -> IntStream.rangeClosed(0, i).map(cnts::get).sum()).boxed().collect(Collectors.toList());
-            Integer selectedValIdxTmp = cumCnts.stream().filter(c -> c.compareTo(selected) < 0).findFirst().get();
+
+            Integer selectedValIdxTmp = cumCnts.stream().filter(c -> c.compareTo(selected) >= 0).findFirst().get();
             int selectedValIdx = cumCnts.indexOf(selectedValIdxTmp);
             Value selectedVal = vals.get(selectedValIdx);
             issuevalues.put(issueString, selectedVal);
@@ -96,10 +118,25 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
         return false;
     }
 
-    public FrequencyOpponentModel getOppModel() {
-        return oppModel;
+    @JsonIgnore
+    @Override
+    public UtilitySpace getUtilitySpace() {
+        return super.getUtilitySpace();
     }
 
+    @JsonIgnore
+    @Override
+    public void setUtilitySpace(UtilitySpace utilitySpace) {
+        // TODO Auto-generated method stub
+        super.setUtilitySpace(utilitySpace);
+    }
+
+    @JsonIgnore
+    public FrequencyOpponentModel getOppModel() {
+        return this.oppModel;
+    }
+
+    @JsonIgnore
     public void setOppModel(FrequencyOpponentModel oppModel) {
         this.oppModel = oppModel;
     }

@@ -2,7 +2,9 @@ package geniusweb.custom.opponents;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Random;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -28,9 +30,10 @@ public class SelfishOpponentPolicy extends AbstractPolicy {
     private Interval searchRange;
     @JsonIgnore
     private ImmutableList<Bid> possibleBids;
-    private final BigDecimal STUBBORNESS = new BigDecimal(0.8f);
+    public BigDecimal STUBBORNESS = new BigDecimal(Math.max(new Random().nextDouble(), 0.75f));
 
-    public SelfishOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("e") double e) {
+    @JsonCreator
+    public SelfishOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("STUBBORNESS") BigDecimal STUBBORNESS) {
         super(utilitySpace, name);
         this.allBids = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
         this.possibleRange = this.getAllBids().getRange();

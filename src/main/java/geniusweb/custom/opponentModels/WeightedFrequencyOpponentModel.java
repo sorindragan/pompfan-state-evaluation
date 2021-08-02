@@ -2,6 +2,7 @@ package geniusweb.custom.opponentModels;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
@@ -23,9 +27,10 @@ import geniusweb.progress.Progress;
 
 public class WeightedFrequencyOpponentModel extends AbstractOpponentModel {
 
-    public WeightedFrequencyOpponentModel(Domain domain, List<Action> realHistoryActions) {
-        super(domain, realHistoryActions);
-        this.initializeModel(realHistoryActions);
+    @JsonCreator
+    public WeightedFrequencyOpponentModel(@JsonProperty("domain") Domain domain, @JsonProperty("history") List<Action> history) {
+        super(domain, history);
+        this.initializeModel(history);
     }
 
     private WeightedFrequencyOpponentModel initializeModel(List<Action> realHistoryActions) {
@@ -35,10 +40,10 @@ public class WeightedFrequencyOpponentModel extends AbstractOpponentModel {
 
         Set<String> allIssues = this.getDomain().getIssues();
         BigDecimal sum = new BigDecimal(realHistoryActions.size());
-        Map<Action, Long> actionCounts = realHistoryActions.stream()
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        Map<Action, BigDecimal> actionProbabilities = new HashMap<>();
-        actionCounts.forEach((action, cnt) -> actionProbabilities.put(action, new BigDecimal(cnt).divide(sum)));
+        // Map<Action, Long> actionCounts = realHistoryActions.stream()
+        //         .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        // Map<Action, BigDecimal> actionProbabilities = new HashMap<>();
+        // actionCounts.forEach((action, cnt) -> actionProbabilities.put(action, new BigDecimal(cnt).divide(sum)));
 
         Map<String, Map<DiscreteValue, BigDecimal>> newIssueValFreqs = new HashMap<String, Map<DiscreteValue, BigDecimal>>();
         for (Action action : realHistoryActions) {
@@ -54,14 +59,14 @@ public class WeightedFrequencyOpponentModel extends AbstractOpponentModel {
                     BigDecimal oldfreq = freqs.getOrDefault(value, BigDecimal.ZERO);
                     freqs.put(value, oldfreq.add(BigDecimal.ONE));
                 }
-
+                newIssueValFreqs.put(issue, freqs);
             }
 
         }
 
         // Normalize counts
         newIssueValFreqs.forEach((issue, valueCounts) -> valueCounts
-                .forEach((value, count) -> valueCounts.put(value, count.divide(sum))));
+                .forEach((value, count) -> valueCounts.put(value, count.divide(sum, RoundingMode.HALF_UP))));
         //
 
         HashMap<String, ValueSetUtilities> issueUtilities = new HashMap<String, ValueSetUtilities>();
@@ -72,7 +77,8 @@ public class WeightedFrequencyOpponentModel extends AbstractOpponentModel {
 
         }
         BigDecimal issueWeightsSum = issueWeights.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-        issueWeights.forEach((issue, weight) -> issueWeights.put(issue, weight.divide(issueWeightsSum)));
+
+        issueWeights.forEach((issue, weight) -> issueWeights.put(issue, issueWeightsSum.compareTo(BigDecimal.ZERO) != 0 ? weight.divide(issueWeightsSum) : BigDecimal.ZERO));
 
         for (Entry<String, Map<DiscreteValue, BigDecimal>> issueValues : newIssueValFreqs.entrySet()) {
             issueUtilities.put(issueValues.getKey(), new DiscreteValueSetUtilities(issueValues.getValue()));
@@ -102,8 +108,17 @@ public class WeightedFrequencyOpponentModel extends AbstractOpponentModel {
     }
 
     private static BigDecimal computeEntropy(Map<DiscreteValue, BigDecimal> map) {
-        return map.values().stream().map(e -> e.multiply(new BigDecimal(Math.log(e.doubleValue()))))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return map.values().stream().map(WeightedFrequencyOpponentModel::calcPartialEntropy).reduce(BigDecimal.ZERO,
+                BigDecimal::add);
+    }
+
+    private static BigDecimal calcPartialEntropy(BigDecimal e) {
+        double stabilizer = Math.max(e.doubleValue(), Double.MIN_NORMAL);
+        double logP = Math.log(stabilizer);
+        String stringLogP = String.valueOf(logP);
+        BigDecimal bigDecimalLogP = new BigDecimal(stringLogP);
+        BigDecimal result = e.multiply(bigDecimalLogP).multiply(new BigDecimal("-1.0"));
+        return result;
     }
 
 }

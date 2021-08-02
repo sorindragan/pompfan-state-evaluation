@@ -72,6 +72,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
     private UtilitySpace uSpace;
     private PersistentState persistentState;
     private NegotiationData negotiationData;
+    private List<Action> oppActions = new ArrayList<Action>();
     private List<File> dataPaths = new ArrayList<>();
     private File persistentPath;
     private String opponentName;
@@ -99,7 +100,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
      */
     @Override
     public void notifyChange(Inform info) {
-        System.out.println("===========INFO========== " + info.getClass().getName());
+        System.out.println("AAAAAA:===========INFO========== " + info.getClass().getName());
         // System.out.println("DEBUG_PERSIST: " + info.toString());
         // if (DEBUG_IN_TOURNAMENT == false) {
         // }
@@ -177,6 +178,9 @@ public class CustomAgent extends DefaultParty { // TODO: change name
 
             }
             // Process the action of the opponent.
+            this.MCTS.getRealHistory().add(action);
+            this.oppActions.add(action);
+
             processAction(action);
         }
     }
@@ -205,7 +209,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             sessionName = sessionFile.getName();
             try {
                 this.negotiationData.setBelief(this.MCTS.getBelief()).setRoot(this.MCTS.getRoot())
-                        .setRealHistory(this.MCTS.getRealHistory());
+                        .setRealOppHistory(this.oppActions);
 
                 if (DEBUG_PERSIST)
                     System.out.println("DEBUG_PERSIST: End -> " + this.me);
@@ -368,6 +372,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
             this.profileint.close();
             this.profileint = null;
         }
+        this.oppActions = null;
         this.MCTS = null;
     }
 
@@ -484,6 +489,7 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         }
 
         // Send action
+        this.MCTS.getRealHistory().add(action);
         getConnection().send(action);
     }
 
@@ -520,7 +526,8 @@ public class CustomAgent extends DefaultParty { // TODO: change name
         // Write the persistent state object to file
         if (this.dataPaths.size() > 0) {
             try {
-                objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.persistentPath, this.persistentState);
+                PersistentState updatedState = this.persistentState.learn();
+                objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.persistentPath, updatedState);
                 this.getConnection().send(new LearningDone(me));
             } catch (IOException e) {
                 throw new RuntimeException("Failed to write persistent state to disk", e);

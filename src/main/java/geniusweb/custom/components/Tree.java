@@ -128,7 +128,7 @@ public class Tree {
     }
 
     public Tree receiveRealObservation(Action observationAction, Long time) {
-        this.realHistory.add(observationAction);
+        
         this.currentTime = this.getProgress().get(time);
         Offer newRealObservation = (Offer) observationAction;
         Offer lastRealAgentAction = this.lastBestActionNode != null ? (Offer) this.lastBestActionNode.getAction()
@@ -204,7 +204,7 @@ public class Tree {
         
 
             if (this.realHistory.size() == 0) {
-                this.realHistory.add(action);
+                
                 return action;
             }
             Action lastOpponentAction = this.realHistory.get(this.realHistory.size() - 1);
@@ -224,7 +224,7 @@ public class Tree {
             }
         } while (action instanceof Accept);
 
-        this.realHistory.add(action);
+        
         return action;
     }
 

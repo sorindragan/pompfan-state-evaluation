@@ -26,18 +26,18 @@ public class NegotiationData {
     private AbstractBelief belief;
     private BeliefNode rootNode;
     private HashMap<String, Object> configuration;
-    private List<Action> realHistory;
+    private List<Action> realOppHistory;
 
     public HashMap<String, Object> getConfiguration() {
         return configuration;
     }
 
-    public List<Action> getRealHistory() {
-        return realHistory;
+    public List<Action> getRealOppHistory() {
+        return realOppHistory;
     }
 
-    public NegotiationData setRealHistory(List<Action> realHistory) {
-        this.realHistory = realHistory;
+    public NegotiationData setRealOppHistory(List<Action> realHistory) {
+        this.realOppHistory = realHistory;
         return this;
     }
 

@@ -44,7 +44,9 @@ import geniusweb.profile.utilityspace.ValueSetUtilities;
 //         @Type(value = TimeDependentOpponentPolicy.class) })
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @Type(value = AntagonisticOpponentPolicy.class), @Type(value = RandomOpponentPolicy.class),
-        @Type(value = SelfishOpponentPolicy.class), @Type(value = TimeDependentOpponentPolicy.class) })
+        @Type(value = SelfishOpponentPolicy.class), @Type(value = TimeDependentOpponentPolicy.class),
+        @Type(value = SimpleOpponentModelPolicy.class), @Type(value = ImitateOpponentPolicy.class),
+        @Type(value = OwnUtilityTFTOpponentPolicy.class) })
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public abstract class AbstractPolicy implements CommonOpponentInterface, Serializable {
     private String id = UUID.randomUUID().toString();

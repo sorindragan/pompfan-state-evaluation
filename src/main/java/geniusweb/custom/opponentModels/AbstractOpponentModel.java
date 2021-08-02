@@ -5,6 +5,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import geniusweb.actions.Action;
 import geniusweb.issuevalue.Bid;
@@ -14,21 +21,33 @@ import geniusweb.opponentmodel.OpponentModel;
 import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.ValueSetUtilities;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
+@JsonSubTypes({ @Type(value = WeightedFrequencyOpponentModel.class)})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public abstract class AbstractOpponentModel implements LinearAdditive, OpponentModel {
 	private static final int DECIMALS = 4; // accuracy of our computations.
 	private static int serial = 1; // counter for auto name generation
+    private String id = UUID.randomUUID().toString();
 
 	private Domain domain;
 	private List<Action> history;
 	private Map<String, ValueSetUtilities> issueUtilities = new HashMap<>();
 	private Map<String, BigDecimal> issueWeights = new HashMap<>();
 
-	public AbstractOpponentModel(Domain domain, List<Action> realHistoryActions) {
+	public AbstractOpponentModel(Domain domain, List<Action> history) {
 		if (domain == null) {
 			throw new IllegalStateException("domain is not initialized");
 		}
 		this.domain = domain;
-		this.history = realHistoryActions;
+		this.history = history;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	@Override

@@ -5,7 +5,9 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Random;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
@@ -19,6 +21,7 @@ import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.opponentmodel.FrequencyOpponentModel;
 import geniusweb.profile.utilityspace.LinearAdditive;
+import geniusweb.profile.utilityspace.UtilitySpace;
 import tudelft.utilities.immutablelist.ImmutableList;
 
 public class SimpleOpponentModelPolicy extends AbstractPolicy {
@@ -30,13 +33,29 @@ public class SimpleOpponentModelPolicy extends AbstractPolicy {
     private Interval searchRange;
     @JsonIgnore
     private ImmutableList<Bid> possibleBids;
+    @JsonIgnore
     private AbstractOpponentModel oppModel = null;
 
-    private final BigDecimal STUBBORNESS = new BigDecimal(new Random().nextDouble());
+    public BigDecimal STUBBORNESS = new BigDecimal(new Random().nextDouble());
+    private List<Action> recordedBehavior;
+
+    @JsonCreator
+    public SimpleOpponentModelPolicy(@JsonProperty("domain") Domain domain, @JsonProperty("name") String name,
+            @JsonProperty("recordedBehavior") List<Action> recordedBehavior,
+            @JsonProperty("STUBBORNESS") BigDecimal STUBBORNESS) {
+        super(new WeightedFrequencyOpponentModel(domain, recordedBehavior), name);
+        this.setRecordedBehavior(recordedBehavior);
+        this.allBids = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
+        this.possibleRange = this.getAllBids().getRange();
+        this.searchRange = new Interval(this.getPossibleRange().getMax().multiply(STUBBORNESS),
+                this.getPossibleRange().getMax());
+        this.possibleBids = this.getAllBids().getBids(this.getSearchRange());
+    }
 
     public SimpleOpponentModelPolicy(Domain domain, String name, List<Action> realHistoryActions) {
         super(domain, name);
         this.setUtilitySpace(new WeightedFrequencyOpponentModel(domain, realHistoryActions));
+        this.setRecordedBehavior(realHistoryActions);
         this.allBids = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
         this.possibleRange = this.getAllBids().getRange();
         this.searchRange = new Interval(this.getPossibleRange().getMax().multiply(STUBBORNESS),
@@ -48,8 +67,8 @@ public class SimpleOpponentModelPolicy extends AbstractPolicy {
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
         return this.chooseAction(lastReceivedBid, state);
     }
-    
-    //DONE: refactor others
+
+    // DONE: refactor others
     @Override
     public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
 
@@ -57,7 +76,7 @@ public class SimpleOpponentModelPolicy extends AbstractPolicy {
             return this.chooseAction();
         }
         if (lastReceivedBid == null) {
-            return pickAcceptableBid(); 
+            return pickAcceptableBid();
         }
         if (isGood(lastReceivedBid)) {
             return new Accept(this.getPartyId(), lastReceivedBid);
@@ -110,12 +129,35 @@ public class SimpleOpponentModelPolicy extends AbstractPolicy {
         this.possibleBids = possibleBids;
     }
 
+    @JsonIgnore
     public AbstractOpponentModel getOppModel() {
         return oppModel;
     }
 
+    @JsonIgnore
     public void setOppModel(AbstractOpponentModel oppModel) {
         this.oppModel = oppModel;
     }
 
+    public List<Action> getRecordedBehavior() {
+        return recordedBehavior;
+    }
+
+    public void setRecordedBehavior(List<Action> recordedBehavior) {
+        this.recordedBehavior = recordedBehavior;
+    }
+
+    @JsonIgnore
+    @Override
+    public void setUtilitySpace(UtilitySpace utilitySpace) {
+        // TODO Auto-generated method stub
+        super.setUtilitySpace(utilitySpace);
+    }
+
+    @JsonIgnore
+    @Override
+    public UtilitySpace getUtilitySpace() {
+        // TODO Auto-generated method stub
+        return super.getUtilitySpace();
+    }
 }

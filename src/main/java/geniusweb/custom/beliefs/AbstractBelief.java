@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,8 +32,9 @@ import geniusweb.custom.state.AbstractState;
         @Type(value = UniformBelief.class, name = "UniformBelief") })
 public abstract class AbstractBelief {
 
-    List<AbstractPolicy> opponents = null;
-    List<Double> probabilities = null;
+    private List<AbstractPolicy> opponents = null;
+    private List<Double> probabilities = null;
+    private Double learnedOpponentBias = 0.05d;
 
     // @JsonProperty("opponentProbabilities")
     // @JsonDeserialize(keyUsing = AbstractPolicyDeserializer.class)
@@ -130,5 +132,28 @@ public abstract class AbstractBelief {
     // @JsonIgnore
     public List<AbstractPolicy> getOpponents() {
         return this.opponents;
+    }
+
+    public AbstractBelief addNewOpponents(List<AbstractPolicy> newOpponents) {
+        Double slicePerOpponent = 1.0 - this.getLearnedOpponentBias(); 
+        Double sliecePerNewOpponent = this.getLearnedOpponentBias()/newOpponents.size();
+        List<Double> oldProbsAdjusted = this.getProbabilities().stream().map(e -> e*slicePerOpponent).collect(Collectors.toList());
+        List<Double> newProbs = IntStream.range(0, newOpponents.size()).mapToDouble(e -> sliecePerNewOpponent).boxed().collect(Collectors.toList());
+        this.setProbabilities(oldProbsAdjusted);;
+        this.getOpponents().addAll(newOpponents);
+        this.getProbabilities().addAll(newProbs);
+        
+        for (int i = 0; i < this.getOpponents().size(); i++) {
+            this.getOpponentProbabilities().put(this.getOpponents().get(i), this.getProbabilities().get(i));
+        }
+        return this;
+    }
+
+    public Double getLearnedOpponentBias() {
+        return learnedOpponentBias;
+    }
+
+    public void setLearnedOpponentBias(Double learnedOpponentBias) {
+        this.learnedOpponentBias = learnedOpponentBias;
     }
 }

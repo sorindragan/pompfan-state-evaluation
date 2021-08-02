@@ -2,6 +2,7 @@ package geniusweb.custom.opponents;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Random;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,7 +24,7 @@ import tudelft.utilities.immutablelist.ImmutableList;
 
 public class AntagonisticOpponentPolicy extends AbstractPolicy {
 
-    private final BigDecimal SYMPATHY = new BigDecimal(0.5f);
+    private BigDecimal SYMPATHY = new BigDecimal(Math.min(new Random().nextDouble(), 0.5));
     @JsonIgnore
     private BidsWithUtility allBids;
     @JsonIgnore
@@ -37,7 +38,7 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
         super(utilitySpace, name);
         this.allBids = new BidsWithUtility((LinearAdditive) utilitySpace);
         this.possibleRange = this.allBids.getRange();
-        this.searchRange = new Interval(this.possibleRange.getMin(),
+        this.searchRange = new Interval(BigDecimal.ZERO,
                 this.possibleRange.getMin().multiply(SYMPATHY.add(new BigDecimal(1))));
         this.possibleBids = this.allBids.getBids(this.searchRange);
     }
@@ -46,7 +47,7 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
         super(uSpace, "Antagonistic");
         this.allBids = new BidsWithUtility((LinearAdditive) uSpace);
         this.possibleRange = this.allBids.getRange();
-        this.searchRange = new Interval(this.possibleRange.getMin(),
+        this.searchRange = new Interval(BigDecimal.ZERO,
                 this.possibleRange.getMin().multiply(SYMPATHY.add(new BigDecimal(1))));
         this.possibleBids = this.allBids.getBids(this.searchRange);
     }
