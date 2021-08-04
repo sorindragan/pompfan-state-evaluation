@@ -2,6 +2,7 @@ package geniusweb.pompfan.explorers;
 
 import java.util.Random;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;

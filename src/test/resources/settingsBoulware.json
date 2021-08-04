@@ -11,7 +11,7 @@
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"isLearn": true,
 									"numParticlesPerOpponent": "100",
-									"simulationTime": "200",
+									"simulationTime": "500",
 									"config": {
 										"confComparer": "UtilityBidDistance",
 										"confBelief": "ParticleFilterWithAcceptBelief",
