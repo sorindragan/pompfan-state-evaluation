@@ -69,7 +69,7 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                 .readTree(new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8));
 
         Integer cnt = 0;
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 500; i++) {
             cnt++;
             ObjectNode target = (ObjectNode) settingsJson.get("AllPermutationsSettings").get("teams").get(0).get("Team")
                     .get(0);
