@@ -110,9 +110,9 @@ public abstract class AbstractBelief {
     @Override
     public String toString() {
 
-        Map<String, Double> opponents = this.getOpponentProbabilities().entrySet().stream().collect(
+        Map<String, Double> strategies = this.getOpponentProbabilities().entrySet().stream().collect(
                 Collectors.groupingBy(opp -> opp.getKey().getName(), Collectors.summingDouble(opp -> opp.getValue())));
-        return opponents.toString();
+        return strategies.toString();
     }
 
     public List<AbstractPolicy> getOpponents() {
