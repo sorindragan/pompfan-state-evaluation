@@ -44,7 +44,6 @@ public class CustomNegoRunner extends NegoRunner {
     public CustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory, Reporter logger,
             long maxruntime, String settingRef, String name) throws IOException {
         super(settings, connectionfactory, logger, maxruntime);
-        // runTimeStamp = new Date();
         this.startTimeStamp = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm");
         this.timestampString = formatter.format(this.startTimeStamp);
