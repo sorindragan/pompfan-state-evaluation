@@ -60,7 +60,7 @@ ax2 = sns.boxplot(data=df_subset, x="vs", y="utility", hue="pwp.party.parameters
 for tick in ax2.get_xticklabels():
     tick.set_rotation(45)
 ax2.set_xlabel("Opponents per Simulation Time")
-ax2.set_ylabel("Utility")
+ax2.set_ylabel("Percentage")
 plt.show()
 # fig.legend(loc="upper left")
 # handles, labels = ax.get_legend_handles_labels()

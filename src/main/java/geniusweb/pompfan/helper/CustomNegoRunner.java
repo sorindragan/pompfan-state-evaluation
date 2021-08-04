@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -41,13 +42,13 @@ public class CustomNegoRunner extends NegoRunner {
     private Date startTimeStamp;
 
     public CustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory, Reporter logger,
-            long maxruntime, String settingRef, Date runTimeStamp) throws IOException {
+            long maxruntime, String settingRef, String name) throws IOException {
         super(settings, connectionfactory, logger, maxruntime);
         // runTimeStamp = new Date();
         this.startTimeStamp = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm");
         this.timestampString = formatter.format(this.startTimeStamp);
-        FileWriter collectorFile = new FileWriter("eval/tournament_results.jsonl", true);
+        FileWriter collectorFile = new FileWriter("eval/tournament_results_" + name + ".jsonl", true);
         this.intermediateWriter = new ResultsWriter(this.getProtocol().getState(),
                 this.tFormatter.format(startTimeStamp), settingRef, collectorFile);
         this.getProtocol().addListener(ev -> this.processSessionEnd(ev));
@@ -113,15 +114,16 @@ public class CustomNegoRunner extends NegoRunner {
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
-
         Integer cnt = 0;
         Date runStartTime = new Date();
         for (NegoSettings negoSettings : settings) {
-            String settingRef = args[0];
+            String settingRef = args[cnt];
+            String name = Paths.get(settingRef).getParent().getFileName().toString();
             cnt++;
             Reporter logger = new StdOutReporter();
             logger.log(Level.INFO, "Starting Tournament " + cnt);
-            NegoRunner runner = new CustomNegoRunner(negoSettings, new ClassPathConnectionFactory(), logger, 0, settingRef, runStartTime);
+            NegoRunner runner = new CustomNegoRunner(negoSettings, new ClassPathConnectionFactory(), logger, 0,
+                    settingRef, name);
             runner.run();
         }
 
