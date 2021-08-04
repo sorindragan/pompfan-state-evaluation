@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -17,6 +16,8 @@ import geniusweb.deadline.DeadlineTime;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.beliefs.AbstractBelief;
+import geniusweb.pompfan.beliefs.ParticleFilterBelief;
+import geniusweb.pompfan.beliefs.ParticleFilterWithAcceptBelief;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.StateRepresentationException;
@@ -140,8 +141,8 @@ public class Tree {
                 stateUpdatedWithRealTime);
 
         if (PARTICLE_DEBUG) {
-            System.out.println("New Belief-Probabilities");
             System.out.println(this.belief);
+            System.out.println("New Belief-Probabilities");
         }
 
         if (this.lastBestActionNode == null) {

@@ -1,6 +1,7 @@
 package geniusweb.pompfan.beliefs;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,6 +28,10 @@ public class ParticleFilterWithAcceptBelief extends ParticleFilterBelief {
         super(listOfOpponents, distance);
     }
 
+    public ParticleFilterWithAcceptBelief(Map<AbstractPolicy, Double> opponentProbabilities, AbstractBidDistance distance) {
+        super(opponentProbabilities, distance); // particles
+    }
+
     @Override
     protected Bid sample(Offer lastAgentAction, Offer lastOppAction, AbstractState<?> state,
             AbstractPolicy abstractPolicy) {
@@ -42,6 +47,11 @@ public class ParticleFilterWithAcceptBelief extends ParticleFilterBelief {
         }
 
         return chosenAction instanceof Offer ? ((Offer) chosenAction).getBid() : ((Accept) chosenAction).getBid();
+    }
+
+    @Override
+    protected AbstractBelief returnNewBelief() {
+        return new ParticleFilterWithAcceptBelief(this.getOpponentProbabilities(), this.getDistance());
     }
 
 }

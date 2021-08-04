@@ -20,6 +20,7 @@ public class ParticleFilterBelief extends AbstractBelief {
     public static final int NUMBER_SAMPLES = 100;
     public static final Double SAMENESS_THRESHOLD = 0.1;
     private static final Double EPSILON = 0.001;
+    private AbstractPolicy mostProbablePolicy = null;
 
     @JsonCreator
     public ParticleFilterBelief(@JsonProperty("opponents") List<AbstractPolicy> opponents,
@@ -42,6 +43,7 @@ public class ParticleFilterBelief extends AbstractBelief {
     @Override
     public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAgentAction, Offer lastOppAction,
             AbstractState<?> state) {
+        Double minSum = 1000.0;
         for (AbstractPolicy abstractPolicy : this.getOpponentProbabilities().keySet()) {
             List<Bid> candidateObservations = new ArrayList<>();
             for (int i = 0; i < ParticleFilterBelief.NUMBER_SAMPLES; i++) {
@@ -55,10 +57,21 @@ public class ParticleFilterBelief extends AbstractBelief {
             Double weightOpponentLikelihood = candidateObservations.parallelStream().filter(Objects::nonNull)
                     .mapToDouble(obs -> this.getDistance().computeDistance(obs, realObservation.getBid()))
                     .map(val -> Math.abs(val)).sum();
+            
+            if (weightOpponentLikelihood < minSum) {
+                minSum = weightOpponentLikelihood;
+                this.setMostProbablePolicy(abstractPolicy);
+            }
             // DONE: Check the size because abstractpolicies might be overridden --
             // Not a problem!
             this.getOpponentProbabilities().put(abstractPolicy, 1 / (weightOpponentLikelihood + EPSILON));
         }
+        // TODO remove
+        System.out.println(this.getMostProbablePolicy().getName());
+        return returnNewBelief();
+    }
+
+    protected AbstractBelief returnNewBelief() {
         return new ParticleFilterBelief(this.getOpponentProbabilities(), this.getDistance());
     }
 
@@ -78,4 +91,13 @@ public class ParticleFilterBelief extends AbstractBelief {
 
         return chosenAction instanceof Offer ? ((Offer) chosenAction).getBid() : null;
     }
+
+    public AbstractPolicy getMostProbablePolicy() {
+        return mostProbablePolicy;
+    }
+
+    public void setMostProbablePolicy(AbstractPolicy mostProbablePolicy) {
+        this.mostProbablePolicy = mostProbablePolicy;
+    }
+
 }

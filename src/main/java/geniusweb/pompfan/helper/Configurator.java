@@ -185,11 +185,11 @@ public class Configurator {
     private Configurator buildBelief(String confBelief, List<AbstractPolicy> listOfOpponents,
             AbstractBidDistance distance) {
         switch (confBelief) {
-        case "ParticleFilterBelief":
-            this.setBelief(new ParticleFilterBelief(listOfOpponents, distance));
-            break;
         case DEFAULT_BELIEF:
             this.setBelief(new ParticleFilterWithAcceptBelief(listOfOpponents, distance));
+            break;
+        case "ParticleFilterBelief":
+            this.setBelief(new ParticleFilterBelief(listOfOpponents, distance));
             break;
         default:
             this.setBelief(new UniformBelief(listOfOpponents, distance));
