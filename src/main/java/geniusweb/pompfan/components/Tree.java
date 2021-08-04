@@ -27,7 +27,7 @@ import geniusweb.progress.Progress;
 import geniusweb.progress.ProgressFactory;
 
 public class Tree {
-    private static final boolean PARTICLE_DEBUG = true;
+    private static final boolean PARTICLE_DEBUG = false;
     private BeliefNode root;
     private Domain domain;
     @JsonManagedReference
@@ -148,7 +148,7 @@ public class Tree {
         if (this.lastBestActionNode == null) {
             // Quickfix: by doing nothing
             // Startphase - opponent bids first
-            System.out.println("START");
+            // System.out.println("START");
             return this;
         }
         List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream()
