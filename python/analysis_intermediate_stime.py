@@ -101,3 +101,5 @@ ax.set_ylabel("")
 fig.suptitle("Number of non-Agreements of POMPFAN across SimTime")
 fig.tight_layout()
 plt.show()
+
+# %%
