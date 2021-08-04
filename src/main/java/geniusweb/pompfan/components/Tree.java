@@ -27,7 +27,7 @@ import geniusweb.progress.Progress;
 import geniusweb.progress.ProgressFactory;
 
 public class Tree {
-    private static final boolean PARTICLE_DEBUG = false;
+    private static final boolean PARTICLE_DEBUG = true;
     private BeliefNode root;
     private Domain domain;
     @JsonManagedReference
@@ -176,11 +176,11 @@ public class Tree {
         return this;
     }
 
-    public void construct(Long simulationTime) throws StateRepresentationException {
+    public void construct(Long simulationTime, Progress realProgress) throws StateRepresentationException {
         Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime),
                 System.currentTimeMillis());
         while (simulatedProgress.isPastDeadline(System.currentTimeMillis()) == false) {
-            this.simulate(simulatedProgress);
+            this.simulate(realProgress);
         }
     }
 

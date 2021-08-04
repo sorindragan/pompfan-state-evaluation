@@ -58,7 +58,7 @@ public class POMPFANAgent extends DefaultParty {
      */
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = false;
-    private static boolean DEBUG_OFFER = false;
+    private static boolean DEBUG_OFFER = true;
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
     private Bid lastReceivedBid = null;
@@ -398,16 +398,6 @@ public class POMPFANAgent extends DefaultParty {
             // negotiation data.
             this.lastReceivedBid = ((Offer) action).getBid();
             this.negotiationData.addBidUtil(this.uSpace.getUtility(this.lastReceivedBid).doubleValue());
-            // getReporter().log(Level.INFO, "OPPONENT ACTION");
-            // if (this.MCTS.getLastBestActionNode()!=null) getReporter().log(Level.INFO,
-            // this.MCTS.getLastBestActionNode().toString());
-            // ArrayList<Node> possibleNextRoots =
-            // this.MCTS.getLastBestActionNode().getChildren();
-            // possibleNextRoots.sort(Comparator.comparing(Node::getValue,
-            // Comparator.reverseOrder()));
-            // int maxSlice = possibleNextRoots.size() > 5 ? 5 : possibleNextRoots.size();
-            // getReporter().log(Level.INFO, possibleNextRoots.subList(0,
-            // maxSlice).toString());
             this.MCTS.receiveRealObservation(action, System.currentTimeMillis());
 
         }
@@ -460,14 +450,14 @@ public class POMPFANAgent extends DefaultParty {
 
         long simTime = this.simulationTime;
         if (simTime <= remainingTime) {
-            this.MCTS.construct(simTime);
+            this.MCTS.construct(simTime, this.progress);
             // System.out.println(this.MCTS.toString());
             // DONE: Number of nodes do increase at each tree construction
             // System.out.println("Nodes Number:
             // ".concat(String.valueOf(this.MCTS.howManyNodes())));
         }
         // getReporter().log(Level.INFO, "AGENT ACTION");
-        // getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
+        getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
         // getReporter().log(Level.INFO,
         // String.valueOf(this.MCTS.getRoot().getChildren().size()));
         // ArrayList<Node> sortedChildren = this.MCTS.getRoot().getChildren();
