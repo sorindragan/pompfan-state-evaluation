@@ -58,7 +58,7 @@ public class CustomNegoRunner extends NegoRunner {
     protected void logFinal(Level level, NegoState state) {
         FileWriter resultsJsonFileWriter;
         try {
-            log.log(level, "protocol ended normally: " + jacksonWriterCompact.writeValueAsString(state));
+            // log.log(level, "protocol ended normally: " + jacksonWriterCompact.writeValueAsString(state));
             Date now = new Date();
             String logFileName = "none";
             ResultsLogger finalResults = new ResultsLogger(state, this.tFormatter.format(now));

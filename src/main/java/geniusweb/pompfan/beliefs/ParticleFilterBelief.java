@@ -67,7 +67,7 @@ public class ParticleFilterBelief extends AbstractBelief {
             this.getOpponentProbabilities().put(abstractPolicy, 1 / (weightOpponentLikelihood + EPSILON));
         }
         // TODO remove
-        System.out.println(this.getMostProbablePolicy().getName());
+        // System.out.println(this.getMostProbablePolicy().getName());
         return returnNewBelief();
     }
 

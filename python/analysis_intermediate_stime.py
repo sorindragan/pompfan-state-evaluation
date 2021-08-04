@@ -23,35 +23,45 @@ display(f"Start loading file...")
 # %%
 all_results = list(jsonlines.open(file_to_analyse))
 display(all_results[:4])
-
-# %%
 df = pd.json_normalize(all_results)
+# %%
+df["name"] = None
+df["name"] = df.party.copy()
+i_subset = df.party == "POMPFANAgent"
+df.loc[i_subset, ["name"]] = df[i_subset].party + "_" + df[i_subset]["pwp.party.parameters.config.confBelief"] + df[i_subset][
+    "pwp.party.parameters.config.confEvaluator"] + df[i_subset]["pwp.party.parameters.config.confExplorer"]
+df[i_subset]
+# %%
 df["no_agreement"] = df.utility == 0.0
 df["vs"] = None
 df["vs_utility"] = None
 for index, df_subset in df.groupby(["session", "tournamentStart", "sessionStart"]):
-    party1, party2 = df_subset["party"]
+    party1, party2 = df_subset["name"]
     util1, util2 = df_subset["utility"]
-    df.loc[(df.party == party1) & (df.session == index[0]) & (df.tournamentStart == index[1]) &
+    df.loc[(df.name == party1) & (df.session == index[0]) & (df.tournamentStart == index[1]) &
            (df.sessionStart == index[2]), "vs"] = party2
-    df.loc[(df.party == party2) & (df.session == index[0]) & (df.tournamentStart == index[1]) &
+    df.loc[(df.name == party2) & (df.session == index[0]) & (df.tournamentStart == index[1]) &
            (df.sessionStart == index[2]), "vs"] = party1
-    df.loc[(df.party == party1) & (df.session == index[0]) & (df.tournamentStart == index[1]) &
+    df.loc[(df.name == party1) & (df.session == index[0]) & (df.tournamentStart == index[1]) &
            (df.sessionStart == index[2]), "vs_utility"] = util2
-    df.loc[(df.party == party2) & (df.session == index[0]) & (df.tournamentStart == index[1]) &
+    df.loc[(df.name == party2) & (df.session == index[0]) & (df.tournamentStart == index[1]) &
            (df.sessionStart == index[2]), "vs_utility"] = util1
 
 df.to_csv(file_to_analyse.parent / "data.csv")
 # df
 # %%
+
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 12))
-df_subset = df[df.party == "POMPFANAgent"]
-ax1 = sns.boxplot(data=df_subset, x="pwp.party.parameters.simulationTime", y="utility", ax=ax1)
+subset_id = "POMPFANAgent_ParticleFilterWithAcceptBeliefLast2BidsProductUtilityEvaluatorTimeConcedingExplorationPolicy"
+divider_id = "pwp.party.parameters.numParticlesPerOpponent"
+divider_id = "pwp.party.parameters.simulationTime"
+df_subset = df[df.name == subset_id]
+ax1 = sns.boxplot(data=df_subset, x=divider_id, y="utility", ax=ax1)
 for tick in ax1.get_xticklabels():
     tick.set_rotation(45)
 ax1.set_xlabel("Simulation Time")
 ax1.set_ylabel("Utility")
-ax2 = sns.boxplot(data=df_subset, x="vs", y="utility", hue="pwp.party.parameters.simulationTime", ax=ax2)
+ax2 = sns.boxplot(data=df_subset, x="vs", y="utility", hue=divider_id, ax=ax2)
 for tick in ax2.get_xticklabels():
     tick.set_rotation(45)
 ax2.set_xlabel("Opponents per Simulation Time")
@@ -59,15 +69,15 @@ ax2.set_ylabel("Utility")
 plt.show()
 # %%
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 7))
-df_subset = df[df.party == "POMPFANAgent"]
-ax1 = sns.barplot(data=df_subset, x="pwp.party.parameters.simulationTime", y="utility", ax=ax1, estimator=sum)
+df_subset = df[df.name == subset_id]
+ax1 = sns.barplot(data=df_subset, x=divider_id, y="utility", ax=ax1, estimator=sum)
 for tick in ax1.get_xticklabels():
     tick.set_rotation(45)
 ax1.set_xlabel("Simulation Time")
 ax1.set_ylabel("Utility")
 ax1.set_title("Sum of Utility of POMPFAN accross SimTime")
 
-ax2 = sns.barplot(data=df_subset, x="pwp.party.parameters.simulationTime", y="no_agreement", ci=None, ax=ax2)
+ax2 = sns.barplot(data=df_subset, x=divider_id, y="no_agreement", ci=None, ax=ax2)
 for tick in ax2.get_xticklabels():
     tick.set_rotation(45)
 ax2.set_xlabel("Simulation Time")
@@ -93,4 +103,8 @@ fig.suptitle("Number of non-Agreements of POMPFAN across SimTime")
 fig.tight_layout()
 plt.show()
 
+# %%
+sns.countplot(data=df_subset, x="name", hue=divider_id)
+# %%
+df[df["params.config.confExtra.widener.k_b"] == 1.0].groupby(["name", "params.config.confExtra.widener.k_a"]).median().sort_values("utility")
 # %%

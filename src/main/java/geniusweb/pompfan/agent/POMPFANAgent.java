@@ -57,8 +57,8 @@ public class POMPFANAgent extends DefaultParty {
      *
      */
     private Long simulationTime = 500l;
-    private static final boolean DEBUG_LEARN = true;
-    private static boolean DEBUG_OFFER = true;
+    private static final boolean DEBUG_LEARN = false;
+    private static boolean DEBUG_OFFER = false;
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
     private Bid lastReceivedBid = null;
@@ -98,7 +98,7 @@ public class POMPFANAgent extends DefaultParty {
      */
     @Override
     public void notifyChange(Inform info) {
-        System.out.println("===========INFO========== " + info.getClass().getName());
+        // System.out.println("===========INFO========== " + info.getClass().getName());
         try {
             if (info instanceof Settings) {
                 runSetupPhase(info);
@@ -116,10 +116,10 @@ public class POMPFANAgent extends DefaultParty {
 
     private void runSetupPhase(Inform info)
             throws IOException, JsonParseException, JsonMappingException, DeploymentException, Exception {
-        
-                // info is a Settings object that is passed at the start of a negotiation
+
+        // info is a Settings object that is passed at the start of a negotiation
         Settings settings = (Settings) info;
-        
+
         // Needs to run
         if (DEBUG_LEARN)
             System.out.println("DEBUG_LEARN_PERSISTENCE: ========================================= "
@@ -127,7 +127,7 @@ public class POMPFANAgent extends DefaultParty {
         if (DEBUG_LEARN)
             System.out.println("DEBUG_LEARN_PERSISTENCE: ".concat(settings.toString()));
         this.initializeVariables(settings);
-        
+
         if (this.isLearn) {
             // We are in the learning step: We execute the learning and notify when we are
             // done. REMEMBER that there is a deadline of 60 seconds for this step.
@@ -329,7 +329,8 @@ public class POMPFANAgent extends DefaultParty {
                 throw e;
             }
         } else {
-            System.out.println("DEBUG_LEARN_PERSISTENCE: Create Persistence!");
+            if (DEBUG_LEARN)
+                System.out.println("DEBUG_LEARN_PERSISTENCE: Create Persistence!");
             this.persistentState = new PersistentState();
         }
 
@@ -398,11 +399,15 @@ public class POMPFANAgent extends DefaultParty {
             this.lastReceivedBid = ((Offer) action).getBid();
             this.negotiationData.addBidUtil(this.uSpace.getUtility(this.lastReceivedBid).doubleValue());
             // getReporter().log(Level.INFO, "OPPONENT ACTION");
-            // if (this.MCTS.getLastBestActionNode()!=null) getReporter().log(Level.INFO, this.MCTS.getLastBestActionNode().toString());
-            // ArrayList<Node> possibleNextRoots = this.MCTS.getLastBestActionNode().getChildren();
-            // possibleNextRoots.sort(Comparator.comparing(Node::getValue, Comparator.reverseOrder()));
+            // if (this.MCTS.getLastBestActionNode()!=null) getReporter().log(Level.INFO,
+            // this.MCTS.getLastBestActionNode().toString());
+            // ArrayList<Node> possibleNextRoots =
+            // this.MCTS.getLastBestActionNode().getChildren();
+            // possibleNextRoots.sort(Comparator.comparing(Node::getValue,
+            // Comparator.reverseOrder()));
             // int maxSlice = possibleNextRoots.size() > 5 ? 5 : possibleNextRoots.size();
-            // getReporter().log(Level.INFO, possibleNextRoots.subList(0, maxSlice).toString());
+            // getReporter().log(Level.INFO, possibleNextRoots.subList(0,
+            // maxSlice).toString());
             this.MCTS.receiveRealObservation(action, System.currentTimeMillis());
 
         }
@@ -463,15 +468,19 @@ public class POMPFANAgent extends DefaultParty {
         }
         // getReporter().log(Level.INFO, "AGENT ACTION");
         // getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
-        // getReporter().log(Level.INFO, String.valueOf(this.MCTS.getRoot().getChildren().size()));
+        // getReporter().log(Level.INFO,
+        // String.valueOf(this.MCTS.getRoot().getChildren().size()));
         // ArrayList<Node> sortedChildren = this.MCTS.getRoot().getChildren();
-        // sortedChildren.sort(Comparator.comparing(Node::getValue, Comparator.reverseOrder()));
+        // sortedChildren.sort(Comparator.comparing(Node::getValue,
+        // Comparator.reverseOrder()));
         // int maxSlice = sortedChildren.size() > 5 ? 5 : sortedChildren.size();
-        // getReporter().log(Level.INFO, sortedChildren.subList(0, maxSlice).toString());
-        // getReporter().log(Level.INFO, String.valueOf(this.MCTS.getBelief().getOpponents().size()));
+        // getReporter().log(Level.INFO, sortedChildren.subList(0,
+        // maxSlice).toString());
+        // getReporter().log(Level.INFO,
+        // String.valueOf(this.MCTS.getBelief().getOpponents().size()));
 
         action = this.MCTS.chooseBestAction();
-        
+
         // Consuming the whole tree will result in an error
         // So accept | proposing old bids also possible
         if (action == null) {
@@ -488,8 +497,9 @@ public class POMPFANAgent extends DefaultParty {
             }
         } else if (action instanceof Accept) {
             Bid acceptedBid = ((Accept) action).getBid();
-            System.out.println("We ACCEPT: Util=" + String.valueOf(this.uSpace.getUtility(acceptedBid)) + " -- "
-                    + acceptedBid.toString());
+            if (DEBUG_OFFER == true)
+                System.out.println("We ACCEPT: Util=" + String.valueOf(this.uSpace.getUtility(acceptedBid)) + " -- "
+                        + acceptedBid.toString());
         } else {
             System.out.println("Something HAPPENED! " + action.toString());
         }
