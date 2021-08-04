@@ -3,6 +3,7 @@
 !launch.json
 logs/**/*
 !logs/.gitkeep
+eval/**/*
 
 
 # DEFAULT

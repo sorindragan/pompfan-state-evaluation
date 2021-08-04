@@ -9,7 +9,7 @@
 			"name": "Launch RandomCustomNegoRunner",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.RandomCustomNegoRunner",
-			"projectName": "learningagent",
+			"projectName": "olusorin",
 			"classPaths": [
 				"$Auto"
 			],
