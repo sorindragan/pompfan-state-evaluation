@@ -42,7 +42,7 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
             .map(e -> e + "0").collect(Collectors.toList());
     private final static List<String> setSimulationTime = IntStream.range(1, 10).boxed().map(String::valueOf)
             .map(e -> e + "00").collect(Collectors.toList());
-    private final static List<String> setK = RANDOM.doubles(10, 1.0, 4.0).mapToObj(String::valueOf)
+    private final static List<String> setK = RANDOM.doubles(10, 2.0, 5.0).mapToObj(String::valueOf)
             .map(BigDecimal::new).map(e -> e.setScale(0, RoundingMode.DOWN)).map(String::valueOf).map(e -> e + ".0")
             .collect(Collectors.toList());
     private final static List<String> setA = RANDOM.doubles(10, 0.1, 1.0).mapToObj(String::valueOf)
