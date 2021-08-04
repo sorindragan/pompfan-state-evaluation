@@ -12,7 +12,7 @@ import pandas as pd
 import seaborn as sns
 import jsonlines
 # %%
-filename = "tournament_results_numParticles.jsonl"
+filename = "tournament_results_random.jsonl"
 # filename = "log_tournament_xx_xx_xxxx_xx_xx.json" # Something else
 curr_dir = pathlib.Path(__file__)
 log_dir = curr_dir.parent.parent / "eval"
@@ -26,11 +26,10 @@ display(all_results[:4])
 
 # %%
 df = pd.json_normalize(all_results)
-df["agreed"] = df.utility == 0.0
+df["no_agreement"] = df.utility == 0.0
 df["vs"] = None
 df["vs_utility"] = None
 for index, df_subset in df.groupby(["session", "tournamentStart", "sessionStart"]):
-    # df_subset = df[df["session"] == i]
     party1, party2 = df_subset["party"]
     util1, util2 = df_subset["utility"]
     df.loc[(df.party == party1) & (df.session == index[0]) & (df.tournamentStart == index[1]) &
@@ -45,10 +44,6 @@ for index, df_subset in df.groupby(["session", "tournamentStart", "sessionStart"
 df.to_csv(file_to_analyse.parent / "data.csv")
 df
 # %%
-# for idx, grp in df.groupby("party"):
-#     # display(idx)
-#     # display(grp)
-#     sns.boxplot(data=grp, x="party", y="util")
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 12))
 df_subset = df[df.party == "POMPFANAgent"]
 ax1 = sns.boxplot(data=df_subset, x="pwp.party.parameters.numParticlesPerOpponent", y="utility", ax=ax1)
@@ -62,9 +57,7 @@ for tick in ax2.get_xticklabels():
 ax2.set_xlabel("Opponents per NumParticlesPerOpponent")
 ax2.set_ylabel("Utility")
 plt.show()
-# fig.legend(loc="upper left")
-# handles, labels = ax.get_legend_handles_labels()
-# ax.legend(handles, labels, loc="best")
+
 # %%
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 7))
 df_subset = df[df.party == "POMPFANAgent"]
@@ -75,18 +68,18 @@ ax1.set_xlabel("NumParticlesPerOpponent")
 ax1.set_ylabel("Utility")
 ax1.set_title("Sum of Utility of POMPFAN accross NumParticlesPerOpponent")
 
-ax2 = sns.barplot(data=df_subset, x="pwp.party.parameters.numParticlesPerOpponent", y="agreed", ci=None, ax=ax2)
+ax2 = sns.barplot(data=df_subset, x="pwp.party.parameters.numParticlesPerOpponent", y="no_agreement", ci=None, ax=ax2)
 for tick in ax2.get_xticklabels():
     tick.set_rotation(45)
-ax2.set_xlabel("NumParticlesPerOpponent Time")
-ax2.set_ylabel("Utility")
+ax2.set_xlabel("NumParticlesPerOpponent")
+ax2.set_ylabel("Percentage")
 ax2.set_title("Average non-Agreements of POMPFAN accross NumParticlesPerOpponent")
 fig.tight_layout()
 plt.show()
 
 # %%
 fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-df_no_aggreement_counts = df[df["agreed"]].groupby("pwp.party.parameters.numParticlesPerOpponent").count()
+df_no_aggreement_counts = df[df["no_agreement"]].groupby("pwp.party.parameters.numParticlesPerOpponent").count()
 unique_agents = df_no_aggreement_counts.index.unique()
 num_agents = len(unique_agents)
 (ax, ) = df_no_aggreement_counts["session"].plot.pie(

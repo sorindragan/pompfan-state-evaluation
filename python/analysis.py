@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 # %%
-filename = "log_tournament_newest.json"
-# filename = "log_tournament_xx_xx_xxxx_xx_xx.json" # Something else
+# filename = "log_tournament_newest.json"
+filename = "log_tournament_2021_08_04_15_47.json"  # Something else
 curr_dir = pathlib.Path(__file__)
 log_dir = curr_dir.parent.parent / "logs"
 file_to_analyse = log_dir / filename
@@ -39,7 +39,6 @@ for i in df["session"].unique():
     df.loc[(df.party == party2) & (df.session == i), "vs_utility"] = util1
 
 df.to_csv(file_to_analyse.parent / "data.csv")
-df
 # %%
 # for idx, grp in df.groupby("party"):
 #     # display(idx)
@@ -109,3 +108,4 @@ for idx, ax in zip(groups.index.unique(), axes):
 fig.suptitle(f"Number of non-Agreements")
 fig.tight_layout()
 plt.show()
+# %%
