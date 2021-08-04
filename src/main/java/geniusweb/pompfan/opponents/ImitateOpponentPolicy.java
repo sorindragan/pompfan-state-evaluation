@@ -102,7 +102,8 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
             Value selectedVal = vals.get(selectedValIdx);
             issuevalues.put(issueString, selectedVal);
         }
-        Bid resultBid = new Bid(issuevalues);
+        
+        Bid resultBid = this.getRandom().nextDouble() > 0.75 ? new Bid(issuevalues) : currentBid;
 
         return new Offer(this.getPartyId(), resultBid);
     }
