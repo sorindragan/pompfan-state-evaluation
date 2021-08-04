@@ -12,7 +12,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
 
-    private static final BigDecimal STUBBORNESS = new BigDecimal("0.8");
+    private static final BigDecimal STUBBORNESS = new BigDecimal("0.6");
 
     public RandomOwnExplorerPolicy(UtilitySpace utilitySpace,  PartyId id) {
         super(utilitySpace, id);
