@@ -6,17 +6,33 @@
 	"configurations": [
 		{
 			"type": "java",
+			"name": "Launch RandomCustomNegoRunner",
+			"request": "launch",
+			"mainClass": "geniusweb.pompfan.helper.RandomCustomNegoRunner",
+			"projectName": "learningagent",
+			"classPaths": [
+				"$Auto"
+			],
+			"args": [
+				"src/test/resources/tournament_random.json",
+			],
+			"console": "internalConsole"
+		},
+		{
+			"type": "java",
 			"name": "Tournament SimulationTime",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": [
 				"src/test/resources/simTime/t0.json",
 				"src/test/resources/simTime/t1.json",
 				"src/test/resources/simTime/t2.json",
 				"src/test/resources/simTime/t3.json",
 				"src/test/resources/simTime/t4.json",
-				"src/test/resources/simTime/t5.json",
+				"src/test/resources/simTime/t5.json"
 			],
 			"console": "internalConsole"
 		},
@@ -25,14 +41,16 @@
 			"name": "Tournament NumParticles",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": [
 				"src/test/resources/numParticles/t0.json",
 				"src/test/resources/numParticles/t1.json",
 				"src/test/resources/numParticles/t2.json",
 				"src/test/resources/numParticles/t3.json",
 				"src/test/resources/numParticles/t4.json",
-				"src/test/resources/numParticles/t5.json",
+				"src/test/resources/numParticles/t5.json"
 			],
 			"console": "internalConsole"
 		},
@@ -41,7 +59,9 @@
 			"name": "Tournament early wideness",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": [
 				"src/test/resources/earlySimulation/t0.json",
 				"src/test/resources/earlySimulation/t1.json",
@@ -50,7 +70,7 @@
 				"src/test/resources/earlySimulation/t4.json",
 				"src/test/resources/earlySimulation/t5.json",
 				"src/test/resources/earlySimulation/t6.json",
-				"src/test/resources/earlySimulation/t7.json",
+				"src/test/resources/earlySimulation/t7.json"
 			],
 			"console": "internalConsole"
 		},
@@ -59,7 +79,9 @@
 			"name": "Tournament later wideness",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": [
 				"src/test/resources/laterSimulation/t0.json",
 				"src/test/resources/laterSimulation/t1.json",
@@ -69,7 +91,7 @@
 				"src/test/resources/laterSimulation/t5.json",
 				"src/test/resources/laterSimulation/t6.json",
 				"src/test/resources/laterSimulation/t7.json",
-				"src/test/resources/laterSimulation/t8.json",
+				"src/test/resources/laterSimulation/t8.json"
 			],
 			"console": "internalConsole"
 		},
@@ -78,7 +100,9 @@
 			"name": "Tournament Flight",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": "src/test/resources/tournament_flight.json",
 			"console": "internalConsole"
 		},
@@ -87,7 +111,9 @@
 			"name": "Tournament Party",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": "src/test/resources/tournament_party.json",
 			"console": "internalConsole"
 		},
@@ -96,7 +122,9 @@
 			"name": "Tournament Test",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": "src/test/resources/tournament_test.json",
 			"console": "internalConsole"
 		},
@@ -105,7 +133,9 @@
 			"name": "Test",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": "src/test/resources/settingsTest.json",
 			"console": "internalConsole"
 		},
@@ -114,7 +144,9 @@
 			"name": "Test Learn",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": "src/test/resources/settingsTestLearn.json",
 			"console": "internalConsole"
 		},
@@ -123,7 +155,9 @@
 			"name": "vs. TimeDependentParty",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": "src/test/resources/settingsTimeDependent.json",
 			"console": "internalConsole"
 		},
@@ -132,7 +166,9 @@
 			"name": "vs. Boulware",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": "src/test/resources/settingsBoulware.json",
 			"console": "internalConsole"
 		},
@@ -141,7 +177,9 @@
 			"name": "vs. Conceder",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": "src/test/resources/settingsConceder.json",
 			"console": "internalConsole"
 		},
@@ -150,7 +188,9 @@
 			"name": "vs. SimpleBoa",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": "src/test/resources/settingsSimpleBoa.json",
 			"console": "internalConsole"
 		},
@@ -159,7 +199,9 @@
 			"name": "vs. Linear",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": "src/test/resources/settingsLinear.json",
 			"console": "internalConsole"
 		},
@@ -168,7 +210,9 @@
 			"name": "vs. Hardliner",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": ["$Auto"],
+			"classPaths": [
+				"$Auto"
+			],
 			"args": "src/test/resources/settingsHardliner.json",
 			"console": "internalConsole"
 		},
