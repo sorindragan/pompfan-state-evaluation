@@ -28,8 +28,7 @@ public class TimeConcedingExplorationPolicy extends AbstractOwnExplorationPolicy
         Action action;
         Bid bid;
         // progressively open the bounds of explored bids
-        double lowerBound = 1.0 - state.getTime();
-        // System.out.println(lowerBound);
+        double lowerBound = 1.0 - (state.getTime() / 2);
 
         if (lastReceivedBid == null) {
             return new Offer(this.getPartyId(), this.getAllBids().getExtremeBid(true));
@@ -47,7 +46,6 @@ public class TimeConcedingExplorationPolicy extends AbstractOwnExplorationPolicy
         BigDecimal utilToBeOffered = this.getUtilitySpace().getUtility(bid);
         BigDecimal utilFromOpp = this.getUtilitySpace().getUtility(lastReceivedBid);
         if (utilToBeOffered.doubleValue() <= utilFromOpp.doubleValue()) {
-            // System.out.println(this.getName() + " generated Accept");
             action = new Accept(this.getPartyId(), lastReceivedBid);
         }
 

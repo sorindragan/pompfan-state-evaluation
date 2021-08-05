@@ -1,13 +1,7 @@
 package geniusweb.pompfan.wideners;
 
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.stream.Collector;
 
-import geniusweb.actions.Accept;
-import geniusweb.actions.Action;
-import geniusweb.actions.Offer;
-import geniusweb.issuevalue.Bid;
 import geniusweb.pompfan.components.ActionNode;
 import geniusweb.pompfan.components.BeliefNode;
 import geniusweb.pompfan.components.Node;
@@ -26,9 +20,9 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
     public ProgressiveWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy,
             HashMap<String, Object> params) {
         super(ownExplorationStrategy);
-        this.k_a = Double.parseDouble((String) params.getOrDefault("k_a", 42.0));
+        this.k_a = Double.parseDouble((String) params.getOrDefault("k_a", 2.0));
         this.a_a = Double.parseDouble((String) params.getOrDefault("a_a", 0.42));
-        this.k_b = Double.parseDouble((String) params.getOrDefault("k_b", 42.0));
+        this.k_b = Double.parseDouble((String) params.getOrDefault("k_b", 1.0));
         this.a_b = Double.parseDouble((String) params.getOrDefault("a_b", 0.42));
     }
 
@@ -51,7 +45,6 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
                 
                 // this if code omits the evaluation when the same accept is sampled again
                 if (currRoot == null) {
-                    // System.out.println("SAME ACCEPT SAMPLED");
                     return;
                 }
 
@@ -96,7 +89,6 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
                     currRoot = newChild;
                     Double value = currRoot.getState().evaluate();
                     Tree.backpropagate(currRoot, value);
-                    // System.out.println("ADDED NEW BROTHER");
                     return;
                 }
             }
@@ -123,7 +115,6 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
 
             // this if code omits the evaluation when the same accept is sampled again
             if (currRoot == null) {
-                // System.out.println("SAME ACCEPT SAMPLED2");
                 return;
             }
 
@@ -139,22 +130,15 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
                 ActionNode newActionNode = (ActionNode) ((BeliefNode) currRoot).act(this.getOwnExplorationStrategy(),
                         simulatedTimeOfNewActReceival);
 
-                // if (newActionNode!= null && newActionNode.getAction() instanceof Accept) {
-                //     System.out.println("WE ACT ACCEPT after going down");
-                // }
                 Double simulatedTimeOfNewObsReceival = simulatedProgress.get(System.currentTimeMillis());
                 BeliefNode newBeliefNode = (BeliefNode) newActionNode.receiveObservation(simulatedTimeOfNewObsReceival);
                 currRoot = newBeliefNode;
                 
-                // if (newBeliefNode!= null && newBeliefNode.getObservation() instanceof Accept) {
-                //     System.out.println("OPPONENT SENDS ACCEPT after going down");
-                // }
             }
 
             // this if code omits the evaluation when the same accept is sampled again
             // again
             if (currRoot == null) {
-                // System.out.println("SAME ACCEPT SAMPLED2 after goinf one level down");
                 return;
             }
 

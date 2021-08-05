@@ -62,7 +62,6 @@ for tick in ax.get_xticklabels():
     tick.set_rotation(45)
 ax.set_xlabel("Party")
 ax.set_ylabel("Total Utility")
-fig.suptitle("Utility")
 fig.tight_layout()
 plt.show()
 
@@ -102,5 +101,7 @@ for idx, ax in zip(groups.index.unique(), axes):
 fig.suptitle(f"Number of non-Agreements")
 fig.tight_layout()
 plt.show()
+
+# %%
 
 # %%

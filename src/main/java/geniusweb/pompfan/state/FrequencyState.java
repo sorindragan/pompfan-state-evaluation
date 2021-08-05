@@ -16,7 +16,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
 
-    private List<IVPair> allIssueValues;
+    // private List<IVPair> allIssueValues;
 
     public FrequencyState() {
         super();

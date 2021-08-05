@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +34,6 @@ import geniusweb.inform.YourTurn;
 import geniusweb.issuevalue.Bid;
 import geniusweb.party.Capabilities;
 import geniusweb.party.DefaultParty;
-import geniusweb.pompfan.components.Node;
 import geniusweb.pompfan.components.Tree;
 import geniusweb.pompfan.helper.Configurator;
 import geniusweb.pompfan.opponents.AbstractPolicy;
@@ -58,7 +56,7 @@ public class POMPFANAgent extends DefaultParty {
      */
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = false;
-    private static boolean DEBUG_OFFER = true;
+    private static boolean DEBUG_OFFER = false;
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
     private Bid lastReceivedBid = null;
@@ -152,7 +150,6 @@ public class POMPFANAgent extends DefaultParty {
                 // The part behind the last _ is always changing, so we must cut it off.
                 String fullOpponentName = action.getActor().getName();
                 int lastIndexOf = fullOpponentName.lastIndexOf("_");
-                // int index = lastIndexOf == -1 ? fullOpponentName.length() : lastIndexOf;
                 int index = lastIndexOf;
                 this.opponentName = fullOpponentName.substring(0, index);
 
@@ -219,13 +216,14 @@ public class POMPFANAgent extends DefaultParty {
                 throw new RuntimeException("Failed to write negotiation data to disk", e);
             }
         }
+        
         if (DEBUG_SAVE_TREE) {
             saveTreeToLogs("full_".concat(sessionName), this.MCTS.toStringOriginal());
             saveTreeToLogs("curr_".concat(sessionName), this.MCTS.toString());
         }
 
         // Log the final outcome and terminate
-        getReporter().log(Level.INFO, "Final outcome:" + info);
+        if (DEBUG_OFFER) getReporter().log(Level.INFO, "Final outcome:" + info);
         terminate();
     }
 
@@ -276,7 +274,7 @@ public class POMPFANAgent extends DefaultParty {
     private void initializeVariables(Settings settings) throws IOException, JsonParseException, JsonMappingException {
         // Protocol that is initiate for the agent
         this.protocol = settings.getProtocol().getURI().getPath();
-        this.getReporter().log(Level.INFO, protocol);
+        //this.getReporter().log(Level.INFO, protocol);
 
         // ID of my agent
         this.me = settings.getID();
@@ -415,7 +413,7 @@ public class POMPFANAgent extends DefaultParty {
         if (!agreements.getMap().isEmpty()) {
             // Get the bid that is agreed upon and add it's value to our negotiation data
             Bid agreement = agreements.getMap().values().iterator().next();
-            System.out.println("AGREEMENT!!!! -- Util=" + String.valueOf(this.uSpace.getUtility(agreement)) + " -- "
+            if (DEBUG_LEARN) System.out.println("AGREEMENT!!!! -- Util=" + String.valueOf(this.uSpace.getUtility(agreement)) + " -- "
                     + agreement.toString());
             this.negotiationData.addAgreementUtil(this.uSpace.getUtility(agreement).doubleValue());
         }
@@ -451,23 +449,8 @@ public class POMPFANAgent extends DefaultParty {
         long simTime = this.simulationTime;
         if (simTime <= remainingTime) {
             this.MCTS.construct(simTime, this.progress);
-            // System.out.println(this.MCTS.toString());
-            // DONE: Number of nodes do increase at each tree construction
-            // System.out.println("Nodes Number:
-            // ".concat(String.valueOf(this.MCTS.howManyNodes())));
         }
-        // getReporter().log(Level.INFO, "AGENT ACTION");
-        getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
-        // getReporter().log(Level.INFO,
-        // String.valueOf(this.MCTS.getRoot().getChildren().size()));
-        // ArrayList<Node> sortedChildren = this.MCTS.getRoot().getChildren();
-        // sortedChildren.sort(Comparator.comparing(Node::getValue,
-        // Comparator.reverseOrder()));
-        // int maxSlice = sortedChildren.size() > 5 ? 5 : sortedChildren.size();
-        // getReporter().log(Level.INFO, sortedChildren.subList(0,
-        // maxSlice).toString());
-        // getReporter().log(Level.INFO,
-        // String.valueOf(this.MCTS.getBelief().getOpponents().size()));
+        if (DEBUG_OFFER) getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
 
         action = this.MCTS.chooseBestAction();
 

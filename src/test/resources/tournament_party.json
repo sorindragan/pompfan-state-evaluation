@@ -10,8 +10,8 @@
 							"negotiationdata": [
 							],
 							"isLearn": false,
-							"numParticles": "70",
-							"simulationTime": "300",
+							"numParticlesPerOpponent": "10",
+							"simulationTime": "400",
 							"config": {
 								"confComparer": "UtilityBidDistance",
 								"confBelief": "ParticleFilterWithAcceptBelief",
@@ -96,7 +96,7 @@
 			"SAOPSettings": {
 				"participants": [],
 				"deadline": {
-					"deadlinetime": { "durationms": 10000 }
+					"deadlinetime": { "durationms": 8000 }
 				}
 			}
 		},

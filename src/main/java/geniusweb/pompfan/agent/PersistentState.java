@@ -160,6 +160,9 @@ public class PersistentState {
     for (int i = 0; i < numParticlesPerOpponent; i++) {
       int cnt = 0;
       for (List<Action> oppActions : this.getAllOpponentActions()) {
+        if (oppActions.size() < 2) {
+            continue;
+        }
         ArrayList<Action> l1 = new ArrayList<Action>(oppActions);
         ArrayList<Action> l2 = new ArrayList<Action>(oppActions);
         String nameOfOpponent = this.getEncounteredOpponentArchive().get(cnt);
@@ -184,7 +187,7 @@ public class PersistentState {
     AbstractBelief belief2use = belief == null ? configurator.getBelief() : belief;
     belief2use = belief2use.addNewOpponents(newOpponents);
     this.setEncounteredOpponentArchive(new ArrayList<String>());
-    this.setAllOpponentActions(new ArrayList<List<Action>>());;
+    this.setAllOpponentActions(new ArrayList<List<Action>>());
 
 
     AbstractWidener widener = configurator.getWidener();
@@ -206,7 +209,7 @@ public class PersistentState {
   }
 
   public PersistentState learn(){
-    // Future TODO: All the learning
+    // Future TODO: Move all the learning here
     return this;
   }
 }

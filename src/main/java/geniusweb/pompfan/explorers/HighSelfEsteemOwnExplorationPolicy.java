@@ -2,14 +2,12 @@ package geniusweb.pompfan.explorers;
 
 import java.util.Random;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
 import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
-import geniusweb.boa.biddingstrategy.ExtendedUtilSpace;
 import geniusweb.issuevalue.Bid;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.profile.utilityspace.LinearAdditive;

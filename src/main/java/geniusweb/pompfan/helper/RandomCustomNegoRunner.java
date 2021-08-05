@@ -6,9 +6,7 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,16 +16,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 
 import geniusweb.protocol.NegoSettings;
 import geniusweb.protocol.partyconnection.ProtocolToPartyConnFactory;
-import geniusweb.protocol.tournament.allpermutations.AllPermutationsSettings;
 import geniusweb.simplerunner.ClassPathConnectionFactory;
 import geniusweb.simplerunner.NegoRunner;
 import tudelft.utilities.logging.Reporter;

@@ -41,7 +41,6 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
 
         this.setUtilitySpace(oppModel);
         this.setRecordedBehavior(realHistoryActions);
-        // this.STUBBORNESS = STUBBORNESS;
 
     }
 

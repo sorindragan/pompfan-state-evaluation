@@ -42,7 +42,7 @@ public class Configurator {
     public static final String DEFAULT_BELIEF = "ParticleFilterWithAcceptBelief";
     public static final String DEFAULT_EVALUATOR = "Last2BidsProductUtilityEvaluator";
     public static final String DEFAULT_STATE = "HistoryState";
-    public static final String DEFAULT_EXPLORER_POLICY = "RandomOwnExplorerPolicy";
+    public static final String DEFAULT_EXPLORER_POLICY = "TimeConcedingExplorationPolicy";
     public static final String DEFAULT_WIDENING_STRATEGY = "ProgressiveWideningStrategy";
     private String confComparer = DEFAULT_COMPARER;
     private String confBelief = DEFAULT_BELIEF;
@@ -243,7 +243,7 @@ public class Configurator {
         case "SelfishReluctantOwnExplorerPolicy":
             this.setExplorer(new SelfishReluctantOwnExplorerPolicy(uSpace, me));
             break;
-        case "TimeConcedingExplorationPolicy":
+        case DEFAULT_EXPLORER_POLICY:
             this.setExplorer(new TimeConcedingExplorationPolicy(uSpace, me));
             break;
         default:

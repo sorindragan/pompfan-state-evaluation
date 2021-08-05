@@ -31,8 +31,8 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
             return new Offer(this.getPartyId(), this.getAllBids().getExtremeBid(true));
         }
 
+        // easir to debug
         if (shouldAccept(bid, lastOpponentBid)) {
-            // System.out.println(this.getName() + " generated Accept");
             action = new Accept(this.getPartyId(), lastOpponentBid);
         } else {
             action = new Offer(this.getPartyId(), bid);

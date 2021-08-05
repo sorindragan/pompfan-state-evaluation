@@ -1,19 +1,14 @@
 package geniusweb.pompfan.evaluators;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.issuevalue.Bid;
-import geniusweb.issuevalue.Domain;
-import geniusweb.pompfan.helper.BidVector;
-import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.UtilitySpace;
 

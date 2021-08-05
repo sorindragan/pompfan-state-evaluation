@@ -16,8 +16,6 @@ import geniusweb.deadline.DeadlineTime;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.beliefs.AbstractBelief;
-import geniusweb.pompfan.beliefs.ParticleFilterBelief;
-import geniusweb.pompfan.beliefs.ParticleFilterWithAcceptBelief;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.StateRepresentationException;
@@ -27,7 +25,7 @@ import geniusweb.progress.Progress;
 import geniusweb.progress.ProgressFactory;
 
 public class Tree {
-    private static final boolean PARTICLE_DEBUG = true;
+    private static final boolean PARTICLE_DEBUG = false;
     private BeliefNode root;
     private Domain domain;
     @JsonManagedReference
@@ -42,9 +40,7 @@ public class Tree {
     private Progress progress;
     private Double currentTime = 0.0;
     private BeliefNode originalRoot;
-    // TODO
-    private Double ACCEPT_SLACK = 0.1;
-    // private Double ACCEPT_SLACK = -0.5;
+    private Double ACCEPT_SLACK = 0.05;
 
     public Tree(UtilitySpace utilitySpace, AbstractBelief belief, AbstractState<?> startState, AbstractWidener widener,
             Progress progress) {
@@ -148,7 +144,6 @@ public class Tree {
         if (this.lastBestActionNode == null) {
             // Quickfix: by doing nothing
             // Startphase - opponent bids first
-            // System.out.println("START");
             return this;
         }
         List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream()
