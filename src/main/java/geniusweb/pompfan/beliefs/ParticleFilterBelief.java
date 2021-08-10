@@ -17,9 +17,9 @@ import geniusweb.pompfan.state.AbstractState;
 
 public class ParticleFilterBelief extends AbstractBelief {
 
-    public static final int NUMBER_SAMPLES = 100;
-    public static final Double SAMENESS_THRESHOLD = 0.1;
-    private static final Double EPSILON = 0.001;
+    public static final int NUMBER_SAMPLES = 100; // TODO: Maybe check that out?
+    public static final Double SAMENESS_THRESHOLD = 0.1; // TODO: Not necessary anymore
+    private static final Double EPSILON = 0.001; // TODO: Maybe check that out?
     private AbstractPolicy mostProbablePolicy = null;
 
     @JsonCreator

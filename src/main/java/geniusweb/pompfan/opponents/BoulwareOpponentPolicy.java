@@ -13,12 +13,11 @@ public class BoulwareOpponentPolicy extends TimeDependentOpponentPolicy {
     @JsonCreator
     public BoulwareOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace,
             @JsonProperty("name") String name, @JsonProperty("e") double e) {
-        super(utilitySpace, name, e);
+        super(utilitySpace, BOULWARE, e);
     }
 
     public BoulwareOpponentPolicy(Domain domain) {
-        super(domain);
-        this.setName(BOULWARE);
+        super(domain, BOULWARE);
     }
 
     @Override

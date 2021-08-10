@@ -73,7 +73,7 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
         super();
         this.setDomain(uSpace.getDomain());
         this.setName(name);
-        this.setPartyId(new PartyId("Opponent_" + name));
+        this.setPartyId(new PartyId("Simulated_" + name));
         this.setUtilitySpace(uSpace);
         this.setBidspace(new AllBidsList(this.getDomain()));
         this.setRandom(new Random());

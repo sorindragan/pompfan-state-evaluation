@@ -15,12 +15,11 @@ public class ConcederOpponentPolicy extends TimeDependentOpponentPolicy{
 
     @JsonCreator
     public ConcederOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("e") double e) {
-        super(utilitySpace, name, e);
+        super(utilitySpace, CONCEDER, e);
     }
 
     public ConcederOpponentPolicy(Domain domain) {
-        super(domain);
-        this.setName(CONCEDER);
+        super(domain, CONCEDER);
     }
     
     @Override

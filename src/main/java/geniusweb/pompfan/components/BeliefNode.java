@@ -62,11 +62,17 @@ public class BeliefNode extends Node {
 
         if (child == null) {
             // create new node
+            // QUESTION: Does it make sense to just always propagate the opponent?
             child = (ActionNode) Node.buildNode(Node.NODE_TYPE.ACTION, this, newState, state.getOpponent(),
                     agentAction);
             this.addChild(child);
         }
         return child;
+    }
+
+    @Override
+    public String extraString() {
+        return this.getState().getOpponent().getPartyId().toString();
     }
 
 }

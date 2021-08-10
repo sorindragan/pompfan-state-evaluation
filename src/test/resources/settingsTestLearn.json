@@ -10,7 +10,7 @@
 								"parameters": {
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"negotiationdata": ["22e3f183-f039-476a-82ea-01829bb50876"],
-									"numParticles": "100",
+									"numParticlesPerOpponent": "100",
 									"simulationTime": "250",
 									"config": {
 										"confComparer": "UtilityBidDistance",

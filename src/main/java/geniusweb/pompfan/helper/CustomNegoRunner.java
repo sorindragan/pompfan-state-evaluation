@@ -124,8 +124,8 @@ public class CustomNegoRunner extends NegoRunner {
                     settingRef, name);
             runner.run();
         }
-
-        System.exit(0);
+        
+        // System.exit(0);
     }
 }
 

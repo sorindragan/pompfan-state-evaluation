@@ -10,12 +10,11 @@ public class HardLinerOpponentPolicy extends TimeDependentOpponentPolicy {
     private final static String HARDLINER = "HardLiner";
 
     public HardLinerOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("e") double e) {
-        super(utilitySpace, name, e);
+        super(utilitySpace, HARDLINER, e);
     }
 
     public HardLinerOpponentPolicy(Domain domain) {
-        super(domain);
-        this.setName(HARDLINER);
+        super(domain, HARDLINER);
     }
 
     @Override

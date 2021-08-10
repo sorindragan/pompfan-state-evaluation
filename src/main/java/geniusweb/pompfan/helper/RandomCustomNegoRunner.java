@@ -49,9 +49,9 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
 
     private final static List<String> setComparer = Arrays.asList("UtilityBidDistance");
     private final static List<String> setBelief = Arrays.asList("ParticleFilterWithAcceptBelief", "ParticleFilterBelief");
-    private final static List<String> setEvaluator = Arrays.asList("Last2BidsProductUtilityEvaluator", "Last2BidsMeanUtilityEvaluator");
+    private final static List<String> setEvaluator = Arrays.asList("Last2BidsProductUtilityEvaluator", "Last2BidsMeanUtilityEvaluator", "RandomEvaluator");
     private final static List<String> setExplorer = Arrays.asList("HighSelfEsteemOwnExplorationPolicy", "TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
-    private final static List<String> setWidener = Arrays.asList("ProgressiveWideningStrategy");
+    private final static List<String> setWidener = Arrays.asList("ProgressiveWideningStrategy", "MaxWidthWideningStrategy");
 
     public RandomCustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory, Reporter logger,
             long maxruntime, String settingRef, String name) throws IOException {

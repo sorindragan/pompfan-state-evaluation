@@ -12,7 +12,7 @@
 									"negotiationdata": [
 										"22e3f183-f039-476a-82ea-01829bb50876"
 									],
-									"numParticles": "100",
+									"numParticlesPerOpponent": "100",
 									"simulationTime": "250",
 									"config": {
 										"confComparer": "UtilityBidDistance",

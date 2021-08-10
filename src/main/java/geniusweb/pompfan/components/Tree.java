@@ -25,7 +25,7 @@ import geniusweb.progress.Progress;
 import geniusweb.progress.ProgressFactory;
 
 public class Tree {
-    private static final boolean PARTICLE_DEBUG = false;
+    private static final boolean PARTICLE_DEBUG = true;
     private BeliefNode root;
     private Domain domain;
     @JsonManagedReference
