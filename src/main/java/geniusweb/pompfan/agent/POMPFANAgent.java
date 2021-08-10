@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
+import geniusweb.actions.ActionWithBid;
 import geniusweb.actions.FileLocation;
 import geniusweb.actions.LearningDone;
 import geniusweb.actions.Offer;
@@ -34,6 +35,7 @@ import geniusweb.inform.YourTurn;
 import geniusweb.issuevalue.Bid;
 import geniusweb.party.Capabilities;
 import geniusweb.party.DefaultParty;
+import geniusweb.pompfan.components.ActionNode;
 import geniusweb.pompfan.components.Tree;
 import geniusweb.pompfan.helper.Configurator;
 import geniusweb.pompfan.opponents.AbstractPolicy;
@@ -59,6 +61,7 @@ public class POMPFANAgent extends DefaultParty {
     private static boolean DEBUG_OFFER = false;
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
+    private static boolean DEBUG_BELIEF = true;
     private Bid lastReceivedBid = null;
     private PartyId me;
     protected ProfileInterface profileint = null;
@@ -77,6 +80,7 @@ public class POMPFANAgent extends DefaultParty {
     private Long numParticlesPerOpponent = 10l;
     private Boolean isLearn = false;
     private HashMap<String, Object> config;
+    private BidsWithUtility bidsWithUtility;
 
     public POMPFANAgent() {
     }
@@ -137,9 +141,16 @@ public class POMPFANAgent extends DefaultParty {
                 System.out.println("DEBUG_LEARN_PERSISTENCE: Enter tree init");
             this.initializeTree(settings);
         }
+
+        if (DEBUG_BELIEF) {
+            String contentDetailed = this.MCTS.getBelief().toDetailedString();
+            String content = this.MCTS.getBelief().toCoarseString();
+            saveDistributionToLogs("distribution_detailed", contentDetailed, false);
+            saveDistributionToLogs("distribution", content, false);
+        }
     }
 
-    private void runOpponentPhase(Inform info) {
+    private void runOpponentPhase(Inform info) throws IOException {
         // The info object is an action that is performed by an agent.
         Action action = ((ActionDone) info).getAction();
 
@@ -171,9 +182,6 @@ public class POMPFANAgent extends DefaultParty {
                 }
 
             }
-            // Process the action of the opponent.
-            this.MCTS.getRealHistory().add(action);
-            this.oppActions.add(action);
 
             processAction(action);
         }
@@ -216,20 +224,27 @@ public class POMPFANAgent extends DefaultParty {
                 throw new RuntimeException("Failed to write negotiation data to disk", e);
             }
         }
-        
+
         if (DEBUG_SAVE_TREE) {
             saveTreeToLogs("full_".concat(sessionName), this.MCTS.toStringOriginal());
             saveTreeToLogs("curr_".concat(sessionName), this.MCTS.toString());
         }
 
         // Log the final outcome and terminate
-        if (DEBUG_OFFER) getReporter().log(Level.INFO, "Final outcome:" + info);
+        if (DEBUG_OFFER)
+            getReporter().log(Level.INFO, "Final outcome:" + info);
         terminate();
     }
 
     private void saveTreeToLogs(String fileName, String content) throws IOException {
         FileWriter fullTreeFileWriter = new FileWriter("logs/log_" + fileName + ".txt");
         fullTreeFileWriter.write(content);
+        fullTreeFileWriter.close();
+    }
+
+    private void saveDistributionToLogs(String fileName, String content, Boolean isAppend) throws IOException {
+        FileWriter fullTreeFileWriter = new FileWriter("logs/log_" + fileName + ".jsonl", isAppend);
+        fullTreeFileWriter.write(content+ "\n");
         fullTreeFileWriter.close();
     }
 
@@ -244,6 +259,7 @@ public class POMPFANAgent extends DefaultParty {
         try {
             this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(), getReporter());
             this.uSpace = ((UtilitySpace) profileint.getProfile());
+            this.bidsWithUtility = new BidsWithUtility((LinearAdditive) this.uSpace);
             // Our stuff
 
         } catch (IOException e) {
@@ -274,7 +290,7 @@ public class POMPFANAgent extends DefaultParty {
     private void initializeVariables(Settings settings) throws IOException, JsonParseException, JsonMappingException {
         // Protocol that is initiate for the agent
         this.protocol = settings.getProtocol().getURI().getPath();
-        //this.getReporter().log(Level.INFO, protocol);
+        // this.getReporter().log(Level.INFO, protocol);
 
         // ID of my agent
         this.me = settings.getID();
@@ -283,7 +299,6 @@ public class POMPFANAgent extends DefaultParty {
         this.progress = settings.getProgress();
 
         this.isLearn = "Learn".equals(protocol);
-
         // Parameters for the agent (can be passed through the GeniusWeb GUI, or a
         // JSON-file)
         this.parameters = settings.getParameters();
@@ -389,15 +404,25 @@ public class POMPFANAgent extends DefaultParty {
      * Processes an Action performed by the opponent.
      *
      * @param action
+     * @throws IOException
      */
-    protected void processAction(Action action) {
+    protected void processAction(Action action) throws IOException {
+        // Process the action of the opponent.
+        this.MCTS.getRealHistory().add(action);
+        this.oppActions.add(action);
+
         if (action instanceof Offer) {
             // If the action was an offer: Obtain the bid and add it's value to our
             // negotiation data.
             this.lastReceivedBid = ((Offer) action).getBid();
             this.negotiationData.addBidUtil(this.uSpace.getUtility(this.lastReceivedBid).doubleValue());
             this.MCTS.receiveRealObservation(action, System.currentTimeMillis());
-
+            if (DEBUG_BELIEF) {
+                String contentDetailed = this.MCTS.getBelief().toDetailedString();
+                String content = this.MCTS.getBelief().toString();
+                saveDistributionToLogs("distribution_detailed", contentDetailed, true);
+                saveDistributionToLogs("distribution", content, true);
+            }
         }
     }
 
@@ -413,8 +438,9 @@ public class POMPFANAgent extends DefaultParty {
         if (!agreements.getMap().isEmpty()) {
             // Get the bid that is agreed upon and add it's value to our negotiation data
             Bid agreement = agreements.getMap().values().iterator().next();
-            if (DEBUG_LEARN) System.out.println("AGREEMENT!!!! -- Util=" + String.valueOf(this.uSpace.getUtility(agreement)) + " -- "
-                    + agreement.toString());
+            if (DEBUG_LEARN)
+                System.out.println("AGREEMENT!!!! -- Util=" + String.valueOf(this.uSpace.getUtility(agreement)) + " -- "
+                        + agreement.toString());
             this.negotiationData.addAgreementUtil(this.uSpace.getUtility(agreement).doubleValue());
         }
     }
@@ -436,7 +462,7 @@ public class POMPFANAgent extends DefaultParty {
         }
         Action action;
         if (this.opponentName == null) {
-            Bid bid = new BidsWithUtility((LinearAdditive) this.uSpace).getExtremeBid(true);
+            Bid bid = this.bidsWithUtility.getExtremeBid(true);
             action = new Offer(this.me, bid);
             this.MCTS.getRealHistory().add(action);
             getConnection().send(action);
@@ -450,7 +476,8 @@ public class POMPFANAgent extends DefaultParty {
         if (simTime <= remainingTime) {
             this.MCTS.construct(simTime, this.progress);
         }
-        if (DEBUG_OFFER) getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
+        if (DEBUG_OFFER)
+            getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
 
         action = this.MCTS.chooseBestAction();
 
@@ -458,8 +485,24 @@ public class POMPFANAgent extends DefaultParty {
         // So accept | proposing old bids also possible
         if (action == null) {
             // if action==null we failed to suggest next action.
-            System.err.println("WARNING! Could not produce action!!!");
-            action = new Accept(this.me, lastReceivedBid);
+            this.getReporter().log(Level.WARNING, "Could not produce action!!!");
+            ;
+            try {
+                ActionNode lastBestActionNode = this.MCTS.getLastBestActionNode();
+                if (lastBestActionNode != null) {
+                    Action tmpAction = (ActionWithBid) lastBestActionNode.getAction();
+                    this.MCTS.getRealHistory().add(tmpAction);
+                    getConnection().send(tmpAction);
+                    return;
+                }
+                Bid bid = this.bidsWithUtility.getExtremeBid(true);
+                action = new Offer(this.me, bid);
+            } catch (Exception e) {
+                this.getReporter().log(Level.WARNING, "First level fallback even failed!!!");
+                e.printStackTrace();
+                getConnection().send(new Accept(this.me, this.lastReceivedBid));
+                return;
+            }
         }
 
         if (action instanceof Offer) {

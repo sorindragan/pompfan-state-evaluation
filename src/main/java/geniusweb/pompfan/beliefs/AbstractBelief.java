@@ -1,5 +1,7 @@
 package geniusweb.pompfan.beliefs;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +14,19 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import geniusweb.actions.Offer;
+import geniusweb.issuevalue.DiscreteValue;
+import geniusweb.issuevalue.Value;
 import geniusweb.pompfan.distances.AbstractBidDistance;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.pompfan.state.AbstractState;
+import geniusweb.profile.utilityspace.DiscreteValueSetUtilities;
+import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
+import geniusweb.profile.utilityspace.ValueSetUtilities;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @Type(value = ParticleFilterBelief.class, name = "ParticleFilterBelief"),
@@ -120,14 +129,16 @@ public abstract class AbstractBelief {
     }
 
     public AbstractBelief addNewOpponents(List<AbstractPolicy> newOpponents) {
-        Double slicePerOpponent = 1.0 - this.getLearnedOpponentBias(); 
-        Double sliecePerNewOpponent = this.getLearnedOpponentBias()/newOpponents.size();
-        List<Double> oldProbsAdjusted = this.getProbabilities().stream().map(e -> e*slicePerOpponent).collect(Collectors.toList());
-        List<Double> newProbs = IntStream.range(0, newOpponents.size()).mapToDouble(e -> sliecePerNewOpponent).boxed().collect(Collectors.toList());
+        Double slicePerOpponent = 1.0 - this.getLearnedOpponentBias();
+        Double sliecePerNewOpponent = this.getLearnedOpponentBias() / newOpponents.size();
+        List<Double> oldProbsAdjusted = this.getProbabilities().stream().map(e -> e * slicePerOpponent)
+                .collect(Collectors.toList());
+        List<Double> newProbs = IntStream.range(0, newOpponents.size()).mapToDouble(e -> sliecePerNewOpponent).boxed()
+                .collect(Collectors.toList());
         this.setProbabilities(oldProbsAdjusted);
         this.getOpponents().addAll(newOpponents);
         this.getProbabilities().addAll(newProbs);
-        
+
         for (int i = 0; i < this.getOpponents().size(); i++) {
             this.getOpponentProbabilities().put(this.getOpponents().get(i), this.getProbabilities().get(i));
         }
@@ -140,5 +151,45 @@ public abstract class AbstractBelief {
 
     public void setLearnedOpponentBias(Double learnedOpponentBias) {
         this.learnedOpponentBias = learnedOpponentBias;
+    }
+
+    public String toDetailedString() throws JsonProcessingException {
+        Map<String, Map<String, Double>> strategies = new HashMap<String, Map<String, Double>>();
+        for (Entry<AbstractPolicy, Double> entry : this.getOpponentProbabilities().entrySet()) {
+            LinearAdditiveUtilitySpace uSpace = (LinearAdditiveUtilitySpace) entry.getKey().getUtilitySpace();
+            Double probability = entry.getValue();
+            Map<String, Double> tmpMap = strategies.getOrDefault(entry.getKey().getPartyId().toString(), new HashMap<>());
+            tmpMap.put(convertUspaceToString(uSpace), probability);
+            strategies.put(entry.getKey().getPartyId().toString(), tmpMap);
+        }
+        return new ObjectMapper().writeValueAsString(strategies);
+    }
+
+    public String toCoarseString() throws JsonProcessingException {
+
+        Map<String, Double> strategies = this.getOpponentProbabilities().entrySet().stream().collect(
+                Collectors.groupingBy(opp -> opp.getKey().getName(), Collectors.summingDouble(opp -> opp.getValue())));
+        return new ObjectMapper().writeValueAsString(strategies);
+    }
+
+    private String convertUspaceToString(LinearAdditiveUtilitySpace uSpace){
+        StringBuffer buffer = new StringBuffer();
+        for (Entry<String, ValueSetUtilities> ivs : uSpace.getUtilities().entrySet()) {
+            String issue = ivs.getKey();
+            BigDecimal weight = uSpace.getWeight(issue);
+            MathContext mc = new MathContext(4);
+            buffer.append(weight.round(mc)).append("*(");
+            DiscreteValueSetUtilities vs = (DiscreteValueSetUtilities) ivs.getValue();
+            StringBuffer tmpBuffer = new StringBuffer();
+            for (Entry<DiscreteValue, BigDecimal> vEntry : vs.getUtilities().entrySet()) {
+                tmpBuffer.append(vEntry.getValue().round(mc)).append("*").append(vEntry.getKey().toString().replaceAll("\"", "").replaceAll(" ", "_").toLowerCase()).append(" ");
+            }
+            String midPart = tmpBuffer.toString().trim().replaceAll(" ", "+");
+            buffer.append(midPart);
+            buffer.append(")+");
+        }
+        String result = buffer.toString();
+        result.subSequence(0, result.length()-1);
+        return result;
     }
 }

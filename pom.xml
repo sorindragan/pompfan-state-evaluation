@@ -149,11 +149,11 @@
 			<artifactId>protocol</artifactId>
 			<version>${geniusweb.version}</version>
 		</dependency>
-		<!-- <dependency>
+		<dependency>
 			<groupId>geniusweb</groupId>
 			<artifactId>events</artifactId>
 			<version>${geniusweb.version}</version>
-		</dependency> -->
+		</dependency>
 		<!-- CUSTOM: Parties -->
 		<dependency>
 			<groupId>geniusweb.exampleparties</groupId>
