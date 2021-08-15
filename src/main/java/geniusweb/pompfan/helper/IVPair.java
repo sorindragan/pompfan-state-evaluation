@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -69,8 +70,13 @@ public class IVPair {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(issue, value);
+    }
+
+    @Override
     public boolean equals(Object obj) {
-        return this.toString().contentEquals(obj.toString());
+        return this.toString().equals(obj.toString());
     }
 
     public static List<IVPair> convertValueSet(String issue, ValueSet values) {

@@ -47,11 +47,14 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
             .map(BigDecimal::new).map(e -> e.setScale(1, RoundingMode.HALF_UP)).map(String::valueOf)
             .collect(Collectors.toList());
 
-    private final static List<String> setComparer = Arrays.asList("UtilityBidDistance");
+//     private final static List<String> setComparer = Arrays.asList("UtilityBidDistance", "JaccardBidDistance", "HammingBidDistance");
+    private final static List<String> setComparer = Arrays.asList("JaccardBidDistance", "HammingBidDistance");
     private final static List<String> setBelief = Arrays.asList("ParticleFilterWithAcceptBelief", "ParticleFilterBelief");
     private final static List<String> setEvaluator = Arrays.asList("Last2BidsProductUtilityEvaluator", "Last2BidsMeanUtilityEvaluator", "RandomEvaluator");
-    private final static List<String> setExplorer = Arrays.asList("HighSelfEsteemOwnExplorationPolicy", "TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
-    private final static List<String> setWidener = Arrays.asList("ProgressiveWideningStrategy", "MaxWidthWideningStrategy");
+    //     private final static List<String> setExplorer = Arrays.asList("HighSelfEsteemOwnExplorationPolicy", "TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
+    private final static List<String> setExplorer = Arrays.asList("TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
+//     private final static List<String> setWidener = Arrays.asList("ProgressiveWideningStrategy", "MaxWidthWideningStrategy");
+    private final static List<String> setWidener = Arrays.asList("MaxWidthWideningStrategy");
 
     public RandomCustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory, Reporter logger,
             long maxruntime, String settingRef, String name) throws IOException {
@@ -64,7 +67,7 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                 .readTree(new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8));
 
         Integer cnt = 0;
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 20; i++) {
             cnt++;
             ObjectNode target = (ObjectNode) settingsJson.get("AllPermutationsSettings").get("teams").get(0).get("Team")
                     .get(0);

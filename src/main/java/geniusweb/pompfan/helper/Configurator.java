@@ -10,6 +10,8 @@ import geniusweb.pompfan.beliefs.ParticleFilterBelief;
 import geniusweb.pompfan.beliefs.ParticleFilterWithAcceptBelief;
 import geniusweb.pompfan.beliefs.UniformBelief;
 import geniusweb.pompfan.distances.AbstractBidDistance;
+import geniusweb.pompfan.distances.HammingBidDistance;
+import geniusweb.pompfan.distances.JaccardBidDistance;
 import geniusweb.pompfan.distances.RandomBidDistance;
 import geniusweb.pompfan.distances.UtilityBidDistance;
 import geniusweb.pompfan.evaluators.IEvalFunction;
@@ -174,7 +176,12 @@ public class Configurator {
         case DEFAULT_COMPARER:
             this.setBidDistance(new UtilityBidDistance(uSpace));
             break;
-
+        case "JaccardBidDistance":
+            this.setBidDistance(new JaccardBidDistance(uSpace));
+            break;
+        case "HammingBidDistance":
+            this.setBidDistance(new HammingBidDistance(uSpace));
+            break;
         default:
             this.setBidDistance(new RandomBidDistance(uSpace));
             break;

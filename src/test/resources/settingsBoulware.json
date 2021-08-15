@@ -13,7 +13,7 @@
 									"numParticlesPerOpponent": "10",
 									"simulationTime": "400",
 									"config": {
-										"confComparer": "UtilityBidDistance",
+										"confComparer": "HammingBidDistance",
 										"confBelief": "ParticleFilterWithAcceptBelief",
 										"confEvaluator": "Last2BidsProductUtilityEvaluator",
 										"confState": "HistoryState",
@@ -56,7 +56,7 @@
 			}
 		],
 		"deadline": {
-			"deadlinetime": { "durationms": 30000}
+			"deadlinetime": { "durationms": 60000}
 		}
 	}
 }

@@ -3,6 +3,7 @@ package geniusweb.pompfan.distances;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -22,14 +23,15 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 public abstract class AbstractBidDistance {
     private Domain domain;
     private UtilitySpace utilitySpace;
-    private UtilitySpace issues;
+    private Set<String> issues;
     private Map<String, ValueSet> issueValues;
 
     @JsonCreator
     public AbstractBidDistance(@JsonProperty("utilitySpace") UtilitySpace utilitySpace) {
         this.domain = utilitySpace.getDomain();
         this.utilitySpace = utilitySpace;
-        this.issues = utilitySpace;
+        this.issues = utilitySpace.getDomain().getIssues();
+        
     }
 
     public Domain getDomain() {
@@ -52,11 +54,11 @@ public abstract class AbstractBidDistance {
         this.utilitySpace = utilitySpace;
     }
 
-    public UtilitySpace getIssues() {
+    public Set<String> getIssues() {
         return issues;
     }
 
-    public void setIssues(UtilitySpace issues) {
+    public void setIssues(Set<String> issues) {
         this.issues = issues;
     }
 
