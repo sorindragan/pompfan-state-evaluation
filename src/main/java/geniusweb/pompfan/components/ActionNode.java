@@ -82,4 +82,9 @@ public class ActionNode extends Node {
         this.setStoredAction(action);
     }
 
+    @Override
+    public String extraString() {
+        return this.getState().getOpponent().getPartyId().toString();
+    }
+
 }

@@ -7,6 +7,7 @@ import geniusweb.pompfan.components.BeliefNode;
 import geniusweb.pompfan.components.Node;
 import geniusweb.pompfan.components.Tree;
 import geniusweb.pompfan.explorers.AbstractOwnExplorationPolicy;
+import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.pompfan.state.StateRepresentationException;
 import geniusweb.progress.Progress;
 
@@ -31,9 +32,11 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
 
     @Override
     public void widen(Progress simulatedProgress, Node currRoot) throws StateRepresentationException  {
+        AbstractPolicy currOpp = currRoot.getState().getOpponent();
         while (currRoot.getChildren().size() == this.maxWidth) {
             // Going down the tree - Action Node Level
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
+            currRoot.getState().setOpponent(currOpp);
             if (currRoot.getChildren().size() < this.maxWidth) {
                 // Widening the Belief level
 
@@ -45,6 +48,7 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
                 if (currRoot == null) {
                     return;
                 } // !!: finish dealing with exceptions
+                currRoot.getState().setOpponent(currOpp);
                 
                 Double value = currRoot.getState().evaluate();
                 Tree.backpropagate(currRoot, value);
@@ -52,6 +56,7 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
             } else {
                 // Going down the tree - Belief Node Level
                 currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
+                currRoot.getState().setOpponent(currOpp);
             }
         }
 
@@ -68,6 +73,7 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
             if(currRoot == null){
                 return;
             }
+            currRoot.getState().setOpponent(currOpp);
             Double value = currRoot.getState().evaluate();
             Tree.backpropagate(currRoot, value);
         }
