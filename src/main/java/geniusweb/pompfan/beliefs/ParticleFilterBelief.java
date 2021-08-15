@@ -17,9 +17,8 @@ import geniusweb.pompfan.state.AbstractState;
 
 public class ParticleFilterBelief extends AbstractBelief {
 
-    public static final int NUMBER_SAMPLES = 100; // TODO: Maybe check that out?
-    public static final Double SAMENESS_THRESHOLD = 0.1; // TODO: Not necessary anymore
-    private static final Double EPSILON = 0.001; // TODO: Maybe check that out?
+    public static final int NUMBER_SAMPLES = 1000; // TODO: Maybe check that out?
+    private static final Double EPSILON = 0.0000000000000001; // TODO: Maybe check that out?
     private AbstractPolicy mostProbablePolicy = null;
 
     @JsonCreator
@@ -44,6 +43,7 @@ public class ParticleFilterBelief extends AbstractBelief {
     public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAgentAction, Offer lastOppAction,
             AbstractState<?> state) {
         Double minSum = 1000.0;
+        // TODO: This is not an update
         for (AbstractPolicy abstractPolicy : this.getOpponentProbabilities().keySet()) {
             List<Bid> candidateObservations = new ArrayList<>();
             for (int i = 0; i < ParticleFilterBelief.NUMBER_SAMPLES; i++) {

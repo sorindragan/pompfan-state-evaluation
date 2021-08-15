@@ -61,7 +61,7 @@ public class POMPFANAgent extends DefaultParty {
     private static boolean DEBUG_OFFER = false;
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
-    private static boolean DEBUG_BELIEF = true;
+    private static boolean DEBUG_BELIEF = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
     protected ProfileInterface profileint = null;
@@ -189,13 +189,22 @@ public class POMPFANAgent extends DefaultParty {
 
     private void runAgentPhase(Inform info) throws IOException, StateRepresentationException {
         // Advance the round number if a round-based deadline is set.
+
         if (progress instanceof ProgressRounds) {
             progress = ((ProgressRounds) progress).advance();
         }
         if (info instanceof YourTurn) {
-            // The info notifies us that it is our turn
-            YourTurn myTurnInfo = (YourTurn) info;
-            myTurn(myTurnInfo);
+            try {
+                // The info notifies us that it is our turn
+                YourTurn myTurnInfo = (YourTurn) info;
+                Action action = myTurn(myTurnInfo);
+                this.MCTS.getRealHistory().add(action);
+                getConnection().send(action);
+            } catch (Exception e) {
+                this.getReporter().log(Level.WARNING, "First level fallback even failed!!!");
+                e.printStackTrace();
+                getConnection().send(new Accept(this.me, this.lastReceivedBid));
+            }
         }
     }
 
@@ -231,8 +240,7 @@ public class POMPFANAgent extends DefaultParty {
         }
 
         // Log the final outcome and terminate
-        if (DEBUG_OFFER)
-            getReporter().log(Level.INFO, "Final outcome:" + info);
+        if (DEBUG_OFFER) getReporter().log(Level.INFO, "Final outcome: " + this.uSpace.getUtility(agreements.getMap().get(this.me)) + " " + info);
         terminate();
     }
 
@@ -244,7 +252,7 @@ public class POMPFANAgent extends DefaultParty {
 
     private void saveDistributionToLogs(String fileName, String content, Boolean isAppend) throws IOException {
         FileWriter fullTreeFileWriter = new FileWriter("logs/log_" + fileName + ".jsonl", isAppend);
-        fullTreeFileWriter.write(content+ "\n");
+        fullTreeFileWriter.write(content + "\n");
         fullTreeFileWriter.close();
     }
 
@@ -452,7 +460,8 @@ public class POMPFANAgent extends DefaultParty {
      *
      * @throws StateRepresentationException
      */
-    protected void myTurn(YourTurn myTurnInfo) throws IOException, StateRepresentationException {
+    protected Action myTurn(YourTurn myTurnInfo) throws IOException, StateRepresentationException {
+        Action action;
         if (this.lastReceivedBid != null) {
             if (DEBUG_OFFER == true) {
                 System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
@@ -460,18 +469,16 @@ public class POMPFANAgent extends DefaultParty {
                         + this.lastReceivedBid.toString());
             }
         }
-        Action action;
         if (this.opponentName == null) {
+            // The first one to make the offer
             Bid bid = this.bidsWithUtility.getExtremeBid(true);
             action = new Offer(this.me, bid);
-            this.MCTS.getRealHistory().add(action);
-            getConnection().send(action);
-            return;
+            return action;
         }
+
         // STEP: Generate offer!
         long negotiationEnd = this.progress.getTerminationTime().getTime();
         long remainingTime = negotiationEnd - System.currentTimeMillis();
-
         long simTime = this.simulationTime;
         if (simTime <= remainingTime) {
             this.MCTS.construct(simTime, this.progress);
@@ -484,45 +491,37 @@ public class POMPFANAgent extends DefaultParty {
         // Consuming the whole tree will result in an error
         // So accept | proposing old bids also possible
         if (action == null) {
-            // if action==null we failed to suggest next action.
             this.getReporter().log(Level.WARNING, "Could not produce action!!!");
-            ;
-            try {
-                ActionNode lastBestActionNode = this.MCTS.getLastBestActionNode();
-                if (lastBestActionNode != null) {
-                    Action tmpAction = (ActionWithBid) lastBestActionNode.getAction();
-                    this.MCTS.getRealHistory().add(tmpAction);
-                    getConnection().send(tmpAction);
-                    return;
-                }
-                Bid bid = this.bidsWithUtility.getExtremeBid(true);
-                action = new Offer(this.me, bid);
-            } catch (Exception e) {
-                this.getReporter().log(Level.WARNING, "First level fallback even failed!!!");
-                e.printStackTrace();
-                getConnection().send(new Accept(this.me, this.lastReceivedBid));
-                return;
+            ActionNode lastBestActionNode = this.MCTS.getLastBestActionNode();
+            if (lastBestActionNode != null) {
+                action = (ActionWithBid) lastBestActionNode.getAction();
+                return action;
             }
+        }
+        if (action == null) {
+            this.getReporter().log(Level.WARNING, "Could not get last best action node!!!");
+            Bid bid = this.bidsWithUtility.getExtremeBid(true);
+            action = new Offer(this.me, bid);
+            return action;
         }
 
         if (action instanceof Offer) {
             Bid myBid = ((Offer) action).getBid();
-            if (DEBUG_OFFER == true) {
+            if (DEBUG_OFFER == true)
                 System.out.println(
-                        "Agent:    Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- " + myBid.toString());
-            }
-        } else if (action instanceof Accept) {
+                        "Agent: Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- " + myBid.toString());
+            return action;
+        }
+
+        if (action instanceof Accept) {
             Bid acceptedBid = ((Accept) action).getBid();
             if (DEBUG_OFFER == true)
                 System.out.println("We ACCEPT: Util=" + String.valueOf(this.uSpace.getUtility(acceptedBid)) + " -- "
                         + acceptedBid.toString());
-        } else {
-            System.out.println("Something HAPPENED! " + action.toString());
+            return action;
         }
-
-        // Send action
-        this.MCTS.getRealHistory().add(action);
-        getConnection().send(action);
+        this.getReporter().log(Level.SEVERE, "Something unexpected HAPPENED! " + action.toString());
+        return action;
     }
 
     /**

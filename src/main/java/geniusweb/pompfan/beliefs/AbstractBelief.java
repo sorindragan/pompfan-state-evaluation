@@ -23,6 +23,7 @@ import geniusweb.issuevalue.DiscreteValue;
 import geniusweb.issuevalue.Value;
 import geniusweb.pompfan.distances.AbstractBidDistance;
 import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.opponents.AntagonisticOpponentPolicy;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.profile.utilityspace.DiscreteValueSetUtilities;
 import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
@@ -158,8 +159,14 @@ public abstract class AbstractBelief {
         for (Entry<AbstractPolicy, Double> entry : this.getOpponentProbabilities().entrySet()) {
             LinearAdditiveUtilitySpace uSpace = (LinearAdditiveUtilitySpace) entry.getKey().getUtilitySpace();
             Double probability = entry.getValue();
-            Map<String, Double> tmpMap = strategies.getOrDefault(entry.getKey().getPartyId().toString(), new HashMap<>());
-            tmpMap.put(convertUspaceToString(uSpace), probability);
+            Map<String, Double> tmpMap = strategies.getOrDefault(entry.getKey().getPartyId().toString(),
+                    new HashMap<>());
+            String uSpaceKey = convertUspaceToString(uSpace);
+            if (entry.getKey() instanceof AntagonisticOpponentPolicy) {
+                String symString = ((AntagonisticOpponentPolicy) entry.getKey()).getSYMPATHY().round(new MathContext(4)).toString();
+                uSpaceKey = symString + " > " + uSpaceKey;
+            }
+            tmpMap.put(uSpaceKey, probability);
             strategies.put(entry.getKey().getPartyId().toString(), tmpMap);
         }
         return new ObjectMapper().writeValueAsString(strategies);
@@ -172,7 +179,7 @@ public abstract class AbstractBelief {
         return new ObjectMapper().writeValueAsString(strategies);
     }
 
-    private String convertUspaceToString(LinearAdditiveUtilitySpace uSpace){
+    private String convertUspaceToString(LinearAdditiveUtilitySpace uSpace) {
         StringBuffer buffer = new StringBuffer();
         for (Entry<String, ValueSetUtilities> ivs : uSpace.getUtilities().entrySet()) {
             String issue = ivs.getKey();
@@ -182,14 +189,16 @@ public abstract class AbstractBelief {
             DiscreteValueSetUtilities vs = (DiscreteValueSetUtilities) ivs.getValue();
             StringBuffer tmpBuffer = new StringBuffer();
             for (Entry<DiscreteValue, BigDecimal> vEntry : vs.getUtilities().entrySet()) {
-                tmpBuffer.append(vEntry.getValue().round(mc)).append("*").append(vEntry.getKey().toString().replaceAll("\"", "").replaceAll(" ", "_").toLowerCase()).append(" ");
+                tmpBuffer.append(vEntry.getValue().round(mc)).append("*")
+                        .append(vEntry.getKey().toString().replaceAll("\"", "").replaceAll(" ", "_").toLowerCase())
+                        .append(" ");
             }
-            String midPart = tmpBuffer.toString().trim().replaceAll(" ", "+");
+            String midPart = tmpBuffer.toString().trim().replaceAll(" ", " + ");
             buffer.append(midPart);
-            buffer.append(")+");
+            buffer.append(") + ");
         }
         String result = buffer.toString();
-        result.subSequence(0, result.length()-1);
+        result.subSequence(0, result.length() - 1);
         return result;
     }
 }
