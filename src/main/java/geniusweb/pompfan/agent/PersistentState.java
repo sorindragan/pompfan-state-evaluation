@@ -21,6 +21,7 @@ import geniusweb.pompfan.components.BeliefNode;
 import geniusweb.pompfan.components.Tree;
 import geniusweb.pompfan.helper.Configurator;
 import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.opponents.AntagonisticOpponentPolicy;
 import geniusweb.pompfan.opponents.ImitateOpponentPolicy;
 import geniusweb.pompfan.opponents.OpponentParticleCreator;
 import geniusweb.pompfan.opponents.SimpleOpponentModelPolicy;
@@ -157,28 +158,29 @@ public class PersistentState {
     }
 
     List<AbstractPolicy> newOpponents = new ArrayList<>();
+    // TODO recreate antagonistic agents
     for (int i = 0; i < numParticlesPerOpponent; i++) {
       int cnt = 0;
       for (List<Action> oppActions : this.getAllOpponentActions()) {
         if (oppActions.size() < 2) {
-            continue;
+          continue;
         }
         ArrayList<Action> l1 = new ArrayList<Action>(oppActions);
         ArrayList<Action> l2 = new ArrayList<Action>(oppActions);
         String nameOfOpponent = this.getEncounteredOpponentArchive().get(cnt);
         String[] nameSplit = nameOfOpponent.split("_");
-        AbstractPolicy imitator = new ImitateOpponentPolicy(utilitySpace.getDomain(), "Imitator" + nameSplit[nameSplit.length-1],
-            l1);
+        AbstractPolicy imitator = new ImitateOpponentPolicy(utilitySpace.getDomain(),
+            "Imitator" + nameSplit[nameSplit.length - 1], l1);
         AbstractPolicy freqModel = new SimpleOpponentModelPolicy(utilitySpace.getDomain(),
-            "OpponentModel" + nameSplit[nameSplit.length-1], l2);
+            "OpponentModel" + nameSplit[nameSplit.length - 1], l2);
+        AbstractPolicy antagonistic = new AntagonisticOpponentPolicy(utilitySpace, "OpponentModel" + nameSplit[nameSplit.length - 1]);
         newOpponents.add(imitator);
         newOpponents.add(freqModel);
+        newOpponents.add(antagonistic);
         cnt++;
       }
     }
 
-    
-    
     Configurator configurator = this.getConfiguration() != null
         ? this.mapper.convertValue(this.getConfiguration(), Configurator.class)
         : new Configurator();
@@ -188,7 +190,6 @@ public class PersistentState {
     belief2use = belief2use.addNewOpponents(newOpponents);
     this.setEncounteredOpponentArchive(new ArrayList<String>());
     this.setAllOpponentActions(new ArrayList<List<Action>>());
-
 
     AbstractWidener widener = configurator.getWidener();
     AbstractState<?> startState = configurator.getInitState();
@@ -208,7 +209,7 @@ public class PersistentState {
     this.allOpponentBeliefs = allOpponentBeliefs;
   }
 
-  public PersistentState learn(){
+  public PersistentState learn() {
     // Future TODO: Move all the learning here
     return this;
   }

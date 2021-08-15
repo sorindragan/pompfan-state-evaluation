@@ -2,6 +2,8 @@ package geniusweb.pompfan.opponents;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
+import java.util.ArrayList;
 import java.util.Random;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -9,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
+import geniusweb.actions.PartyId;
 import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
 import geniusweb.issuevalue.Bid;
@@ -23,7 +26,11 @@ import tudelft.utilities.immutablelist.ImmutableList;
 
 public class AntagonisticOpponentPolicy extends AbstractPolicy {
 
-    private BigDecimal SYMPATHY = new BigDecimal(Math.min(new Random().nextDouble(), 0.5));
+    /**
+     *
+     */
+    public static final String ANTAGONISTIC = "Antagonistic";
+    private BigDecimal SYMPATHY = new BigDecimal(new Random().doubles(1l, 0.0, 0.5).mapToObj(dbl -> String.valueOf(dbl)).findFirst().get());
     @JsonIgnore
     private BidsWithUtility allBids;
     @JsonIgnore
@@ -43,7 +50,18 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
     }
 
     public AntagonisticOpponentPolicy(UtilitySpace uSpace) {
-        super(uSpace, "Antagonistic");
+        super(uSpace, ANTAGONISTIC);
+        this.allBids = new BidsWithUtility((LinearAdditive) uSpace);
+        this.possibleRange = this.allBids.getRange();
+        this.searchRange = new Interval(BigDecimal.ZERO,
+                this.possibleRange.getMin().multiply(SYMPATHY.add(new BigDecimal(1))));
+        this.possibleBids = this.allBids.getBids(this.searchRange);
+        // this.setPartyId(new PartyId(ANTAGONISTIC+"_"+SYMPATHY.round(new MathContext(4)).toString().replace(".", "")));
+    }
+
+
+	public AntagonisticOpponentPolicy(UtilitySpace uSpace, String name) {
+        super(uSpace, name);
         this.allBids = new BidsWithUtility((LinearAdditive) uSpace);
         this.possibleRange = this.allBids.getRange();
         this.searchRange = new Interval(BigDecimal.ZERO,
@@ -67,5 +85,15 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
     public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
         return this.chooseAction();
     }
+
+    public BigDecimal getSYMPATHY() {
+        return SYMPATHY;
+    }
+
+    public void setSYMPATHY(BigDecimal sYMPATHY) {
+        SYMPATHY = sYMPATHY;
+    }
+
+    
 
 }

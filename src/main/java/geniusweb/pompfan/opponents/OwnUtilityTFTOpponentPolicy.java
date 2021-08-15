@@ -34,9 +34,9 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
         this.setBidsWithinUtil(new BidsWithUtility((LinearAdditive) this.getUtilitySpace()));
     }
     
-    public OwnUtilityTFTOpponentPolicy(Domain domain, BidsWithUtility bidsWithinUtil) {
+    public OwnUtilityTFTOpponentPolicy(Domain domain) {
         super(domain, "OwnUtilTFT");
-        this.bidsWithinUtil = bidsWithinUtil;
+        this.setBidsWithinUtil(new BidsWithUtility((LinearAdditive) this.getUtilitySpace()));;
     }
 
     @Override
