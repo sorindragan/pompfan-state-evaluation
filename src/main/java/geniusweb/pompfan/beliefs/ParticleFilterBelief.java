@@ -54,7 +54,7 @@ public class ParticleFilterBelief extends AbstractBelief {
 
                 candidateObservations.add(sampledBid);
             }
-            Double weightOpponentLikelihood = candidateObservations.stream().filter(Objects::nonNull)
+            Double weightOpponentLikelihood = candidateObservations.parallelStream().filter(Objects::nonNull)
                     .mapToDouble(obs -> this.getDistance().computeDistance(obs, realObservation.getBid()))
                     .map(val -> Math.abs(val)).sum();
             

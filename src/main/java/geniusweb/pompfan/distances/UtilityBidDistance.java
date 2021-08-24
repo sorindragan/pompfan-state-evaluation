@@ -32,7 +32,7 @@ public class UtilityBidDistance extends AbstractBidDistance {
         // Bid ftmpb1 = new Bid(t);
         for (String issue : this.getDomain().getIssues()) {
             Value value = null;
-            System.out.println("==================");
+            // System.out.println("==================");
             if (!tmpb2.containsIssue(issue)) {
                 value = tmpb1.getValue(issue);
                 tmpb2 = completeBid(tmpb2, issue, value);
