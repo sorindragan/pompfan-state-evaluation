@@ -72,26 +72,6 @@
 						}
 					}
 				]
-			},
-			{
-				"Team": [
-					{
-						"partyref": "classpath:geniusweb.exampleparties.simpleboa.SimpleBoa",
-						"parameters": {
-							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9ab111"
-						}
-					}
-				]
-			},
-			{
-				"Team": [
-					{
-						"partyref": "classpath:geniusweb.exampleparties.timedependentparty.TimeDependentParty",
-						"parameters": {
-							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9ab111"
-						}
-					}
-				]
 			}
 		],
 		"reuseTeams": false,
@@ -108,11 +88,11 @@
 			"SAOPSettings": {
 				"participants": [],
 				"deadline": {
-					"deadlinetime": { "durationms": 8000 }
+					"deadlinetime": { "durationms": 5000 }
 				}
 			}
 		},
-		"numberTournaments": 1,
+		"numberTournaments": 3,
 		"learnSettings": {
 			"LearnSettings": {
 				"participants": [
@@ -154,7 +134,7 @@
 					}
 				],
 				"deadline": {
-					"deadlinetime": {"durationms": 10000 }
+					"deadlinetime": {"durationms": 5000 }
 				}
 			}
 		}

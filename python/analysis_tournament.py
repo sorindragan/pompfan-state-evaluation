@@ -194,6 +194,7 @@ for tick in ax.get_xticklabels():
     tick.set_rotation(45)
 ax.set_xlabel("Num Particles per Opponent")
 ax.set_ylabel("Utility")
+plt.show()
 
 # %%
 # df_tmp = df_pgws
@@ -246,7 +247,6 @@ ax.set_ylabel("Utility")
 # ax.set_ylabel("")
 # fig.suptitle("Number of non-Agreements of POMPFAN across SimTime")
 # fig.tight_layout()
-# plt.show()
 
 # # %%
 # sns.countplot(data=df_subset, x="name", hue=divider_id)
@@ -277,14 +277,14 @@ rulefit_preds = rulefit.predict(X.values)
 rulefit_rmse = metrics.r2_score(y, rulefit_preds)
 print(rulefit_rmse)
 # %%
-pd.set_option('display.max_colwidth', 400) # Adjust row width to read the entire rule
-pd.options.display.float_format = '{:.5f}'.format # Round decimals to 2 decimal places
-rules = rulefit.get_rules() # Get the rules
-rules = rules[rules['type']!='linear'] # Eliminate the existing explanatory variables
-rules = rules[rules['coef'] != 0] # eliminate the insignificant rules
-rules = rules.sort_values('support', ascending=False) # Sort the rules based on "support" value
+pd.set_option('display.max_colwidth', 400)  # Adjust row width to read the entire rule
+pd.options.display.float_format = '{:.5f}'.format  # Round decimals to 2 decimal places
+rules = rulefit.get_rules()  # Get the rules
+rules = rules[rules['type'] != 'linear']  # Eliminate the existing explanatory variables
+rules = rules[rules['coef'] != 0]  # eliminate the insignificant rules
+rules = rules.sort_values('support', ascending=False)  # Sort the rules based on "support" value
 # rules = rules[rules['rule'].str.len()>30] # optional: To see more complex rules, filter the long rules
-rules.iloc[0:5] # Show the first 5 rules
+rules.iloc[0:5]  # Show the first 5 rules
 # %%
 import shap
 import xgboost
@@ -295,7 +295,11 @@ rulefit_rmse = metrics.r2_score(y, model.predict(X.values))
 print(rulefit_rmse)
 explainer = shap.Explainer(model)
 shap_values = explainer(X)
-# shap.plots.waterfall(shap_values[0]) 
+# shap.plots.waterfall(shap_values[0])
 # shap.plots.waterfall(explainer.base_values[0], shap_values[0], X[0])
-shap.plots.beeswarm(shap_values) 
+shap.plots.beeswarm(shap_values)
 # %%
+sns.scatterplot(data=rules, x="coef", y="support", size="importance", legend=False, sizes=(20, 2000))
+
+# show the graph
+plt.show()

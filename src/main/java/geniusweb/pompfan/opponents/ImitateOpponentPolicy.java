@@ -1,6 +1,7 @@
 package geniusweb.pompfan.opponents;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import geniusweb.actions.Offer;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.issuevalue.Value;
+import geniusweb.issuevalue.ValueSet;
 import geniusweb.opponentmodel.FrequencyOpponentModel;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.profile.utilityspace.UtilitySpace;
@@ -41,6 +43,7 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
 
         this.setUtilitySpace(oppModel);
         this.setRecordedBehavior(realHistoryActions);
+        // this.STUBBORNESS = STUBBORNESS;
 
     }
 
@@ -88,8 +91,15 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
         ActionWithBid selectedAction = (ActionWithBid) this.getRecordedBehavior().get(selectedIdx);
         Bid currentBid = selectedAction.getBid();
         Map<String, Value> issuevalues = new HashMap<String, Value>();
-        for (String issueString : currentBid.getIssues()) {
+        for (String issueString : this.getDomain().getIssues()) {
             Map<Value, Integer> valCounts = this.getOppModel().getCounts(issueString);
+            if (valCounts.size() == 0) {
+                ValueSet possibleValues = this.getDomain().getValues(issueString);
+                Integer selected = this.getRandom().nextInt(possibleValues.size().intValue());
+                issuevalues.put(issueString, possibleValues.get(selected.longValue()));
+                continue;
+            }
+
             Integer selected = this.getRandom().nextInt(valCounts.size());
             List<Value> vals = valCounts.keySet().stream().collect(Collectors.toList());
             List<Integer> cnts = valCounts.values().stream().collect(Collectors.toList());

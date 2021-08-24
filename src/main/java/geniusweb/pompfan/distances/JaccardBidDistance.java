@@ -22,7 +22,6 @@ public class JaccardBidDistance extends AbstractBidDistance {
         int cntTotal = 0;
 
         for (String issue : issues) {
-
             if (b1.containsIssue(issue) && b2.containsIssue(issue)) {
                 cntTotal++;
                 cntSame = b1.getValue(issue).equals(b2.getValue(issue)) ? ++cntSame : cntSame;
