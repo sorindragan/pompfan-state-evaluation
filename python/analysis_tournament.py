@@ -13,6 +13,8 @@ import seaborn as sns
 import jsonlines
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
+import shap
+import xgboost
 # %%
 filename = "tournament_results_random.jsonl"
 # filename = "log_tournament_xx_xx_xxxx_xx_xx.json" # Something else
@@ -82,6 +84,7 @@ df.loc[i_subset, ["name_encoded"]] = le.fit_transform(df[i_subset].name)
 df
 # %%
 df["no_agreement"] = df.utility == 0.0
+df["error"] = df.utility == -1.0
 df["vs"] = None
 df["vs_utility"] = None
 for index, df_subset in df.groupby(["session", "tournamentStart", "sessionStart"]):
@@ -176,6 +179,19 @@ display(agg_df_mwws)
 agg_df_mwws.to_csv(log_dir / "data_mwws.csv")
 
 # %%
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+sns.boxplot(data=df_pgws, x="vs", y="utility", ax=ax1)
+sns.boxplot(data=df_mwws, x="vs", y="utility", ax=ax2)
+ax1.set_title("ProgessiveWidening")
+ax2.set_title("MaxWidthWidening")
+for ax in [ax1, ax2]:
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(45)
+    ax.set_xlabel("Opponents")
+    ax.set_ylabel("Utility")
+# %%
+
+# %%
 fig, axes = plt.subplots(2, 1, figsize=(15, 15))
 subset_id = "ParticleFilterBelief_JaccardBidDistance_TimeConcedingExplorationPolicy_Last2BidsMeanUtilityEvaluator_MaxWidthWideningStrategy"
 
@@ -195,111 +211,120 @@ for tick in ax.get_xticklabels():
 ax.set_xlabel("Num Particles per Opponent")
 ax.set_ylabel("Utility")
 plt.show()
+# %%
+ax = sns.boxplot(data=df_relevant, x="vs", y="utility")
+for tick in ax.get_xticklabels():
+    tick.set_rotation(45)
+ax.set_xlabel("Num Particles per Opponent")
+ax.set_ylabel("Utility")
+plt.show()
 
 # %%
-# df_tmp = df_pgws
-# md = smf.mixedlm(
-#     "utility ~ belief + comparer + explorer + widener + simulationTime + np.square(simulationTime) + numParticles + np.square(numParticles) + k_a * a_a + a_b",
-#     df_tmp,
-#     groups=df_tmp["name"])
-# mdf = md.fit()
-# print(mdf.summary())
-
-# # %%
-# df_tmp = df_mwws
-# md = smf.mixedlm(
-#     "utility ~ belief + comparer + explorer + widener + simulationTime + np.square(simulationTime) + numParticles + np.square(numParticles) + maxWidth + np.square(maxWidth)",
-#     df_tmp,
-#     groups=df_tmp["name"])
-# mdf = md.fit()
-# print(mdf.summary())
-# # %%
-# fig, (ax, ax2) = plt.subplots(2, 1, figsize=(10, 7))
-# df_subset = df[df.party == "POMPFANAgent"]
-# ax = sns.barplot(data=df_subset, x=divider_id, y="utility", ax=ax, estimator=sum)
-# for tick in ax.get_xticklabels():
-#     tick.set_rotation(45)
-# ax.set_xlabel("Simulation Time")
-# ax.set_ylabel("Utility")
-# ax.set_title("Sum of Utility of POMPFAN accross SimTime")
-
-# ax2 = sns.barplot(data=df_subset, x=divider_id, y="no_agreement", ci=None, ax=ax2)
-# for tick in ax2.get_xticklabels():
-#     tick.set_rotation(45)
-# ax2.set_xlabel("Simulation Time")
-# ax2.set_ylabel("Non-Agreements Percentage")
-# ax2.set_title("Average non-Agreements of POMPFAN accross SimTime")
-# fig.tight_layout()
-# plt.show()
-
-# # %%
-# fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-# df_no_aggreement_counts = df[df["no_agreement"]].groupby("pwp.party.parameters.simulationTime").count()
-# unique_agents = df_no_aggreement_counts.index.unique()
-# num_agents = len(unique_agents)
-# (ax, ) = df_no_aggreement_counts["session"].plot.pie(
-#     subplots=True,
-#     ax=ax,
-#     autopct="%.3f%%",
-#     explode=[0.02] * num_agents,
-#     labels=unique_agents,
-# )
-# ax.set_ylabel("")
-# fig.suptitle("Number of non-Agreements of POMPFAN across SimTime")
-# fig.tight_layout()
-
-# # %%
-# sns.countplot(data=df_subset, x="name", hue=divider_id)
-# # %%
-# df[df["params.config.confExtra.widener.k_b"] == 1.0].groupby(["name", "params.config.confExtra.widener.k_a"
-#                                                               ]).median().sort_values("utility")
-# # %%
+df_relevant.groupby(["vs"]).mean()[["utility", "no_agreement"]]
 
 # %%
 from rulefit import RuleFit
 from sklearn.ensemble import RandomForestRegressor
 from sklearn import preprocessing
 from sklearn import metrics
+# %%
 df_tmp = df_mwws
 df_tmp = df_tmp[df_tmp["utility"] > 0]
-
 min_max_scaler = preprocessing.MinMaxScaler()
 y = df_tmp["utility"]
 X = df_tmp[cols_conf + cols_mwws + cols_univ]
 X = pd.get_dummies(X, drop_first=True)
 # X.loc[:,:] = min_max_scaler.fit_transform(X)
 
-# %%
 # https://towardsdatascience.com/interpretable-machine-learning-in-10-minutes-with-rulefit-and-scikit-learn-da9ebb925795
 rulefit = RuleFit(tree_generator=RandomForestRegressor(n_estimators=10))
 rulefit.fit(X.values, y, feature_names=X.columns)
 rulefit_preds = rulefit.predict(X.values)
 rulefit_rmse = metrics.r2_score(y, rulefit_preds)
 print(rulefit_rmse)
+rules_mwws = rulefit.get_rules()
 # %%
-pd.set_option('display.max_colwidth', 400)  # Adjust row width to read the entire rule
-pd.options.display.float_format = '{:.5f}'.format  # Round decimals to 2 decimal places
-rules = rulefit.get_rules()  # Get the rules
-rules = rules[rules['type'] != 'linear']  # Eliminate the existing explanatory variables
-rules = rules[rules['coef'] != 0]  # eliminate the insignificant rules
-rules = rules.sort_values('support', ascending=False)  # Sort the rules based on "support" value
-# rules = rules[rules['rule'].str.len()>30] # optional: To see more complex rules, filter the long rules
-rules.iloc[0:5]  # Show the first 5 rules
-# %%
-import shap
-import xgboost
+df_tmp = df_pgws
+df_tmp = df_tmp[df_tmp["utility"] > 0]
+min_max_scaler = preprocessing.MinMaxScaler()
+y = df_tmp["utility"]
+X = df_tmp[cols_conf + cols_pgws + cols_univ]
+X = pd.get_dummies(X, drop_first=True)
+# X.loc[:,:] = min_max_scaler.fit_transform(X)
 
+# https://towardsdatascience.com/interpretable-machine-learning-in-10-minutes-with-rulefit-and-scikit-learn-da9ebb925795
+rulefit = RuleFit(tree_generator=RandomForestRegressor(n_estimators=10))
+rulefit.fit(X.values, y, feature_names=X.columns)
+rulefit_preds = rulefit.predict(X.values)
+rulefit_rmse = metrics.r2_score(y, rulefit_preds)
+print(rulefit_rmse)
+rules_pgws = rulefit.get_rules()
+# %%
+rules_mwws["strategy"] = "MaxWidthWidening"
+rules_pgws["strategy"] = "ProgessiveWidening"
+rules = pd.concat([rules_mwws, rules_pgws])
+
+# %%
+df_tmp = df_pgws
+df_tmp = df_tmp[df_tmp["utility"] > 0]
+min_max_scaler = preprocessing.MinMaxScaler()
+y = df_tmp["utility"]
+X = df_tmp[cols_conf + cols_pgws + cols_univ]
+X = pd.get_dummies(X, drop_first=True)
 model = xgboost.XGBRegressor().fit(X.values, y)
 # model = RandomForestRegressor(n_estimators=10).fit(X.values, y)
 rulefit_rmse = metrics.r2_score(y, model.predict(X.values))
 print(rulefit_rmse)
 explainer = shap.Explainer(model)
 shap_values = explainer(X)
-# shap.plots.waterfall(shap_values[0])
-# shap.plots.waterfall(explainer.base_values[0], shap_values[0], X[0])
 shap.plots.beeswarm(shap_values)
 # %%
-sns.scatterplot(data=rules, x="coef", y="support", size="importance", legend=False, sizes=(20, 2000))
+df_tmp = df_mwws
+df_tmp = df_tmp[df_tmp["utility"] > 0]
+min_max_scaler = preprocessing.MinMaxScaler()
+y = df_tmp["utility"]
+X = df_tmp[cols_conf + cols_pgws + cols_univ]
+X = pd.get_dummies(X, drop_first=True)
+model = xgboost.XGBRegressor().fit(X.values, y)
+# model = RandomForestRegressor(n_estimators=10).fit(X.values, y)
+rulefit_rmse = metrics.r2_score(y, model.predict(X.values))
+print(rulefit_rmse)
+explainer = shap.Explainer(model)
+shap_values = explainer(X)
+shap.plots.beeswarm(shap_values)
 
-# show the graph
+# %%
+pd.set_option('display.max_colwidth', 400)  # Adjust row width to read the entire rule
+pd.options.display.float_format = '{:.5f}'.format  # Round decimals to 2 decimal places
+# rules = rulefit.get_rules()  # Get the rules
+rules = rules_pgws  # Get the rules
+rules = rules[rules['type'] != 'linear']  # Eliminate the existing explanatory variables
+rules = rules[rules['coef'] != 0]  # eliminate the insignificant rules
+rules = rules.sort_values('importance', ascending=False)  # Sort the rules based on "support" value
+# rules = rules[rules['rule'].str.len()>30] # optional: To see more complex rules, filter the long rules
+rules.iloc[0:20]  # Show the first 5 rules
+
+from adjustText import adjust_text
+fig = plt.figure(figsize=(15, 10))
+ax = sns.scatterplot(data=rules, x="coef", y="support", size="importance", alpha=0.5, legend=False, sizes=(20, 2000))
+TEXTS = []
+BG_WHITE = "#fbf9f4"
+GREY_LIGHT = "#b4aea9"
+GREY50 = "#7F7F7F"
+GREY30 = "#4d4d4d"
+topk_rules = rules.iloc[0:3]
+for i in range(len(topk_rules)):
+    x = topk_rules["coef"].iloc[i]
+    y = topk_rules["support"].iloc[i]
+    text = topk_rules["rule"].iloc[i]
+    TEXTS.append(ax.text(x, y, text, color=GREY30, fontsize=14, fontname="Poppins"))
+
+adjust_text(TEXTS, expand_points=(1, 10), arrowprops=dict(arrowstyle="->", color=GREY50, lw=2), ax=fig.axes[0])
+# legend = ax.legend(
+#     loc=(0.85, 0.025), # bottom-right
+#     labelspacing=1.5,  # add space between labels
+#     markerscale=1.5,   # increase marker size
+#     frameon=False      # don't put a frame
+# )
 plt.show()
+# %%
