@@ -3,12 +3,14 @@ package geniusweb.pompfan.agent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -26,6 +28,7 @@ import geniusweb.actions.LearningDone;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
 import geniusweb.bidspace.BidsWithUtility;
+import geniusweb.bidspace.Interval;
 import geniusweb.inform.ActionDone;
 import geniusweb.inform.Agreements;
 import geniusweb.inform.Finished;
@@ -49,6 +52,7 @@ import geniusweb.profileconnection.ProfileInterface;
 import geniusweb.progress.Progress;
 import geniusweb.progress.ProgressRounds;
 import geniusweb.references.Parameters;
+import tudelft.utilities.immutablelist.ImmutableList;
 import tudelft.utilities.logging.Reporter;
 
 public class POMPFANAgent extends DefaultParty {
@@ -81,6 +85,8 @@ public class POMPFANAgent extends DefaultParty {
     private Boolean isLearn = false;
     private HashMap<String, Object> config;
     private BidsWithUtility bidsWithUtility;
+    private ImmutableList<Bid> goodBids;
+    private Random random = new Random();
 
     public POMPFANAgent() {
     }
@@ -121,7 +127,6 @@ public class POMPFANAgent extends DefaultParty {
 
         // info is a Settings object that is passed at the start of a negotiation
         Settings settings = (Settings) info;
-
         // Needs to run
         if (DEBUG_LEARN)
             System.out.println("DEBUG_LEARN_PERSISTENCE: ========================================= "
@@ -140,6 +145,7 @@ public class POMPFANAgent extends DefaultParty {
             if (DEBUG_LEARN)
                 System.out.println("DEBUG_LEARN_PERSISTENCE: Enter tree init");
             this.initializeTree(settings);
+            this.goodBids = this.bidsWithUtility.getBids(new Interval(new BigDecimal(0.8), BigDecimal.ONE));
         }
 
         if (DEBUG_BELIEF) {
@@ -197,12 +203,21 @@ public class POMPFANAgent extends DefaultParty {
             try {
                 // The info notifies us that it is our turn
                 YourTurn myTurnInfo = (YourTurn) info;
-                Action action = myTurn(myTurnInfo);
+                ActionWithBid action = (ActionWithBid) myTurn(myTurnInfo);
                 this.MCTS.getRealHistory().add(action);
+                if (DEBUG_OFFER == true) {
+                    System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
+                    System.out.println("Agent: Util=" + this.uSpace.getUtility(action.getBid()) + " -- "
+                            + action.getBid().toString());
+                }
                 getConnection().send(action);
             } catch (Exception e) {
                 this.getReporter().log(Level.WARNING, "First level fallback even failed!!!");
                 e.printStackTrace();
+                if (DEBUG_OFFER == true) {
+                    System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
+                    System.out.println("Agent: Util= " + "Some ERR");
+                }
                 getConnection().send(new Accept(this.me, this.lastReceivedBid));
             }
         }
@@ -240,7 +255,9 @@ public class POMPFANAgent extends DefaultParty {
         }
 
         // Log the final outcome and terminate
-        if (DEBUG_OFFER) getReporter().log(Level.INFO, "Final outcome: " + this.uSpace.getUtility(agreements.getMap().get(this.me)) + " " + info);
+        if (DEBUG_OFFER)
+            getReporter().log(Level.INFO,
+                    "Final outcome: " + this.uSpace.getUtility(agreements.getMap().get(this.me)) + " " + info);
         terminate();
     }
 
@@ -312,7 +329,6 @@ public class POMPFANAgent extends DefaultParty {
         this.parameters = settings.getParameters();
         if (this.parameters.containsKey("simulationTime")) {
             this.simulationTime = Long.valueOf(((String) this.parameters.get("simulationTime")));
-
         }
         if (this.parameters.containsKey("numParticlesPerOpponent")) {
             this.numParticlesPerOpponent = Long.valueOf(((String) this.parameters.get("numParticlesPerOpponent")));
@@ -432,6 +448,12 @@ public class POMPFANAgent extends DefaultParty {
                 saveDistributionToLogs("distribution", content, true);
             }
         }
+        ActionWithBid aBid = (ActionWithBid) action;
+        if (DEBUG_OFFER == true) {
+            System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
+            System.out.println("Opponent: Util=" + this.uSpace.getUtility(aBid.getBid()) + " -- "
+                    + aBid.getBid().toString());
+        }
     }
 
     /**
@@ -462,13 +484,19 @@ public class POMPFANAgent extends DefaultParty {
      */
     protected Action myTurn(YourTurn myTurnInfo) throws IOException, StateRepresentationException {
         Action action;
-        if (this.lastReceivedBid != null) {
-            if (DEBUG_OFFER == true) {
-                System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
-                System.out.println("Opponent: Util=" + this.uSpace.getUtility(this.lastReceivedBid) + " -- "
-                        + this.lastReceivedBid.toString());
-            }
+        // STEP: Generate offer!
+        long negotiationEnd = this.progress.getTerminationTime().getTime();
+        long remainingTime = negotiationEnd - System.currentTimeMillis();
+        long simTime = this.simulationTime;
+        // if (this.lastReceivedBid != null) {
+        // }
+        if (this.progress.get(System.currentTimeMillis()) < 0.25) {
+            // High throughput bidding
+            Bid bid = this.goodBids.get(this.random.nextInt(this.goodBids.size().intValue()));
+            action = new Offer(this.me, bid);
+            return action;
         }
+
         if (this.opponentName == null) {
             // The first one to make the offer
             Bid bid = this.bidsWithUtility.getExtremeBid(true);
@@ -476,10 +504,6 @@ public class POMPFANAgent extends DefaultParty {
             return action;
         }
 
-        // STEP: Generate offer!
-        long negotiationEnd = this.progress.getTerminationTime().getTime();
-        long remainingTime = negotiationEnd - System.currentTimeMillis();
-        long simTime = this.simulationTime;
         if (simTime <= remainingTime) {
             this.MCTS.construct(simTime, this.progress);
         }
