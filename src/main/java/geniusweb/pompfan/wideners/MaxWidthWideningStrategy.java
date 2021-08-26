@@ -16,7 +16,8 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
     // !! AT THIS MOMENT THIS IS JUNK
     // TODO: This needs to be fixed
 
-    public MaxWidthWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy, HashMap<String, Object> params) {
+    public MaxWidthWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy,
+            HashMap<String, Object> params) {
         super(ownExplorationStrategy);
         this.maxWidth = Double.valueOf((String) params.getOrDefault("maxWidth", "42.0")).intValue();
     }
@@ -31,7 +32,7 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
     }
 
     @Override
-    public void widen(Progress simulatedProgress, Node currRoot) throws StateRepresentationException  {
+    public void widen(Progress simulatedProgress, Node currRoot) throws StateRepresentationException {
         AbstractPolicy currOpp = currRoot.getState().getOpponent();
         while (currRoot.getChildren().size() == this.maxWidth) {
             // Going down the tree - Action Node Level
@@ -49,14 +50,25 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
                     return;
                 } // !!: finish dealing with exceptions
                 currRoot.getState().setOpponent(currOpp);
-                
+
                 Double value = currRoot.getState().evaluate();
                 Tree.backpropagate(currRoot, value);
                 return;
             } else {
                 // Going down the tree - Belief Node Level
+                ActionNode oldRoot = (ActionNode) currRoot;
+                oldRoot.getState().setOpponent(currOpp);
                 currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
-                currRoot.getState().setOpponent(currOpp);
+                if (currRoot == null) {
+                    Double simulatedTimeOfNewNode = simulatedProgress.get(System.currentTimeMillis());
+                    BeliefNode newChild = (BeliefNode) oldRoot.receiveObservation(simulatedTimeOfNewNode);
+                    currRoot = newChild;
+                    currRoot.getState().setOpponent(currOpp);
+                    Double value = currRoot.getState().evaluate();
+                    Tree.backpropagate(currRoot, value);
+                    return;
+                }
+
             }
         }
 
@@ -70,7 +82,7 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
             Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
             BeliefNode beliefNode = (BeliefNode) actionNode.receiveObservation(simulatedTimeOfObsReceival);
             currRoot = beliefNode;
-            if(currRoot == null){
+            if (currRoot == null) {
                 return;
             }
             currRoot.getState().setOpponent(currOpp);
