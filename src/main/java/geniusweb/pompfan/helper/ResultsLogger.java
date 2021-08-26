@@ -66,7 +66,8 @@ public class ResultsLogger {
             Map<PartyId, PartyWithProfile> allParties = sess.getParticipants();
             Map<PartyId, Bid> allAgreements = agreements.getMap();
             List<Result> collectedResults = allParties.keySet().stream()
-                    .map(k -> new Result(this.sessionNum, k, allParties.get(k), allAgreements.get(k)).setSessionStart(this.startTime).computeUtility())
+                    .map(k -> new Result(this.sessionNum, k, allParties.get(k), allAgreements.get(k))
+                            .setSessionStart(this.startTime).computeUtility())
                     .collect(Collectors.toList());
             results.addAll(collectedResults);
         }
@@ -158,15 +159,18 @@ public class ResultsLogger {
                 this.utility = this.getAggreeBid() != null ? utilitySpace.getUtility(this.getAggreeBid()).doubleValue()
                         : 0.0;
             } catch (IOException e) {
-                // !!: Better error handling -- consistent return of error utility.
                 this.utility = -1.0;
-                throw new IllegalStateException(e);
-            } catch (DeploymentException e) {
                 e.printStackTrace();
-                return null;
+                return this;
+            } catch (DeploymentException e) {
+                this.utility = -1.0;
+                e.printStackTrace();
+                return this;
             } catch (IllegalArgumentException e) {
                 this.reporter.log(Level.WARNING, "Couldn't create profile from: " + this.profile.getURI());
-                return null;
+                this.utility = -2.0;
+                e.printStackTrace();
+                return this;
             }
             return this;
         }

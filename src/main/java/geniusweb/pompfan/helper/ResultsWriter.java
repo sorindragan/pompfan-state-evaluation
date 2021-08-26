@@ -158,14 +158,19 @@ public class ResultsWriter {
                 this.utility = this.getAggreeBid() != null ? utilitySpace.getUtility(this.getAggreeBid()).doubleValue()
                         : 0.0;
             } catch (IOException e) {
-                throw new IllegalStateException(e);
+                this.utility = -1.0;
+                e.printStackTrace();
+                return this;
             } catch (DeploymentException e) {
                 this.utility = -1.0;
                 e.printStackTrace();
-                return null;
+                return this;
             } catch (IllegalArgumentException e) {
                 this.reporter.log(Level.WARNING, "Couldn't create profile from: " + this.profile.getURI());
-                return null;
+                this.utility = -1.0;
+                
+                // e.printStackTrace();
+                return this;
             }
             return this;
         }
