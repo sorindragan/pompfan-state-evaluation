@@ -20,9 +20,8 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @Type(value = RandomBidDistance.class, name = "RandomBidDistance"),
         @Type(value = UtilityBidDistance.class, name = "UtilityBidDistance"),
-        @Type(value = JaccardBidDistance.class, name = "JaccardBidDistance"),  
-        @Type(value = HammingBidDistance.class, name = "HammingBidDistance"),  
-    })
+        @Type(value = JaccardBidDistance.class, name = "JaccardBidDistance"),
+        @Type(value = HammingBidDistance.class, name = "HammingBidDistance"), })
 public abstract class AbstractBidDistance {
     private Domain domain;
     private UtilitySpace utilitySpace;
@@ -86,7 +85,12 @@ public abstract class AbstractBidDistance {
     };
 
     public Map<Bid, Double> computeDistances(Bid b1, List<Bid> b2) {
-        return b2.parallelStream().collect(Collectors.toMap(bid -> bid, bid -> this.computeDistance(b1, bid)));
+        try {
+            return b2.parallelStream().collect(Collectors.toMap(bid -> bid, bid -> this.computeDistance(b1, bid)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public abstract Double computeDistance(Bid b1, Bid b2);
