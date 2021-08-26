@@ -1,4 +1,4 @@
-package geniusweb.exampleparties.learningagent;
+package geniusweb.opponents;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,5 +70,7 @@ public class PersistentState {
         return opponentEncounters.containsKey(opponent);
     }
 
-
+    public PersistentState learn(){
+        return this;
+    }
 }
