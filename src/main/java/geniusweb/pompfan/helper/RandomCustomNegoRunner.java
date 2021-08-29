@@ -37,6 +37,9 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                         .map(String::valueOf).map(e -> e + "0").collect(Collectors.toList());
         private final static List<String> setSimulationTime = IntStream.range(1, 10).boxed().map(String::valueOf)
                         .map(e -> e + "00").collect(Collectors.toList());
+        private final static List<String> setDataCollectionTime = RANDOM.doubles(10, 0.0, 0.5).mapToObj(String::valueOf)
+                        .map(BigDecimal::new).map(e -> e.setScale(1, RoundingMode.HALF_UP)).map(String::valueOf)
+                        .collect(Collectors.toList());
         private final static List<String> setK = RANDOM.doubles(10, 2.0, 5.0).mapToObj(String::valueOf)
                         .map(BigDecimal::new).map(e -> e.setScale(0, RoundingMode.DOWN)).map(String::valueOf)
                         .map(e -> e + ".0").collect(Collectors.toList());
@@ -59,24 +62,31 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                         "TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
         // private final static List<String> setExplorer =
         // Arrays.asList("TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
-        // private final static List<String> setWidener = Arrays.asList("ProgressiveWideningStrategy",
-        //                 "MaxWidthWideningStrategy");
-        private final static List<String> setWidener = Arrays.asList("MaxWidthWideningStrategy");
+        private final static List<String> setWidener = Arrays.asList("ProgressiveWideningStrategy",
+                        "MaxWidthWideningStrategy");
+        // private final static List<String> setWidener =
+        // Arrays.asList("MaxWidthWideningStrategy");
         // private final static List<String> setWidener =
         // Arrays.asList("ProgressiveWideningStrategy");
+        private final static List<String> setOpponents = Arrays.asList("classpath:geniusweb.opponents.OwnUtilTFTAgent",
+                        "classpath:geniusweb.opponents.OppUtilTFTAgent",
+                        "classpath:geniusweb.opponents.AntagonisticAgent", "classpath:geniusweb.opponents.SelfishAgent",
+                        "classpath:geniusweb.exampleparties.boulware.Boulware",
+                        "classpath:geniusweb.exampleparties.hardliner.Hardliner",
+                        "classpath:geniusweb.exampleparties.randomparty.RandomParty",
+                        "classpath:geniusweb.exampleparties.timedependentparty.TimeDependantParty");
 
         public RandomCustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory,
                         Reporter logger, long maxruntime, String settingRef, String name) throws IOException {
                 super(settings, connectionfactory, logger, maxruntime, settingRef, name);
         }
 
-        @SuppressWarnings("unchecked")
         public static void main(String[] args) throws JsonMappingException, JsonProcessingException, IOException {
                 JsonNode settingsJson = jacksonReader
                                 .readTree(new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8));
 
                 Integer cnt = 0;
-                for (int i = 0; i < 20; i++) {
+                for (int i = 0; i < 100; i++) {
                         cnt++;
                         ObjectNode target = (ObjectNode) settingsJson.get("AllPermutationsSettings").get("teams").get(0)
                                         .get("Team").get(0);
@@ -90,6 +100,8 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                                         .get(RANDOM.nextInt(setNumParticlesPerOpponent.size())));
                         parameters.put("simulationTime",
                                         setSimulationTime.get(RANDOM.nextInt(setSimulationTime.size())));
+                        parameters.put("dataCollectionTime",
+                                        setDataCollectionTime.get(RANDOM.nextInt(setDataCollectionTime.size())));
                         parameters.put("persistentstate", "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7");
                         parameters.put("config", config);
 
@@ -110,6 +122,15 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                         widener.put("a_b", setA.get(RANDOM.nextInt(setA.size())));
 
                         target.set("parameters", jacksonReader.convertValue(parameters, JsonNode.class));
+
+                        ObjectNode opponent = (ObjectNode) settingsJson.get("AllPermutationsSettings").get("teams")
+                                        .get(1).get("Team").get(0);
+
+                        Map<String, Object> oppParameters = new HashMap<String, Object>();
+                        String ref = setOpponents.get(RANDOM.nextInt(setOpponents.size()));
+                        oppParameters.put("persistentstate", "59853b79-f3f8-4179-8b57-7b5b2e9eb111");
+                        opponent.put("partyref", ref);
+                        opponent.set("parameters", jacksonReader.convertValue(oppParameters, JsonNode.class));
 
                         String settingRef = args[0];
 

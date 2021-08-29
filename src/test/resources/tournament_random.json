@@ -33,17 +33,7 @@
 			{
 				"Team": [
 					{
-						"partyref": "classpath:geniusweb.opponents.AntagonisticAgent",
-						"parameters": {
-							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9ab111"
-						}
-					}
-				]
-			},
-			{
-				"Team": [
-					{
-						"partyref": "classpath:geniusweb.opponents.SelfishAgent",
+						"partyref": "classpath:geniusweb.opponents.OwnUtilTFTAgent",
 						"parameters": {
 							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9ab111"
 						}
@@ -71,7 +61,7 @@
 			"SAOPSettings": {
 				"participants": [],
 				"deadline": {
-					"deadlinetime": { "durationms": 5000 }
+					"deadlinetime": { "durationms": 20000 }
 				}
 			}
 		},

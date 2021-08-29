@@ -88,14 +88,20 @@ df["error"] = df.utility == -1.0
 df["vs"] = None
 df["vs_utility"] = None
 for index, df_subset in df.groupby(["session", "tournamentStart", "sessionStart"]):
-    party1, party2 = df_subset["name"]
-    party1_enc, party2_enc = df_subset["name_encoded"]
-    util1, util2 = df_subset["utility"]
-    selector = (df.session == index[0]) & (df.tournamentStart == index[1]) & (df.sessionStart == index[2])
-    df.loc[(df.name == party1) & selector, "vs"] = party2_enc
-    df.loc[(df.name == party2) & selector, "vs"] = party1_enc
-    df.loc[(df.name == party1) & selector, "vs_utility"] = util2
-    df.loc[(df.name == party2) & selector, "vs_utility"] = util1
+    try:
+        party1, party2 = df_subset["name"]
+        party1_enc, party2_enc = df_subset["name_encoded"]
+        util1, util2 = df_subset["utility"]
+        selector = (df.session == index[0]) & (df.tournamentStart == index[1]) & (df.sessionStart == index[2])
+        df.loc[(df.name == party1) & selector, "vs"] = party2_enc
+        df.loc[(df.name == party2) & selector, "vs"] = party1_enc
+        df.loc[(df.name == party1) & selector, "vs_utility"] = util2
+        df.loc[(df.name == party2) & selector, "vs_utility"] = util1
+    except Exception as e:
+        print("Problem with missing correspondence!!!")
+        print(e)
+        print(index)
+        display(df_subset)
 
 df.to_csv(file_to_analyse.parent / "data.csv")
 df
@@ -220,7 +226,27 @@ ax.set_ylabel("Utility")
 plt.show()
 
 # %%
-df_relevant.groupby(["vs"]).mean()[["utility", "no_agreement"]]
+print("df_relevant: ")
+display(
+    df_relevant.groupby(["vs"]).agg({
+        'utility': ['mean', 'median', 'sum'],
+        'session': ['count'],
+        'no_agreement': ['mean', 'sum'],
+    }))
+print("df_pgws: ")
+display(
+    df_pgws.groupby(["vs"]).agg({
+        'utility': ['mean', 'median', 'sum'],
+        'session': ['count'],
+        'no_agreement': ['mean', 'sum'],
+    }))
+print("df_mwws: ")
+display(
+    df_mwws.groupby(["vs"]).agg({
+        'utility': ['mean', 'median', 'sum'],
+        'session': ['count'],
+        'no_agreement': ['mean', 'sum'],
+    }))
 
 # %%
 from rulefit import RuleFit
@@ -283,7 +309,7 @@ df_tmp = df_mwws
 df_tmp = df_tmp[df_tmp["utility"] > 0]
 min_max_scaler = preprocessing.MinMaxScaler()
 y = df_tmp["utility"]
-X = df_tmp[cols_conf + cols_pgws + cols_univ]
+X = df_tmp[cols_conf + cols_mwws + cols_univ]
 X = pd.get_dummies(X, drop_first=True)
 model = xgboost.XGBRegressor().fit(X.values, y)
 # model = RandomForestRegressor(n_estimators=10).fit(X.values, y)
@@ -298,6 +324,40 @@ pd.set_option('display.max_colwidth', 400)  # Adjust row width to read the entir
 pd.options.display.float_format = '{:.5f}'.format  # Round decimals to 2 decimal places
 # rules = rulefit.get_rules()  # Get the rules
 rules = rules_pgws  # Get the rules
+rules = rules[rules['type'] != 'linear']  # Eliminate the existing explanatory variables
+rules = rules[rules['coef'] != 0]  # eliminate the insignificant rules
+rules = rules.sort_values('importance', ascending=False)  # Sort the rules based on "support" value
+# rules = rules[rules['rule'].str.len()>30] # optional: To see more complex rules, filter the long rules
+rules.iloc[0:20]  # Show the first 5 rules
+
+from adjustText import adjust_text
+fig = plt.figure(figsize=(15, 10))
+ax = sns.scatterplot(data=rules, x="coef", y="support", size="importance", alpha=0.5, legend=False, sizes=(20, 2000))
+TEXTS = []
+BG_WHITE = "#fbf9f4"
+GREY_LIGHT = "#b4aea9"
+GREY50 = "#7F7F7F"
+GREY30 = "#4d4d4d"
+topk_rules = rules.iloc[0:3]
+for i in range(len(topk_rules)):
+    x = topk_rules["coef"].iloc[i]
+    y = topk_rules["support"].iloc[i]
+    text = topk_rules["rule"].iloc[i]
+    TEXTS.append(ax.text(x, y, text, color=GREY30, fontsize=14, fontname="Poppins"))
+
+adjust_text(TEXTS, expand_points=(1, 10), arrowprops=dict(arrowstyle="->", color=GREY50, lw=2), ax=fig.axes[0])
+# legend = ax.legend(
+#     loc=(0.85, 0.025), # bottom-right
+#     labelspacing=1.5,  # add space between labels
+#     markerscale=1.5,   # increase marker size
+#     frameon=False      # don't put a frame
+# )
+plt.show()
+# %%
+pd.set_option('display.max_colwidth', 400)  # Adjust row width to read the entire rule
+pd.options.display.float_format = '{:.5f}'.format  # Round decimals to 2 decimal places
+# rules = rulefit.get_rules()  # Get the rules
+rules = rules_mwws  # Get the rules
 rules = rules[rules['type'] != 'linear']  # Eliminate the existing explanatory variables
 rules = rules[rules['coef'] != 0]  # eliminate the insignificant rules
 rules = rules.sort_values('importance', ascending=False)  # Sort the rules based on "support" value
