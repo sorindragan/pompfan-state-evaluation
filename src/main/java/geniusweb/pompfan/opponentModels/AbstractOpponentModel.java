@@ -1,6 +1,7 @@
 package geniusweb.pompfan.opponentModels;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,19 +15,24 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import geniusweb.actions.Action;
+import geniusweb.bidspace.AllBidsList;
 import geniusweb.issuevalue.Bid;
+import geniusweb.issuevalue.DiscreteValue;
+import geniusweb.issuevalue.DiscreteValueSet;
 import geniusweb.issuevalue.Domain;
 import geniusweb.issuevalue.Value;
+import geniusweb.issuevalue.ValueSet;
 import geniusweb.opponentmodel.OpponentModel;
+import geniusweb.profile.utilityspace.DiscreteValueSetUtilities;
 import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.ValueSetUtilities;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes({ @Type(value = WeightedFrequencyOpponentModel.class)})
+@JsonSubTypes({ @Type(value = EntropyWeightedOpponentModel.class) })
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public abstract class AbstractOpponentModel implements LinearAdditive, OpponentModel {
 	private static int serial = 1; // counter for auto name generation
-    private String id = UUID.randomUUID().toString();
+	private String id = UUID.randomUUID().toString();
 
 	private Domain domain;
 	private List<Action> history;
@@ -38,7 +44,23 @@ public abstract class AbstractOpponentModel implements LinearAdditive, OpponentM
 			throw new IllegalStateException("domain is not initialized");
 		}
 		this.domain = domain;
-		this.history = history;
+		if (history == null || history.isEmpty()) {
+			Map<String, ValueSetUtilities> issueUtilities = new HashMap<>();	
+			Map<String, BigDecimal> issueWeights = new HashMap<>();
+			for (String issueString : this.domain.getIssues()) {
+				Map<DiscreteValue, BigDecimal> valueUtils = new HashMap<>();
+				ValueSet allValues = this.domain.getValues(issueString);
+				for (Value value : allValues) {
+					valueUtils.put((DiscreteValue) value, BigDecimal.ZERO);
+				}
+				issueUtilities.put(issueString, new DiscreteValueSetUtilities(valueUtils));
+				issueWeights.put(issueString, BigDecimal.ONE.divide(BigDecimal.valueOf(this.domain.getIssues().size()), 2, RoundingMode.HALF_UP));
+			}
+			this.issueUtilities = issueUtilities;
+			this.issueWeights = issueWeights;
+		} else {
+			this.history = history;
+		}
 	}
 
 	public String getId() {
@@ -81,7 +103,6 @@ public abstract class AbstractOpponentModel implements LinearAdditive, OpponentM
 	public Bid getReservationBid() {
 		return null;
 	}
-
 
 	public void setDomain(Domain domain) {
 		this.domain = domain;

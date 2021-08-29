@@ -17,15 +17,16 @@ import geniusweb.inform.Settings;
 import geniusweb.issuevalue.Bid;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class SelfishAgent extends GenericOpponent<Object>{
+public class SelfishAgent extends GenericOpponent{
 
 
     private ImmutableList<Bid> possibleBids;
 
     @Override
-    protected void initializeVariables(Settings settings) throws DeploymentException {
+    protected void initializeVariables(Settings settings) throws DeploymentException, IOException {
         super.initializeVariables(settings);
         this.setPossibleBids(this.getBidsWithUtility().getBids(new Interval(new BigDecimal("0.75"), BigDecimal.ONE)));
+        // this.setDEBUG_OFFER(true);
     }
 
     public ImmutableList<Bid> getPossibleBids() {
@@ -38,8 +39,6 @@ public class SelfishAgent extends GenericOpponent<Object>{
 
     @Override
     protected void processOpponentAction(ActionWithBid action) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
@@ -58,8 +57,13 @@ public class SelfishAgent extends GenericOpponent<Object>{
     protected ActionWithBid myTurn(Object param) {
         ActionWithBid action;
         List<ActionWithBid> oppHistory = this.getOpponentHistory();
-
-        Bid lastOpponentsBid = oppHistory.get(oppHistory.size()).getBid();
+        if (oppHistory.size() == 0) {
+            this.getReporter().log(Level.WARNING, this.getMe().toString() + ": Could not get last opponent action node!!!");
+            Bid bid = this.getBidsWithUtility().getExtremeBid(true);
+            action = new Offer(this.getMe(), bid);
+            return action;
+        }
+        Bid lastOpponentsBid = oppHistory.get(oppHistory.size()-1).getBid();
         Bid selfishBid = this.getPossibleBids().get(this.getRandom().nextInt(this.getPossibleBids().size().intValue()));
 
         ActionWithBid result = this.getUtilitySpace().isPreferredOrEqual(lastOpponentsBid, selfishBid)

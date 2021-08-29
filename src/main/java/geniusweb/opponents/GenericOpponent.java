@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -18,9 +19,11 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import geniusweb.actions.AbstractAction;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.ActionWithBid;
+import geniusweb.actions.FileLocation;
 import geniusweb.actions.LearningDone;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
@@ -42,10 +45,11 @@ import geniusweb.profileconnection.ProfileConnectionFactory;
 import geniusweb.profileconnection.ProfileInterface;
 import geniusweb.progress.Progress;
 import geniusweb.progress.ProgressRounds;
+import geniusweb.references.Parameters;
 import tudelft.utilities.immutablelist.ImmutableList;
 import tudelft.utilities.logging.Reporter;
 
-public abstract class GenericOpponent<T> extends DefaultParty {
+public abstract class GenericOpponent extends DefaultParty {
     private boolean isLearn;
     private BidsWithUtility bidsWithUtility;
     private ImmutableList<Bid> goodBids;
@@ -62,8 +66,11 @@ public abstract class GenericOpponent<T> extends DefaultParty {
     protected ProfileInterface profileint = null;
     private Bid lastReceivedBid;
     private List<File> dataPaths = new ArrayList<>();
-    private static boolean DEBUG_OFFER = false;
-    private T param;
+    protected boolean DEBUG_OFFER = false;
+    // private T param;
+    private Parameters parameters;
+    private String protocol;
+    protected boolean DEBUG_TIME;
 
     public GenericOpponent() {
     }
@@ -102,14 +109,33 @@ public abstract class GenericOpponent<T> extends DefaultParty {
         // System.out.println("===========INFO========== " + info.getClass().getName());
         try {
             if (info instanceof Settings) {
+                if (DEBUG_TIME)
+                    this.me = ((Settings) info).getID();
+                if (DEBUG_TIME)
+                    this.progress = ((Settings) info).getProgress();
+                if (DEBUG_TIME)
+                    System.out.println(
+                            this.me.getName() + " - " + this.progress.get(System.currentTimeMillis()) + ": Setup");
                 runSetupPhase(info);
             } else if (info instanceof ActionDone) {
+                if (DEBUG_TIME)
+                    System.out.println(this.me.getName() + " - " + this.progress.get(System.currentTimeMillis())
+                            + ": ActionDone - " + ((ActionDone) info).getAction().getActor());
                 runOpponentPhase(info);
             } else if (info instanceof YourTurn) {
+                if (DEBUG_TIME)
+                    System.out.println(
+                            this.me.getName() + " - " + this.progress.get(System.currentTimeMillis()) + ": YourTurn");
                 runAgentPhase(info);
             } else if (info instanceof Finished) {
+                if (DEBUG_TIME)
+                    System.out.println(
+                            this.me.getName() + " - " + this.progress.get(System.currentTimeMillis()) + ": Finished");
                 runEndPhase(info);
             }
+            if (DEBUG_TIME)
+                System.out.println(this.me.getName() + " - " + this.progress.get(System.currentTimeMillis())
+                        + ": END Cycle - " + info.getClass().getSimpleName());
         } catch (Exception e) {
             throw new RuntimeException("Failed to handle info", e);
         }
@@ -122,7 +148,7 @@ public abstract class GenericOpponent<T> extends DefaultParty {
             Bid agreement = agreements.getMap().values().iterator().next();
             this.negotiationData.addAgreementUtil(this.utilitySpace.getUtility(agreement).doubleValue());
             processAgreements(agreements);
-        }else{
+        } else {
             processNonAgreements(agreements);
         }
         // Write the negotiation data that we collected to the path provided.
@@ -145,7 +171,7 @@ public abstract class GenericOpponent<T> extends DefaultParty {
         if (info instanceof YourTurn) {
             try {
                 // The info notifies us that it is our turn
-                ActionWithBid action = myTurn(this.param);
+                ActionWithBid action = this.myTurn(null);
                 if (DEBUG_OFFER == true) {
                     System.out.println("Current Time: " + this.getProgress().get(System.currentTimeMillis()));
                     System.out.println("Agent: Util=" + this.getUtilitySpace().getUtility(action.getBid()) + " -- "
@@ -160,14 +186,16 @@ public abstract class GenericOpponent<T> extends DefaultParty {
                     System.out.println("Current Time: " + this.getProgress().get(System.currentTimeMillis()));
                     System.out.println("Agent: Util= " + "Some ERR");
                 }
-                getConnection().send(new Accept(this.getMe(), this.getFallbackBid()));
+                Accept action = new Accept(this.getMe(), this.getFallbackBid());
+                this.getHistory().add(action);
+                getConnection().send(action);
             }
         }
     }
+
     protected void runOpponentPhase(Inform info) throws IOException {
         // The info object is an action that is performed by an agent.
         Action action = ((ActionDone) info).getAction();
-
         // Check if this is not our own action
         if (!this.me.equals(action.getActor())) {
             if (action instanceof Offer) {
@@ -190,7 +218,9 @@ public abstract class GenericOpponent<T> extends DefaultParty {
                 }
 
                 ActionWithBid actionWithBid = (ActionWithBid) action;
+                this.getHistory().add(actionWithBid);
                 processOpponentAction(actionWithBid);
+                // getConnection().send(null);
             }
         }
     }
@@ -227,15 +257,41 @@ public abstract class GenericOpponent<T> extends DefaultParty {
         getConnection().send(new LearningDone(me));
     };
 
-    protected void initializeVariables(Settings settings) throws DeploymentException {
-        try {
-            this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(), getReporter());
-            this.setUtilitySpace((UtilitySpace) this.profileint.getProfile());
-            this.bidsWithUtility = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
-            // Our stuff
+    protected void initializeVariables(Settings settings) throws DeploymentException, IOException {
+        this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(), getReporter());
+        this.setUtilitySpace((UtilitySpace) this.profileint.getProfile());
+        this.bidsWithUtility = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
+        this.protocol = settings.getProtocol().getURI().getPath();
+        this.me = settings.getID();
+        this.progress = settings.getProgress();
+        this.isLearn = "Learn".equals(protocol);
+        this.parameters = settings.getParameters();
+        this.negotiationData = new NegotiationData();
+        if (this.persistentPath != null && this.persistentPath.exists()) {
+            try {
+                this.persistentState = mapper.readValue(this.persistentPath, PersistentState.class);
+            } catch (Exception e) {
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.protocol);
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.progress);
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.progress.get(System.currentTimeMillis()));
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.dataPaths);
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.isLearn);
+                System.out.println("DEBUG_LEARN_PERSISTENCE: " + this.me);
+                e.printStackTrace();
+                throw e;
+            }
+        } else {
+            this.persistentState = new PersistentState();
+        }
 
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+        if (this.parameters.containsKey("negotiationdata")) {
+            this.dataPaths = new ArrayList<>();
+            List<Object> dataPaths_raw = this.parameters.get("negotiationdata", List.class);
+            for (Object path : (List<Object>) dataPaths_raw) {
+                FileLocation tmpPath = path instanceof FileLocation ? (FileLocation) path
+                        : new FileLocation(UUID.fromString((String) path));
+                this.dataPaths.add(tmpPath.getFile());
+            }
         }
     };
 
@@ -290,7 +346,9 @@ public abstract class GenericOpponent<T> extends DefaultParty {
     }
 
     public List<ActionWithBid> getOpponentHistory() {
-        return history.stream().filter(action -> !action.getActor().equals(this.getMe())).collect(Collectors.toList());
+        List<ActionWithBid> oppHistory = history.stream().filter(action -> !action.getActor().equals(this.getMe()))
+                .collect(Collectors.toList());
+        return oppHistory;
     }
 
     public void setHistory(List<ActionWithBid> history) {
@@ -387,8 +445,10 @@ public abstract class GenericOpponent<T> extends DefaultParty {
      * @param agreements
      */
     protected abstract void processAgreements(Agreements agreements);
+
     protected abstract void processNonAgreements(Agreements agreements);
-    protected abstract ActionWithBid myTurn(T param);
+
+    protected abstract ActionWithBid myTurn(Object param);
 
     public ProfileInterface getProfileint() {
         return profileint;
@@ -414,19 +474,11 @@ public abstract class GenericOpponent<T> extends DefaultParty {
         this.dataPaths = dataPaths;
     }
 
-    public static boolean isDEBUG_OFFER() {
-        return DEBUG_OFFER;
-    }
+    // public T getParam() {
+    // return param;
+    // }
 
-    public static void setDEBUG_OFFER(boolean dEBUG_OFFER) {
-        DEBUG_OFFER = dEBUG_OFFER;
-    }
-
-    public T getParam() {
-        return param;
-    }
-
-    public void setParam(T param) {
-        this.param = param;
-    }
+    // public void setParam(T param) {
+    // this.param = param;
+    // }
 }
