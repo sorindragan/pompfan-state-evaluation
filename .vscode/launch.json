@@ -9,7 +9,6 @@
 			"name": "Launch RandomCustomNegoRunner",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.RandomCustomNegoRunner",
-			"projectName": "olusorin",
 			"classPaths": [
 				"$Auto"
 			],
@@ -23,15 +22,14 @@
 			"name": "Launch RandomCustomNegoRunner (Big)",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.RandomCustomNegoRunner",
-			"projectName": "learningagent",
 			"classPaths": [
 				"$Auto"
 			],
 			"args": [
 				"src/test/resources/tournament_random.json",
 			],
-			"console": "internalConsole",
-			"vmArgs": "-Xmx24g"
+			"console": "externalTerminal",
+			"vmArgs": "-Xms4g -Xmx32g"
 		},
 		{
 			"type": "java",
