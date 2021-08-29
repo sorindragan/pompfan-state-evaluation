@@ -26,6 +26,7 @@ import geniusweb.progress.ProgressFactory;
 
 public class Tree {
     private static final boolean PARTICLE_DEBUG = false;
+    private static final boolean TREE_DEBUG = false;
     private BeliefNode root;
     private Domain domain;
     @JsonManagedReference
@@ -46,8 +47,10 @@ public class Tree {
             Progress progress) {
         this.setUtilitySpace(utilitySpace);
         this.belief = belief;
-        this.originalRoot = new BeliefNode(null, startState, null);
-        this.setRoot(this.originalRoot);
+        BeliefNode tmpRoot = new BeliefNode(null, startState, null);
+        if (TREE_DEBUG)
+            this.originalRoot = tmpRoot;
+        this.setRoot(tmpRoot);
         this.widener = widener;
         this.realHistory = new ArrayList<Action>();
         this.setProgress(progress);
@@ -118,7 +121,7 @@ public class Tree {
     }
 
     public Tree receiveRealObservation(Action observationAction, Long time) {
-        
+
         this.currentTime = this.getProgress().get(time);
         Offer newRealObservation = (Offer) observationAction;
         Offer lastRealAgentAction = this.lastBestActionNode != null ? (Offer) this.lastBestActionNode.getAction()
@@ -150,7 +153,8 @@ public class Tree {
                 .filter(node -> node.getIsTerminal() == false).collect(Collectors.toList());
 
         if (rootCandidates.size() == 0) {
-            // Downgrade the value of accept nodes in order to facilitate exploration by forcing a root change
+            // Downgrade the value of accept nodes in order to facilitate exploration by
+            // forcing a root change
             this.lastBestActionNode.setValue(this.lastBestActionNode.getValue() - 1.0);
             // Quickfix: by doing nothing!
             return this;
@@ -164,9 +168,10 @@ public class Tree {
         Node nextRoot = rootCandidates.parallelStream()
                 .filter(node -> ((Offer) ((BeliefNode) node).getObservation()).getBid() == closestBid).findFirst()
                 .get();
-        
+
         // changing the root
         this.root = (BeliefNode) nextRoot;
+        this.root.setParent(null);
 
         return this;
     }
@@ -183,7 +188,7 @@ public class Tree {
 
         List<Node> oldestChildren = this.root.getChildren();
         Action action = null;
-        
+
         do {
 
             if (oldestChildren.isEmpty()) {
@@ -192,9 +197,9 @@ public class Tree {
 
             this.lastBestActionNode = (ActionNode) oldestChildren.stream()
                     .max(Comparator.comparing(node -> node.getValue())).get();
-            action = lastBestActionNode.getAction();     
-        
-            if (this.realHistory.size() == 0) { 
+            action = lastBestActionNode.getAction();
+
+            if (this.realHistory.size() == 0) {
                 return action;
             }
             Action lastOpponentAction = this.realHistory.get(this.realHistory.size() - 1);
@@ -214,7 +219,7 @@ public class Tree {
                 this.root.getChildren().remove(this.lastBestActionNode);
             }
         } while (action instanceof Accept);
-    
+
         return action;
     }
 

@@ -74,19 +74,13 @@ public abstract class AbstractBidDistance {
 
     public Bid computeMostSimilar(Bid b1, List<Bid> allBids) {
 
-        try {
-            Collections.min(this.computeDistances(b1, allBids).entrySet(), Map.Entry.comparingByValue()).getKey();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         Bid key = Collections.min(this.computeDistances(b1, allBids).entrySet(), Map.Entry.comparingByValue()).getKey();
         return key;
     };
 
     public Map<Bid, Double> computeDistances(Bid b1, List<Bid> b2) {
         try {
-            return b2.parallelStream().collect(Collectors.toMap(bid -> bid, bid -> this.computeDistance(b1, bid)));
+            return b2.parallelStream().distinct().collect(Collectors.toMap(bid -> bid, bid -> this.computeDistance(b1, bid)));
         } catch (Exception e) {
             e.printStackTrace();
         }

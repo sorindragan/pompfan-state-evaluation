@@ -62,10 +62,11 @@ public class POMPFANAgent extends DefaultParty {
      */
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = false;
-    private static boolean DEBUG_OFFER = false;
+    private static boolean DEBUG_OFFER = true;
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
     private static boolean DEBUG_BELIEF = false;
+    private static boolean DEBUG_TIME = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
     protected ProfileInterface profileint = null;
@@ -87,6 +88,7 @@ public class POMPFANAgent extends DefaultParty {
     private BidsWithUtility bidsWithUtility;
     private ImmutableList<Bid> goodBids;
     private Random random = new Random();
+    private Double dataCollectionTime = 0.25;
 
     public POMPFANAgent() {
     }
@@ -109,12 +111,22 @@ public class POMPFANAgent extends DefaultParty {
         // System.out.println("===========INFO========== " + info.getClass().getName());
         try {
             if (info instanceof Settings) {
+                if (DEBUG_TIME)
+                    this.me = ((Settings) info).getID();
+                if (DEBUG_TIME)
+                    System.out.println(this.me.getName() + ": Setup");
                 runSetupPhase(info);
             } else if (info instanceof ActionDone) {
+                if (DEBUG_TIME)
+                    System.out.println(this.me.getName() + ": OpponentTurn");
                 runOpponentPhase(info);
             } else if (info instanceof YourTurn) {
+                if (DEBUG_TIME)
+                    System.out.println(this.me.getName() + ": YourTurn");
                 runAgentPhase(info);
             } else if (info instanceof Finished) {
+                if (DEBUG_TIME)
+                    System.out.println(this.me.getName() + ": Finished");
                 runEndPhase(info);
             }
         } catch (Exception e) {
@@ -190,6 +202,7 @@ public class POMPFANAgent extends DefaultParty {
             }
 
             processAction(action);
+            // getConnection().send(null);
         }
     }
 
@@ -255,9 +268,11 @@ public class POMPFANAgent extends DefaultParty {
         }
 
         // Log the final outcome and terminate
-        if (DEBUG_OFFER)
-            getReporter().log(Level.INFO,
-                    "Final outcome: " + this.uSpace.getUtility(agreements.getMap().get(this.me)) + " " + info);
+        if (agreements.getMap().size() > 0) {
+            System.out.println(agreements.getMap());
+            getReporter().log(Level.INFO, "Final outcome: " + this.me.getName() + ": "
+                    + this.uSpace.getUtility(agreements.getMap().get(this.me)) + " " + info);
+        }
         terminate();
     }
 
@@ -332,7 +347,9 @@ public class POMPFANAgent extends DefaultParty {
         }
         if (this.parameters.containsKey("numParticlesPerOpponent")) {
             this.numParticlesPerOpponent = Long.valueOf(((String) this.parameters.get("numParticlesPerOpponent")));
-
+        }
+        if (this.parameters.containsKey("dataCollectionTime")) {
+            this.dataCollectionTime = Double.valueOf(((String) this.parameters.get("dataCollectionTime")));
         }
 
         if (this.parameters.containsKey("config")) {
@@ -451,8 +468,8 @@ public class POMPFANAgent extends DefaultParty {
         ActionWithBid aBid = (ActionWithBid) action;
         if (DEBUG_OFFER == true) {
             System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
-            System.out.println("Opponent: Util=" + this.uSpace.getUtility(aBid.getBid()) + " -- "
-                    + aBid.getBid().toString());
+            System.out.println(
+                    "Counteroffer: Util=" + this.uSpace.getUtility(aBid.getBid()) + " -- " + aBid.getBid().toString());
         }
     }
 
@@ -468,11 +485,13 @@ public class POMPFANAgent extends DefaultParty {
         if (!agreements.getMap().isEmpty()) {
             // Get the bid that is agreed upon and add it's value to our negotiation data
             Bid agreement = agreements.getMap().values().iterator().next();
-            if (DEBUG_LEARN)
-                System.out.println("AGREEMENT!!!! -- Util=" + String.valueOf(this.uSpace.getUtility(agreement)) + " -- "
-                        + agreement.toString());
+            System.out.println("AGREEMENT!!!! -- Util=" + String.valueOf(this.uSpace.getUtility(agreement)) + " -- "
+                    + agreement.toString());
             this.negotiationData.addAgreementUtil(this.uSpace.getUtility(agreement).doubleValue());
+        }else{
+            System.out.println("NO AGREEMENT!!!! ");
         }
+
     }
 
     /**
@@ -490,7 +509,7 @@ public class POMPFANAgent extends DefaultParty {
         long simTime = this.simulationTime;
         // if (this.lastReceivedBid != null) {
         // }
-        if (this.progress.get(System.currentTimeMillis()) < 0.25) {
+        if (this.progress.get(System.currentTimeMillis()) < this.dataCollectionTime) {
             // High throughput bidding
             Bid bid = this.goodBids.get(this.random.nextInt(this.goodBids.size().intValue()));
             action = new Offer(this.me, bid);

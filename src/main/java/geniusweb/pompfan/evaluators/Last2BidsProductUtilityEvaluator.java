@@ -19,7 +19,6 @@ public class Last2BidsProductUtilityEvaluator extends Last2BidsMeanUtilityEvalua
 
     public Last2BidsProductUtilityEvaluator(UtilitySpace utilitySpace) {
         super(utilitySpace);
-
     }
 
     @Override

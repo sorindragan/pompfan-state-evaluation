@@ -15,6 +15,7 @@ import geniusweb.pompfan.distances.JaccardBidDistance;
 import geniusweb.pompfan.distances.RandomBidDistance;
 import geniusweb.pompfan.distances.UtilityBidDistance;
 import geniusweb.pompfan.evaluators.IEvalFunction;
+import geniusweb.pompfan.evaluators.L2BWithOppModelProductUtilityEvaluator;
 import geniusweb.pompfan.evaluators.Last2BidsMeanUtilityEvaluator;
 import geniusweb.pompfan.evaluators.Last2BidsProductUtilityEvaluator;
 import geniusweb.pompfan.evaluators.RandomEvaluator;
@@ -166,7 +167,7 @@ public class Configurator {
 
         return buildBidDistance(this.confComparer, this.uSpace)
                 .buildBelief(this.confBelief, this.listOfOpponents, this.getBidDistance())
-                .buildInitState(this.confEvaluator, this.confInitState, this.uSpace)
+                .buildInitState(this.confEvaluator, this.confInitState, this.uSpace, this.me)
                 .buildExplorer(this.confExplorer, this.me, this.uSpace)
                 .buildWidener(this.confWidener, this.confExtra.get("widener"));
     }
@@ -206,13 +207,15 @@ public class Configurator {
     }
 
     @SuppressWarnings("unchecked")
-    private Configurator buildInitState(String confEvalutator, String confState, UtilitySpace uSpace) {
+    private Configurator buildInitState(String confEvalutator, String confState, UtilitySpace uSpace, PartyId me) {
         switch (confState) {
         case DEFAULT_STATE:
             if (confEvalutator.equals(DEFAULT_EVALUATOR)) {
                 this.setEvaluator(new Last2BidsProductUtilityEvaluator(uSpace));
             } else if (confEvalutator.equals("Last2BidsMeanUtilityEvaluator")) {
                 this.setEvaluator(new Last2BidsMeanUtilityEvaluator(uSpace));
+            } else if (confEvalutator.equals("L2BWithOppModelProductUtilityEvaluator")) {
+                this.setEvaluator(new L2BWithOppModelProductUtilityEvaluator(uSpace).setHolder(me));
             } else {
                 this.setEvaluator(new RandomEvaluator());
             }
