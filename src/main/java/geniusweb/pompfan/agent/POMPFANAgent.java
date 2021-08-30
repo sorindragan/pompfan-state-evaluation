@@ -66,7 +66,7 @@ public class POMPFANAgent extends DefaultParty {
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
     private static boolean DEBUG_BELIEF = false;
-    private static boolean DEBUG_TIME = false;
+    private static boolean DEBUG_TIME = true;
     private Bid lastReceivedBid = null;
     private PartyId me;
     protected ProfileInterface profileint = null;
@@ -114,23 +114,39 @@ public class POMPFANAgent extends DefaultParty {
                 if (DEBUG_TIME)
                     this.me = ((Settings) info).getID();
                 if (DEBUG_TIME)
+                    this.progress = ((Settings) info).getProgress();
+                if (DEBUG_TIME)
                     System.out.println(this.me.getName() + ": Setup");
                 runSetupPhase(info);
             } else if (info instanceof ActionDone) {
                 if (DEBUG_TIME)
-                    System.out.println(this.me.getName() + ": OpponentTurn");
+                    System.out.println(this.me.getName() + " - " + this.progress.get(System.currentTimeMillis())
+                            + ": ActionDone - " + ((ActionDone) info).getAction().getActor());
                 runOpponentPhase(info);
             } else if (info instanceof YourTurn) {
                 if (DEBUG_TIME)
-                    System.out.println(this.me.getName() + ": YourTurn");
+                    System.out.println(
+                            this.me.getName() + " - " + this.progress.get(System.currentTimeMillis()) + ": YourTurn");
                 runAgentPhase(info);
             } else if (info instanceof Finished) {
                 if (DEBUG_TIME)
-                    System.out.println(this.me.getName() + ": Finished");
+                    System.out.println(
+                            this.me.getName() + " - " + this.progress.get(System.currentTimeMillis()) + ": Finished");
                 runEndPhase(info);
             }
+            if (DEBUG_TIME)
+                System.out.println(this.me.getName() + " - " + this.progress.get(System.currentTimeMillis())
+                        + ": END Cycle - " + info.getClass().getSimpleName());
+            cleanupIfGameOver();
         } catch (Exception e) {
             throw new RuntimeException("Failed to handle info", e);
+        }
+    }
+
+    private void cleanupIfGameOver() {
+        if (this.progress.isPastDeadline(System.currentTimeMillis())) {
+            getReporter().log(Level.INFO, "Game's over!");
+            terminate();
         }
     }
 
@@ -427,6 +443,13 @@ public class POMPFANAgent extends DefaultParty {
         }
         this.oppActions = null;
         this.MCTS = null;
+        this.uSpace = null;
+        this.config = null;
+        this.bidsWithUtility = null;
+        this.negotiationData = null;
+        this.persistentState = null;
+        this.parameters = null;
+        this.mapper = null;
     }
 
     /*
@@ -488,7 +511,7 @@ public class POMPFANAgent extends DefaultParty {
             System.out.println("AGREEMENT!!!! -- Util=" + String.valueOf(this.uSpace.getUtility(agreement)) + " -- "
                     + agreement.toString());
             this.negotiationData.addAgreementUtil(this.uSpace.getUtility(agreement).doubleValue());
-        }else{
+        } else {
             System.out.println("NO AGREEMENT!!!! ");
         }
 

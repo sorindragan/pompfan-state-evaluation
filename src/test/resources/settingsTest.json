@@ -6,15 +6,15 @@
 					"parties": [
 						{
 							"party": {
-								"partyref": "classpath:geniusweb.opponents.AntagonisticAgent",
+								"partyref": "classpath:geniusweb.exampleparties.hardliner.Hardliner",
 								"parameters": {
-									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb233",
+									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"negotiationdata": [
-										"e74c1346-1022-438e-887f-26e0ab6b398f"
+										"e74c1346-1022-438e-887f-26e0ab6b398d"
 									]
 								}
 							},
-							"profile": "file:src/test/resources/party2.json"
+							"profile": "file:src/test/resources/party1.json"
 						}
 					]
 				}
@@ -53,14 +53,14 @@
 									}
 								}
 							},
-							"profile": "file:src/test/resources/party1.json"
+							"profile": "file:src/test/resources/party2.json"
 						}
 					]
 				}
 			}
 		],
 		"deadline": {
-			"deadlinetime": { "durationms": 60000 }
+			"deadlinetime": { "durationms": 10000 }
 		}
 	}
 }

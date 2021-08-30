@@ -136,6 +136,7 @@ public abstract class GenericOpponent extends DefaultParty {
             if (DEBUG_TIME)
                 System.out.println(this.me.getName() + " - " + this.progress.get(System.currentTimeMillis())
                         + ": END Cycle - " + info.getClass().getSimpleName());
+            cleanupIfGameOver();
         } catch (Exception e) {
             throw new RuntimeException("Failed to handle info", e);
         }
@@ -163,6 +164,13 @@ public abstract class GenericOpponent extends DefaultParty {
         // Log the final outcome and terminate
         terminate();
     };
+
+    private void cleanupIfGameOver() {
+        if (this.progress.isPastDeadline(System.currentTimeMillis())) {
+            getReporter().log(Level.INFO, "Game's over!");
+            terminate();
+        }
+    }
 
     protected void runAgentPhase(Inform info) throws IOException {
         if (this.getProgress() instanceof ProgressRounds) {
