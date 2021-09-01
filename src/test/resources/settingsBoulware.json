@@ -11,11 +11,11 @@
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"isLearn": true,
 									"numParticlesPerOpponent": "10",
-									"simulationTime": "250",
+									"simulationTime": "100",
 									"dataCollectionTime": "0.25",
 									"config": {
 										"confComparer": "UtilityBidDistance",
-										"confBelief": "BayesianFilterBelief",
+										"confBelief": "ParticleFilterBelief",
 										"confEvaluator": "L2BWithOppModelProductUtilityEvaluator",
 										"confState": "HistoryState",
 										"confExplorer": "TimeConcedingExplorationPolicy",

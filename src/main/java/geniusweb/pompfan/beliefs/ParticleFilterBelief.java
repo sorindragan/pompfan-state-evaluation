@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.apache.commons.math.random.GaussianRandomGenerator;
 
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
@@ -17,9 +20,10 @@ import geniusweb.pompfan.state.AbstractState;
 
 public class ParticleFilterBelief extends AbstractBelief {
 
-    public static final int NUMBER_SAMPLES = 1000; // TODO: Maybe check that out?
-    private static final Double EPSILON = 0.0000000000000001; // TODO: Maybe check that out?
+    public static final int NUMBER_SAMPLES = 100; // TODO: Maybe check that out?
+    protected Double EPSILON = 1.0; // TODO: Maybe check that out?
     private AbstractPolicy mostProbablePolicy = null;
+    protected Random r = new Random();
 
     @JsonCreator
     public ParticleFilterBelief(@JsonProperty("opponents") List<AbstractPolicy> opponents,
@@ -28,7 +32,6 @@ public class ParticleFilterBelief extends AbstractBelief {
         super(opponents, probabilities, distance);
 
     }
-
 
     public ParticleFilterBelief(List<AbstractPolicy> listOfOpponents, AbstractBidDistance distance) {
         super(listOfOpponents, distance); // particles
@@ -50,14 +53,17 @@ public class ParticleFilterBelief extends AbstractBelief {
                 // Monte Carlo Sampling
                 // This is in a loop in which we try multiple actions to get an
                 // understanding of whether the opponent could generate the real obs.
-                Bid sampledBid = this.sample(lastAgentAction, lastOppAction, state, abstractPolicy);
+                // System.out.println(state.getTime());
+                Double noisyTime = state.getTime() + (r.nextGaussian() * 0.1);
+                AbstractState<?> newState = state.setTime(Math.min(1.0, Math.max(0.0, noisyTime)));
+                Bid sampledBid = this.sample(lastAgentAction, lastOppAction, newState, abstractPolicy);
 
                 candidateObservations.add(sampledBid);
             }
             Double weightOpponentLikelihood = candidateObservations.parallelStream().filter(Objects::nonNull)
                     .mapToDouble(obs -> this.getDistance().computeDistance(obs, realObservation.getBid()))
                     .map(val -> Math.abs(val)).sum();
-            
+
             if (weightOpponentLikelihood < minSum) {
                 minSum = weightOpponentLikelihood;
                 this.setMostProbablePolicy(abstractPolicy);

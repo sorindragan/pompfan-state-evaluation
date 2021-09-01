@@ -7,6 +7,7 @@ import java.util.List;
 import geniusweb.actions.PartyId;
 import geniusweb.pompfan.beliefs.AbstractBelief;
 import geniusweb.pompfan.beliefs.BayesianFilterBelief;
+import geniusweb.pompfan.beliefs.BayesianUpdateParticleFilterBelief;
 import geniusweb.pompfan.beliefs.ParticleFilterBelief;
 import geniusweb.pompfan.beliefs.ParticleFilterWithAcceptBelief;
 import geniusweb.pompfan.beliefs.UniformBelief;
@@ -204,6 +205,9 @@ public class Configurator {
             break;
         case "BayesianFilterBelief":
             this.setBelief(new BayesianFilterBelief(listOfOpponents, distance));
+            break;
+        case "BayesianUpdateParticleFilterBelief":
+            this.setBelief(new BayesianUpdateParticleFilterBelief(listOfOpponents, distance));
             break;
         default:
             this.setBelief(new UniformBelief(listOfOpponents, distance));

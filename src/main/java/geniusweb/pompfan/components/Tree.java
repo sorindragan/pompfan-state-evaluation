@@ -1,5 +1,6 @@
 package geniusweb.pompfan.components;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -12,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
+import geniusweb.actions.PartyId;
+import geniusweb.bidspace.AllBidsList;
 import geniusweb.deadline.DeadlineTime;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
@@ -25,7 +28,7 @@ import geniusweb.progress.Progress;
 import geniusweb.progress.ProgressFactory;
 
 public class Tree {
-    private static final boolean PARTICLE_DEBUG = false;
+    private static final boolean PARTICLE_DEBUG = true;
     private static final boolean TREE_DEBUG = false;
     private BeliefNode root;
     private Domain domain;
@@ -42,6 +45,7 @@ public class Tree {
     private Double currentTime = 0.0;
     private BeliefNode originalRoot;
     private Double ACCEPT_SLACK = 0.05;
+    private AllBidsList allBidsList;
 
     public Tree(UtilitySpace utilitySpace, AbstractBelief belief, AbstractState<?> startState, AbstractWidener widener,
             Progress progress) {
@@ -51,6 +55,9 @@ public class Tree {
         if (TREE_DEBUG)
             this.originalRoot = tmpRoot;
         this.setRoot(tmpRoot);
+        this.allBidsList = new AllBidsList(this.getUtilitySpace().getDomain()); 
+        // TODO: This is a very bad code
+        this.lastBestActionNode = new ActionNode(null, startState, new Offer(new PartyId("SomeAgent"), this.allBidsList.get(BigInteger.ZERO)));
         this.widener = widener;
         this.realHistory = new ArrayList<Action>();
         this.setProgress(progress);
@@ -130,10 +137,11 @@ public class Tree {
                 ? (Offer) this.realHistory.get(this.realHistory.size() - 3)
                 : null;
         AbstractState<?> stateUpdatedWithRealTime = null;
-        if (lastRealAgentAction != null) {
-            // get the real negotiation time
-            stateUpdatedWithRealTime = this.lastBestActionNode.getState().setTime(this.currentTime);
+        if (lastRealAgentAction == null) {
+            return this;
         }
+        // get the real negotiation time
+        stateUpdatedWithRealTime = this.lastBestActionNode.getState().setTime(this.currentTime);
 
         // update the belief based on real observation
         this.belief = this.belief.updateBeliefs(newRealObservation, lastRealAgentAction, lastRealOpponentAction,

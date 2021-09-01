@@ -49,7 +49,7 @@ public class BayesianFilterBelief extends ParticleFilterBelief {
         Double numHits = 1.0;
         for (int i = 0; i < BayesianFilterBelief.NUMBER_SAMPLES; i++) {
             Bid sampledBid = this.sample(lastAgentAction, lastOppAction, state, oPolicy);
-            numHits = this.getDistance().computeDistance(sampledBid, realObservation.getBid()) < 0.1 ? ++numHits : numHits;
+            numHits = this.getDistance().computeDistance(sampledBid, realObservation.getBid()) < 0.01 ? ++numHits : numHits;
         }
         return numHits / BayesianFilterBelief.NUMBER_SAMPLES;
     }

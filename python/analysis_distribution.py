@@ -57,7 +57,7 @@ def generate_animate(df: pd.DataFrame, skip=5):
 
         graph = sns.barplot(y=y_data, x=x_data, color="blue", ci=None)
         graph.set_xticklabels(graph.get_xticklabels(), rotation=45, horizontalalignment='right', fontsize='small')
-        # graph.set_ylim(0, 1)
+        graph.set_ylim(0, 1)
         return graph
 
     return animate, len(candindate_cols)

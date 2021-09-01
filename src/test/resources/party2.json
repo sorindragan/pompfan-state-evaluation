@@ -63,12 +63,12 @@
 			}
 		},
 		"issueWeights": {
-			"Food": 0.095,
-			"Drinks": 0.228,
-			"Location": 0.109,
 			"Invitations": 0.214,
 			"Music": 0.108,
-			"Cleanup": 0.246
+			"Drinks": 0.228,
+			"Cleanup": 0.246,
+			"Location": 0.109,
+			"Food": 0.095
 		},
 		"domain": {
 			"name": "party",
