@@ -62,11 +62,11 @@ public class POMPFANAgent extends DefaultParty {
      */
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = false;
-    private static boolean DEBUG_OFFER = true;
+    private static boolean DEBUG_OFFER = false;
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
     private static boolean DEBUG_BELIEF = false;
-    private static boolean DEBUG_TIME = true;
+    private static boolean DEBUG_TIME = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
     protected ProfileInterface profileint = null;

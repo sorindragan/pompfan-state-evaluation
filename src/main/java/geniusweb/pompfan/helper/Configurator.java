@@ -6,6 +6,7 @@ import java.util.List;
 
 import geniusweb.actions.PartyId;
 import geniusweb.pompfan.beliefs.AbstractBelief;
+import geniusweb.pompfan.beliefs.BayesianFilterBelief;
 import geniusweb.pompfan.beliefs.ParticleFilterBelief;
 import geniusweb.pompfan.beliefs.ParticleFilterWithAcceptBelief;
 import geniusweb.pompfan.beliefs.UniformBelief;
@@ -14,6 +15,8 @@ import geniusweb.pompfan.distances.HammingBidDistance;
 import geniusweb.pompfan.distances.JaccardBidDistance;
 import geniusweb.pompfan.distances.RandomBidDistance;
 import geniusweb.pompfan.distances.UtilityBidDistance;
+import geniusweb.pompfan.evaluators.ConcessionUtilityEvaluator;
+import geniusweb.pompfan.evaluators.ConcessionUtilityEvaluatorWithHistory;
 import geniusweb.pompfan.evaluators.IEvalFunction;
 import geniusweb.pompfan.evaluators.L2BWithOppModelProductUtilityEvaluator;
 import geniusweb.pompfan.evaluators.Last2BidsMeanUtilityEvaluator;
@@ -199,6 +202,9 @@ public class Configurator {
         case "ParticleFilterBelief":
             this.setBelief(new ParticleFilterBelief(listOfOpponents, distance));
             break;
+        case "BayesianFilterBelief":
+            this.setBelief(new BayesianFilterBelief(listOfOpponents, distance));
+            break;
         default:
             this.setBelief(new UniformBelief(listOfOpponents, distance));
             break;
@@ -216,6 +222,10 @@ public class Configurator {
                 this.setEvaluator(new Last2BidsMeanUtilityEvaluator(uSpace));
             } else if (confEvalutator.equals("L2BWithOppModelProductUtilityEvaluator")) {
                 this.setEvaluator(new L2BWithOppModelProductUtilityEvaluator(uSpace).setHolder(me));
+            } else if (confEvalutator.equals("ConcessionUtilityEvaluator")) {
+                this.setEvaluator(new ConcessionUtilityEvaluator(uSpace).setHolder(me));
+            } else if (confEvalutator.equals("ConcessionUtilityEvaluatorWithHistory")) {
+                this.setEvaluator(new ConcessionUtilityEvaluatorWithHistory(uSpace).setHolder(me));
             } else {
                 this.setEvaluator(new RandomEvaluator());
             }

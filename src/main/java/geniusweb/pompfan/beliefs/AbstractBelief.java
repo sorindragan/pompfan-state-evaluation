@@ -89,7 +89,7 @@ public abstract class AbstractBelief {
         return opponentProbabilities;
     }
 
-    public AbstractBelief setOpponentProbabilities(HashMap<AbstractPolicy, Double> opponentProbabilities) {
+    public AbstractBelief setOpponentProbabilities(Map<AbstractPolicy, Double> opponentProbabilities) {
         this.opponentProbabilities = opponentProbabilities;
         return this;
     }

@@ -36,20 +36,7 @@ cols_conf = [
     "evaluator",
     "widener",
 ]
-cols_mwws = [
-    "maxWidth",
-]
 
-cols_pgws = [
-    "k_a",
-    "a_a",
-    "a_b",
-]
-
-cols_univ = [
-    "numParticles",
-    "simulationTime",
-]
 
 # %%
 df["name"] = None
@@ -63,11 +50,13 @@ df = df.rename(
         "pwp.party.parameters.config.confWidener": "widener",
         "pwp.party.parameters.numParticlesPerOpponent": "numParticles",
         "pwp.party.parameters.simulationTime": "simulationTime",
+        "pwp.party.parameters.dataCollectionTime": "dataCollectionTime",
         "params.config.confExtra.widener.k_a": "k_a",
         "params.config.confExtra.widener.k_b": "k_b",
         "params.config.confExtra.widener.a_a": "a_a",
         "params.config.confExtra.widener.a_b": "a_b",
         "params.config.confExtra.widener.maxWidth": "maxWidth",
+        "pwp.profile": "profile",
     })
 i_subset = df.party == "POMPFANAgent"
 tmp_df = df[i_subset]
@@ -83,11 +72,14 @@ le = preprocessing.LabelEncoder()
 df.loc[i_subset, ["name_encoded"]] = le.fit_transform(df[i_subset].name)
 df
 # %%
-df["no_agreement"] = df.utility == 0.0
+df["profile"] = df["profile"].str.split("/").str[-1]
+df["no_agreement"] = (df.utility == 0.0) * 1.0
+df["agreement"] = (df.utility != 0.0) * 1.0
 df["error"] = df.utility == -1.0
 df["vs"] = None
-df["vs_utility"] = None
+df["vs_utility"] = 0
 for index, df_subset in df.groupby(["session", "tournamentStart", "sessionStart"]):
+
     try:
         party1, party2 = df_subset["name"]
         party1_enc, party2_enc = df_subset["name_encoded"]
@@ -101,23 +93,26 @@ for index, df_subset in df.groupby(["session", "tournamentStart", "sessionStart"
         print("Problem with missing correspondence!!!")
         print(e)
         print(index)
-        display(df_subset)
+        display(df_subset.iloc[:, :])
 
 df.to_csv(file_to_analyse.parent / "data.csv")
 df
 # %%
-df_relevant = df[df.party == "POMPFANAgent"]
-df_relevant["numParticles"] = df_relevant["numParticles"].astype(float)
-df_relevant["simulationTime"] = df_relevant["simulationTime"].astype(float)
-df_relevant["k_a"] = df_relevant["k_a"].astype(float)
-df_relevant["a_a"] = df_relevant["a_a"].astype(float)
-df_relevant["k_b"] = df_relevant["k_b"].astype(float)
-df_relevant["a_b"] = df_relevant["a_b"].astype(float)
-df_relevant["maxWidth"] = df_relevant["maxWidth"].astype(float)
+df_relevant = df[df.party == "POMPFANAgent"].copy()
+df_relevant.loc[:, ["numParticles"]] = df_relevant.loc[:, ["numParticles"]].astype(float)
+df_relevant.loc[:, ["simulationTime"]] = df_relevant.loc[:, ["simulationTime"]].astype(float)
+df_relevant.loc[:, ["dataCollectionTime"]] = df_relevant.loc[:, ["dataCollectionTime"]].astype(float)
+df_relevant.loc[:, ["k_a"]] = df_relevant.loc[:, ["k_a"]].astype(float)
+df_relevant.loc[:, ["a_a"]] = df_relevant.loc[:, ["a_a"]].astype(float)
+df_relevant.loc[:, ["k_b"]] = df_relevant.loc[:, ["k_b"]].astype(float)
+df_relevant.loc[:, ["a_b"]] = df_relevant.loc[:, ["a_b"]].astype(float)
+df_relevant.loc[:, ["maxWidth"]] = df_relevant.loc[:, ["maxWidth"]].astype(float)
+df_relevant["utility_bins"] = pd.cut(df_relevant['utility'], 11)
 df_relevant
 # %%
 df_pgws = df_relevant[df_relevant.widener == "ProgressiveWideningStrategy"]
 df_mwws = df_relevant[df_relevant.widener == "MaxWidthWideningStrategy"]
+# %%
 
 
 def mode(x):
@@ -131,6 +126,7 @@ def get_top_k(df, k=50):
         'session': ['count'],
         'numParticles': param_grp,
         'simulationTime': param_grp,
+        'dataCollectionTime': param_grp,
         'k_a': param_grp,
         'a_a': param_grp,
         'a_b': param_grp,
@@ -186,8 +182,8 @@ agg_df_mwws.to_csv(log_dir / "data_mwws.csv")
 
 # %%
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
-sns.boxplot(data=df_pgws, x="vs", y="utility", ax=ax1)
-sns.boxplot(data=df_mwws, x="vs", y="utility", ax=ax2)
+sns.boxplot(data=df_pgws.sort_values("vs"), x="vs", y="utility", ax=ax1)
+sns.boxplot(data=df_mwws.sort_values("vs"), x="vs", y="utility", ax=ax2)
 ax1.set_title("ProgessiveWidening")
 ax2.set_title("MaxWidthWidening")
 for ax in [ax1, ax2]:
@@ -197,94 +193,241 @@ for ax in [ax1, ax2]:
     ax.set_ylabel("Utility")
 # %%
 
+
 # %%
-fig, axes = plt.subplots(2, 1, figsize=(15, 15))
-subset_id = "ParticleFilterBelief_JaccardBidDistance_TimeConcedingExplorationPolicy_Last2BidsMeanUtilityEvaluator_MaxWidthWideningStrategy"
+def plot_param(df, ax, divider_id):
+    # df = df[df["agreement"]==1]
+    ax = sns.boxplot(data=df, x=divider_id, y="utility", ax=ax)
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(45)
+    ax.set_xlabel(divider_id)
+    ax.set_ylabel("Utility")
+
+
+fig, all_axes = plt.subplots(3, 2, figsize=(18, 15))
+axes = all_axes.flatten()
 
 divider_id = "simulationTime"
 ax = axes[0]
-ax = sns.boxplot(data=df_mwws, x=divider_id, y="utility", ax=ax)
-for tick in ax.get_xticklabels():
-    tick.set_rotation(45)
-ax.set_xlabel("Simulation Time")
-ax.set_ylabel("Utility")
+plot_param(df_mwws, ax, divider_id)
+
+divider_id = "simulationTime"
+ax = axes[1]
+plot_param(df_pgws, ax, divider_id)
+
+divider_id = "dataCollectionTime"
+ax = axes[2]
+plot_param(df_mwws, ax, divider_id)
+
+divider_id = "dataCollectionTime"
+ax = axes[3]
+plot_param(df_pgws, ax, divider_id)
 
 divider_id = "numParticles"
+ax = axes[4]
+plot_param(df_mwws, ax, divider_id)
+
+divider_id = "numParticles"
+ax = axes[5]
+plot_param(df_pgws, ax, divider_id)
+
+
+# %%
+def plot_my_util_vs_opponents(df, ax):
+    ax = sns.boxplot(data=df.sort_values("vs"), x="vs", y="utility", ax=ax)
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(30)
+    ax.set_xlabel("By Opponent")
+    ax.set_ylabel("Own Utility")
+
+
+def plot_opponents_util_vs_me(df, ax):
+    ax = sns.boxplot(data=df.sort_values("vs"), x="vs", y="vs_utility", ax=ax)
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(30)
+    ax.set_xlabel("By Opponent")
+    ax.set_ylabel("Opponent Utility")
+
+
+fig, all_axes = plt.subplots(2, 3, figsize=(18, 15))
+axes = all_axes.flatten()
+
+ax = axes[0]
+plot_my_util_vs_opponents(df_relevant, ax)
 ax = axes[1]
-ax = sns.boxplot(data=df_mwws, x=divider_id, y="utility", ax=ax)
-for tick in ax.get_xticklabels():
-    tick.set_rotation(45)
-ax.set_xlabel("Num Particles per Opponent")
-ax.set_ylabel("Utility")
-plt.show()
-# %%
-ax = sns.boxplot(data=df_relevant, x="vs", y="utility")
-for tick in ax.get_xticklabels():
-    tick.set_rotation(45)
-ax.set_xlabel("Num Particles per Opponent")
-ax.set_ylabel("Utility")
+plot_my_util_vs_opponents(df_mwws, ax)
+ax = axes[2]
+plot_my_util_vs_opponents(df_pgws, ax)
+ax = axes[3]
+plot_opponents_util_vs_me(df_relevant, ax)
+ax = axes[4]
+plot_opponents_util_vs_me(df_mwws, ax)
+ax = axes[5]
+plot_opponents_util_vs_me(df_pgws, ax)
+
+fig.tight_layout()
 plt.show()
 
 # %%
+aggregator = ["evaluator"]
+agg_mapper = {
+    'utility': ['mean', 'median', 'sum'],
+    'session': ['count'],
+    'agreement': ['mean', 'sum'],
+}
+
 print("df_relevant: ")
-display(
-    df_relevant.groupby(["vs"]).agg({
-        'utility': ['mean', 'median', 'sum'],
-        'session': ['count'],
-        'no_agreement': ['mean', 'sum'],
-    }))
+df_relevant.groupby(["widener", "vs"] + aggregator).agg(agg_mapper)
+# %%
 print("df_pgws: ")
-display(
-    df_pgws.groupby(["vs"]).agg({
-        'utility': ['mean', 'median', 'sum'],
-        'session': ['count'],
-        'no_agreement': ['mean', 'sum'],
-    }))
+display(df_pgws.groupby(["widener", "vs"] + aggregator).agg(agg_mapper))
+# %%
 print("df_mwws: ")
-display(
-    df_mwws.groupby(["vs"]).agg({
+display(df_mwws.groupby(["widener", "vs"] + aggregator).agg(agg_mapper))
+
+
+# %%
+def explore_configs(df, ax, aggregator1, aggregator2):
+    agg_mapper = {
         'utility': ['mean', 'median', 'sum'],
         'session': ['count'],
-        'no_agreement': ['mean', 'sum'],
-    }))
+        'agreement': ['mean', 'sum'],
+    }
+    tmp_df = df.groupby(["widener"] + aggregator2 + aggregator1).agg(agg_mapper).reset_index()
+    tmp_df.columns = tmp_df.columns.map('_'.join).str.strip('_')
+    ax = sns.scatterplot(
+        data=tmp_df,
+        x=aggregator1[0],
+        y=aggregator2[0],
+        size="utility_mean",
+        hue="widener",
+        alpha=0.7,
+        legend=True,
+        ax=ax,
+        sizes=(100, 1000),
+    )
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(30)
+    ax.set_xlabel("By Opponent")
+    ax.set_ylabel("Opponent Utility")
+    ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
+
+aggregator1 = ["beliefer"]
+aggregator2 = ["vs"]
+fig = plt.figure(figsize=(10, 5))
+ax = plt.gca()
+explore_configs(df_relevant, ax, aggregator1, aggregator2)
+plt.show()
+# %%
+# fig = plt.figure(figsize=(10, 5))
+# ax = plt.gca()
+# aggregator1 = ["evaluator"]
+# aggregator2 = ["vs"]
+# agg_mapper = {
+#     'utility': ['mean'],
+#     'simulationTime': ['mean'],
+#     'dataCollectionTime': ['mean'],
+#     'numParticles': ['mean'],
+#     'session': ['count'],
+#     'agreement': ['mean'],
+# }
+# tmp_df = df_mwws.copy()
+# tmp_df = tmp_df.groupby([
+#     "widener",
+#     "evaluator",
+#     "explorer",
+#     "comparer",
+#     "beliefer",
+#     # "simulationTime",
+#     # "numParticles",
+#     "vs",
+# ]).agg(agg_mapper).reset_index()
+# tmp_df.columns = tmp_df.columns.map('_'.join).str.strip('_')
+# display(tmp_df)
+# ax = sns.scatterplot(
+#     data=df_mwws[(df_mwws.vs == "Hardliner") & (df_mwws.agreement == 1)],
+#     x="dataCollectionTime",
+#     y="utility",
+#     hue="simulationTime",
+#     # hue="maxWidth",
+#     alpha=0.7,
+#     legend=True,
+#     ax=ax,
+#     # sizes=(100, 1000),
+# )
+# for tick in ax.get_xticklabels():
+#     tick.set_rotation(30)
+# # ax.set_xlabel("By Opponent")
+# # ax.set_ylabel("Opponent Utility")
+# ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+# plt.show()
+# %%
+cols_mwws = [
+    "maxWidth",
+]
+
+cols_pgws = [
+    "k_a",
+    "a_a",
+    "a_b",
+]
+
+cols_univ = [
+    "numParticles",
+    "simulationTime",
+    "dataCollectionTime",
+    # "vs",
+    # "profile",
+    # "agreement",
+]
+# %%
+fig = plt.figure(figsize=(15, 10))
+df_tmp = df_pgws
+# df_tmp = df_tmp[df_tmp["utility"] > 0]
+min_max_scaler = preprocessing.MinMaxScaler()
+y = df_tmp["utility"]
+X = df_tmp[cols_conf + cols_pgws + cols_univ]
+X = pd.get_dummies(X, drop_first=False)
+ax = sns.heatmap(X.corr())
+plt.show()
 # %%
 from rulefit import RuleFit
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn import preprocessing
 from sklearn import metrics
 # %%
 df_tmp = df_mwws
-df_tmp = df_tmp[df_tmp["utility"] > 0]
+# df_tmp = df_tmp[df_tmp["utility"] > 0]
 min_max_scaler = preprocessing.MinMaxScaler()
 y = df_tmp["utility"]
 X = df_tmp[cols_conf + cols_mwws + cols_univ]
-X = pd.get_dummies(X, drop_first=True)
+X = pd.get_dummies(X, drop_first=False)
 # X.loc[:,:] = min_max_scaler.fit_transform(X)
 
 # https://towardsdatascience.com/interpretable-machine-learning-in-10-minutes-with-rulefit-and-scikit-learn-da9ebb925795
-rulefit = RuleFit(tree_generator=RandomForestRegressor(n_estimators=10))
+rulefit = RuleFit(tree_generator=GradientBoostingRegressor(learning_rate=0.001, n_estimators=50))
 rulefit.fit(X.values, y, feature_names=X.columns)
 rulefit_preds = rulefit.predict(X.values)
 rulefit_rmse = metrics.r2_score(y, rulefit_preds)
-print(rulefit_rmse)
 rules_mwws = rulefit.get_rules()
+print(rulefit_rmse)
 # %%
 df_tmp = df_pgws
-df_tmp = df_tmp[df_tmp["utility"] > 0]
+# df_tmp = df_tmp[df_tmp["utility"] > 0]
 min_max_scaler = preprocessing.MinMaxScaler()
 y = df_tmp["utility"]
 X = df_tmp[cols_conf + cols_pgws + cols_univ]
-X = pd.get_dummies(X, drop_first=True)
+X = pd.get_dummies(X, drop_first=False)
 # X.loc[:,:] = min_max_scaler.fit_transform(X)
 
 # https://towardsdatascience.com/interpretable-machine-learning-in-10-minutes-with-rulefit-and-scikit-learn-da9ebb925795
-rulefit = RuleFit(tree_generator=RandomForestRegressor(n_estimators=10))
+rulefit = RuleFit(tree_generator=GradientBoostingRegressor(learning_rate=0.001, n_estimators=50))
 rulefit.fit(X.values, y, feature_names=X.columns)
 rulefit_preds = rulefit.predict(X.values)
 rulefit_rmse = metrics.r2_score(y, rulefit_preds)
-print(rulefit_rmse)
 rules_pgws = rulefit.get_rules()
+print(rulefit_rmse)
 # %%
 rules_mwws["strategy"] = "MaxWidthWidening"
 rules_pgws["strategy"] = "ProgessiveWidening"
@@ -296,95 +439,69 @@ df_tmp = df_tmp[df_tmp["utility"] > 0]
 min_max_scaler = preprocessing.MinMaxScaler()
 y = df_tmp["utility"]
 X = df_tmp[cols_conf + cols_pgws + cols_univ]
-X = pd.get_dummies(X, drop_first=True)
-model = xgboost.XGBRegressor().fit(X.values, y)
-# model = RandomForestRegressor(n_estimators=10).fit(X.values, y)
+X = pd.get_dummies(X, drop_first=False)
+model = xgboost.XGBRegressor(max_depth=3).fit(X.values, y)
+# model = GradientBoostingRegressor(learning_rate=1, n_estimators=50).fit(X.values, y)
 rulefit_rmse = metrics.r2_score(y, model.predict(X.values))
 print(rulefit_rmse)
 explainer = shap.Explainer(model)
 shap_values = explainer(X)
-shap.plots.beeswarm(shap_values)
+shap.summary_plot(shap_values, X)
 # %%
 df_tmp = df_mwws
 df_tmp = df_tmp[df_tmp["utility"] > 0]
 min_max_scaler = preprocessing.MinMaxScaler()
 y = df_tmp["utility"]
 X = df_tmp[cols_conf + cols_mwws + cols_univ]
-X = pd.get_dummies(X, drop_first=True)
+X = pd.get_dummies(X, drop_first=False)
 model = xgboost.XGBRegressor().fit(X.values, y)
 # model = RandomForestRegressor(n_estimators=10).fit(X.values, y)
 rulefit_rmse = metrics.r2_score(y, model.predict(X.values))
 print(rulefit_rmse)
 explainer = shap.Explainer(model)
 shap_values = explainer(X)
-shap.plots.beeswarm(shap_values)
+shap.summary_plot(shap_values, X)
 
 # %%
 pd.set_option('display.max_colwidth', 400)  # Adjust row width to read the entire rule
 pd.options.display.float_format = '{:.5f}'.format  # Round decimals to 2 decimal places
 # rules = rulefit.get_rules()  # Get the rules
+def plot_rule_bubbles(rules):
+    rules = rules[rules['type'] != 'linear']  # Eliminate the existing explanatory variables
+    rules = rules[rules['coef'] != 0]  # eliminate the insignificant rules
+    rules = rules.sort_values('importance', ascending=False)  # Sort the rules based on "support" value
+    # rules = rules[rules['rule'].str.len()>30] # optional: To see more complex rules, filter the long rules
+    rules.iloc[0:20]  # Show the first 5 rules
+
+    from adjustText import adjust_text
+    fig = plt.figure(figsize=(15, 10))
+    ax = sns.scatterplot(data=rules, x="coef", size="support", y="importance", alpha=0.5, legend=False, sizes=(20, 2000))
+    TEXTS = []
+    BG_WHITE = "#fbf9f4"
+    GREY_LIGHT = "#b4aea9"
+    GREY50 = "#7F7F7F"
+    GREY30 = "#4d4d4d"
+    topk_rules = rules.iloc[0:5]
+    for i in range(len(topk_rules)):
+        x = topk_rules["coef"].iloc[i]
+        y = topk_rules["importance"].iloc[i]
+        text = topk_rules["rule"].iloc[i]
+        TEXTS.append(ax.text(x, y, text, color=GREY30, fontsize=10, fontname="Poppins"))
+
+    adjust_text(TEXTS, expand_points=(2, 1), arrowprops=dict(arrowstyle="->", color=GREY50, lw=2), ax=fig.axes[0])
+# legend = ax.legend(
+#     loc=(0.85, 0.025), # bottom-right
+#     labelspacing=1.5,  # add space between labels
+#     markerscale=1.5,   # increase marker size
+#     frameon=False      # don't put a frame
+    # )
+# %%
 rules = rules_pgws  # Get the rules
-rules = rules[rules['type'] != 'linear']  # Eliminate the existing explanatory variables
-rules = rules[rules['coef'] != 0]  # eliminate the insignificant rules
-rules = rules.sort_values('importance', ascending=False)  # Sort the rules based on "support" value
-# rules = rules[rules['rule'].str.len()>30] # optional: To see more complex rules, filter the long rules
-rules.iloc[0:20]  # Show the first 5 rules
-
-from adjustText import adjust_text
-fig = plt.figure(figsize=(15, 10))
-ax = sns.scatterplot(data=rules, x="coef", y="support", size="importance", alpha=0.5, legend=False, sizes=(20, 2000))
-TEXTS = []
-BG_WHITE = "#fbf9f4"
-GREY_LIGHT = "#b4aea9"
-GREY50 = "#7F7F7F"
-GREY30 = "#4d4d4d"
-topk_rules = rules.iloc[0:3]
-for i in range(len(topk_rules)):
-    x = topk_rules["coef"].iloc[i]
-    y = topk_rules["support"].iloc[i]
-    text = topk_rules["rule"].iloc[i]
-    TEXTS.append(ax.text(x, y, text, color=GREY30, fontsize=14, fontname="Poppins"))
-
-adjust_text(TEXTS, expand_points=(1, 10), arrowprops=dict(arrowstyle="->", color=GREY50, lw=2), ax=fig.axes[0])
-# legend = ax.legend(
-#     loc=(0.85, 0.025), # bottom-right
-#     labelspacing=1.5,  # add space between labels
-#     markerscale=1.5,   # increase marker size
-#     frameon=False      # don't put a frame
-# )
+plot_rule_bubbles(rules)
 plt.show()
 # %%
-pd.set_option('display.max_colwidth', 400)  # Adjust row width to read the entire rule
-pd.options.display.float_format = '{:.5f}'.format  # Round decimals to 2 decimal places
-# rules = rulefit.get_rules()  # Get the rules
 rules = rules_mwws  # Get the rules
-rules = rules[rules['type'] != 'linear']  # Eliminate the existing explanatory variables
-rules = rules[rules['coef'] != 0]  # eliminate the insignificant rules
-rules = rules.sort_values('importance', ascending=False)  # Sort the rules based on "support" value
-# rules = rules[rules['rule'].str.len()>30] # optional: To see more complex rules, filter the long rules
-rules.iloc[0:20]  # Show the first 5 rules
-
-from adjustText import adjust_text
-fig = plt.figure(figsize=(15, 10))
-ax = sns.scatterplot(data=rules, x="coef", y="support", size="importance", alpha=0.5, legend=False, sizes=(20, 2000))
-TEXTS = []
-BG_WHITE = "#fbf9f4"
-GREY_LIGHT = "#b4aea9"
-GREY50 = "#7F7F7F"
-GREY30 = "#4d4d4d"
-topk_rules = rules.iloc[0:3]
-for i in range(len(topk_rules)):
-    x = topk_rules["coef"].iloc[i]
-    y = topk_rules["support"].iloc[i]
-    text = topk_rules["rule"].iloc[i]
-    TEXTS.append(ax.text(x, y, text, color=GREY30, fontsize=14, fontname="Poppins"))
-
-adjust_text(TEXTS, expand_points=(1, 10), arrowprops=dict(arrowstyle="->", color=GREY50, lw=2), ax=fig.axes[0])
-# legend = ax.legend(
-#     loc=(0.85, 0.025), # bottom-right
-#     labelspacing=1.5,  # add space between labels
-#     markerscale=1.5,   # increase marker size
-#     frameon=False      # don't put a frame
-# )
+plot_rule_bubbles(rules)
 plt.show()
+# %%
 # %%

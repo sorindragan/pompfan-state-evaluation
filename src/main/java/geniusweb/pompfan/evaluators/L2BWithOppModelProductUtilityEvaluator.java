@@ -44,7 +44,7 @@ public class L2BWithOppModelProductUtilityEvaluator extends Last2BidsProductUtil
                     .doubleValue();
         }
 
-        List<Action> opponentsActions = currState.stream().filter(act -> act.getActor().equals(this.getHolder()))
+        List<Action> opponentsActions = currState.stream().filter(act -> !act.getActor().equals(this.getHolder()))
                 .collect(Collectors.toList());
         Domain domain = state.getUtilitySpace().getDomain();
         this.setOppModel(new EntropyWeightedOpponentModel(domain, opponentsActions));

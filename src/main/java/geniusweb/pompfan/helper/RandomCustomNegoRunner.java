@@ -38,7 +38,7 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
         private final static List<String> setSimulationTime = IntStream.range(1, 10).boxed().map(String::valueOf)
                         .map(e -> e + "00").collect(Collectors.toList());
         private final static List<String> setDataCollectionTime = RANDOM.doubles(10, 0.0, 0.5).mapToObj(String::valueOf)
-                        .map(BigDecimal::new).map(e -> e.setScale(1, RoundingMode.HALF_UP)).map(String::valueOf)
+                        .map(BigDecimal::new).map(e -> e.setScale(2, RoundingMode.HALF_UP)).map(String::valueOf)
                         .collect(Collectors.toList());
         private final static List<String> setK = RANDOM.doubles(10, 2.0, 5.0).mapToObj(String::valueOf)
                         .map(BigDecimal::new).map(e -> e.setScale(0, RoundingMode.DOWN)).map(String::valueOf)
@@ -54,10 +54,13 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                         "HammingBidDistance");
         // private final static List<String> setComparer =
         // Arrays.asList("JaccardBidDistance", "HammingBidDistance");
-        private final static List<String> setBelief = Arrays.asList("ParticleFilterWithAcceptBelief",
-                        "ParticleFilterBelief");
+        // private final static List<String> setBelief =
+        // Arrays.asList("ParticleFilterWithAcceptBelief",
+        // "ParticleFilterBelief", "BayesianFilterBelief", "UniformBelief");
+        private final static List<String> setBelief = Arrays.asList("BayesianFilterBelief", "UniformBelief");
         private final static List<String> setEvaluator = Arrays.asList("Last2BidsProductUtilityEvaluator",
-                        "Last2BidsMeanUtilityEvaluator", "RandomEvaluator");
+                        "Last2BidsMeanUtilityEvaluator", "L2BWithOppModelProductUtilityEvaluator", "RandomEvaluator",
+                        "ConcessionUtilityEvaluator", "ConcessionUtilityEvaluatorWithHistory");
         private final static List<String> setExplorer = Arrays.asList("HighSelfEsteemOwnExplorationPolicy",
                         "TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
         // private final static List<String> setExplorer =
@@ -86,7 +89,7 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                                 .readTree(new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8));
 
                 Integer cnt = 0;
-                for (int i = 0; i < 100; i++) {
+                for (int i = 0; i < 200; i++) {
                         cnt++;
                         ObjectNode target = (ObjectNode) settingsJson.get("AllPermutationsSettings").get("teams").get(0)
                                         .get("Team").get(0);

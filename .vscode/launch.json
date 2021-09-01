@@ -29,7 +29,7 @@
 				"src/test/resources/tournament_random.json",
 			],
 			"console": "externalTerminal",
-			"vmArgs": "-Xms4g -Xmx32g"
+			"vmArgs": "-Xms4g -Xmx24g"
 		},
 		{
 			"type": "java",

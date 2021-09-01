@@ -37,7 +37,7 @@
 									"config": {
 										"confComparer": "UtilityBidDistance",
 										"confBelief": "ParticleFilterWithAcceptBelief",
-										"confEvaluator": "L2BWithOppModelProductUtilityEvaluator",
+										"confEvaluator": "ConcessionUtilityEvaluatorWithHistory",
 										"confState": "HistoryState",
 										"confExplorer": "TimeConcedingExplorationPolicy",
 										"confWidener": "ProgressiveWideningStrategy",
