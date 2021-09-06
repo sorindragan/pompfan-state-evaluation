@@ -16,8 +16,8 @@ import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
+import geniusweb.pompfan.opponentModels.AHPFreqWeightedOpponentModel;
 import geniusweb.pompfan.opponentModels.AbstractOpponentModel;
-import geniusweb.pompfan.opponentModels.EntropyWeightedOpponentModel;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;
@@ -42,7 +42,8 @@ public class SimpleOpponentModelPolicy extends AbstractPolicy {
     public SimpleOpponentModelPolicy(@JsonProperty("domain") Domain domain, @JsonProperty("name") String name,
             @JsonProperty("recordedBehavior") List<Action> recordedBehavior,
             @JsonProperty("STUBBORNESS") BigDecimal STUBBORNESS) {
-        super(new EntropyWeightedOpponentModel(domain, recordedBehavior), name);
+        super(domain, name);
+        this.setUtilitySpace(new AHPFreqWeightedOpponentModel(domain, recordedBehavior, this.getPartyId()));
         this.setRecordedBehavior(recordedBehavior);
         this.allBids = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
         this.possibleRange = this.getAllBids().getRange();
@@ -53,7 +54,7 @@ public class SimpleOpponentModelPolicy extends AbstractPolicy {
 
     public SimpleOpponentModelPolicy(Domain domain, String name, List<Action> realHistoryActions) {
         super(domain, name);
-        this.setUtilitySpace(new EntropyWeightedOpponentModel(domain, realHistoryActions));
+        this.setUtilitySpace(new AHPFreqWeightedOpponentModel(domain, realHistoryActions, this.getPartyId()));
         this.setRecordedBehavior(realHistoryActions);
         this.allBids = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
         this.possibleRange = this.getAllBids().getRange();
