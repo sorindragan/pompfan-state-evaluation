@@ -1,4 +1,4 @@
-package geniusweb.pompfan.helper;
+package geniusweb.pompfan.components;
 
 import java.util.ArrayList;
 import java.util.HashMap;

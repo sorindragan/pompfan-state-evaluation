@@ -30,7 +30,7 @@ public class SelfishOpponentPolicy extends AbstractPolicy {
     private Interval searchRange;
     @JsonIgnore
     private ImmutableList<Bid> possibleBids;
-    public BigDecimal STUBBORNESS = new BigDecimal(Math.max(new Random().nextDouble(), 0.75f));
+    public BigDecimal STUBBORNESS = new BigDecimal(new Random().doubles(1l, 0.5, 1.0).mapToObj(dbl -> String.valueOf(dbl)).findFirst().get());
 
     @JsonCreator
     public SelfishOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("STUBBORNESS") BigDecimal STUBBORNESS) {

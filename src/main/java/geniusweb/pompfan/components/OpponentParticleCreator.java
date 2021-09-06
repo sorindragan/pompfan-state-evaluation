@@ -1,4 +1,4 @@
-package geniusweb.pompfan.opponents;
+package geniusweb.pompfan.components;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,15 @@ import java.util.stream.Collectors;
 
 import geniusweb.bidspace.AllBidsList;
 import geniusweb.issuevalue.Domain;
+import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.opponents.AntagonisticOpponentPolicy;
+import geniusweb.pompfan.opponents.BoulwareOpponentPolicy;
+import geniusweb.pompfan.opponents.ConcederOpponentPolicy;
+import geniusweb.pompfan.opponents.HardLinerOpponentPolicy;
+import geniusweb.pompfan.opponents.LinearOpponentPolicy;
+import geniusweb.pompfan.opponents.OwnUtilityTFTOpponentPolicy;
+import geniusweb.pompfan.opponents.SelfishOpponentPolicy;
+import geniusweb.pompfan.opponents.TimeDependentOpponentPolicy;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
 public abstract class OpponentParticleCreator {
