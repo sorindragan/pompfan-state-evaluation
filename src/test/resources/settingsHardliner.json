@@ -14,7 +14,7 @@
 									"simulationTime": "400",
 									"config": {
 										"confComparer": "UtilityBidDistance",
-										"confBelief": "ParticleFilterWithAcceptBelief",
+										"confBelief": "BayesianCountFilterBelief",
 										"confEvaluator": "Last2BidsProductUtilityEvaluator",
 										"confState": "HistoryState",
 										"confExplorer": "TimeConcedingExplorationPolicy",

@@ -67,8 +67,8 @@
 			"Music": 0.108,
 			"Drinks": 0.228,
 			"Cleanup": 0.246,
-			"Location": 0.109,
-			"Food": 0.095
+			"Food": 0.095,
+			"Location": 0.109
 		},
 		"domain": {
 			"name": "party",

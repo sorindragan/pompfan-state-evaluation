@@ -150,7 +150,7 @@
 				"$Auto"
 			],
 			"args": "src/test/resources/settingsTest.json",
-			"console": "internalConsole"
+			"console": "externalTerminal"
 		},
 		{
 			"type": "java",
@@ -183,7 +183,7 @@
 				"$Auto"
 			],
 			"args": "src/test/resources/settingsBoulware.json",
-			"console": "internalConsole"
+			"console": "externalTerminal"
 		},
 		{
 			"type": "java",

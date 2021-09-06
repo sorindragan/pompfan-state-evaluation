@@ -1,18 +1,10 @@
 package geniusweb.opponents;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import javax.websocket.DeploymentException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
@@ -21,19 +13,13 @@ import geniusweb.actions.Offer;
 import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
 import geniusweb.inform.Agreements;
-import geniusweb.inform.Inform;
-import geniusweb.inform.Settings;
-import geniusweb.inform.YourTurn;
 import geniusweb.issuevalue.Bid;
-import geniusweb.pompfan.opponentModels.EntropyWeightedOpponentModel;
-import geniusweb.profile.utilityspace.UtilitySpace;
-import geniusweb.progress.Progress;
-import geniusweb.progress.ProgressRounds;
-import tudelft.utilities.immutablelist.ImmutableList;
+import geniusweb.pompfan.opponentModels.AHPFreqWeightedOpponentModel;
+import geniusweb.pompfan.opponentModels.AbstractOpponentModel;
 
 public class AntagonisticAgent extends GenericOpponent {
 
-    private EntropyWeightedOpponentModel opponentModel;
+    private AbstractOpponentModel opponentModel;
     private BidsWithUtility oppBidsWithUtilities;
     private List<Bid> oppBadBids;
 
@@ -65,8 +51,8 @@ public class AntagonisticAgent extends GenericOpponent {
 
         if (this.getOpponentHistory().size() > 5) {
             this.getReporter().log(Level.INFO, this.getMe().toString() + ": Update OppModel!!!");
-            this.opponentModel = new EntropyWeightedOpponentModel(this.getUtilitySpace().getDomain(),
-                    oppHistory.stream().map(a -> (Action) a).collect(Collectors.toList()));
+            this.opponentModel = new AHPFreqWeightedOpponentModel(this.getUtilitySpace().getDomain(),
+                    this.getHistory().stream().map(a -> (Action) a).collect(Collectors.toList()), this.getMe());
             this.oppBidsWithUtilities = new BidsWithUtility(this.opponentModel);
             BigDecimal minUtility = this.opponentModel.getUtility(this.oppBidsWithUtilities.getExtremeBid(false));
             BigDecimal minUtilityUpperBound = minUtility.multiply(new BigDecimal("1.5")).min(BigDecimal.ONE);

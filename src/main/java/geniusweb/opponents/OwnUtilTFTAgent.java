@@ -4,20 +4,14 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import geniusweb.actions.Accept;
-import geniusweb.actions.Action;
 import geniusweb.actions.ActionWithBid;
 import geniusweb.actions.Offer;
 import geniusweb.bidspace.AllBidsList;
-import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
 import geniusweb.inform.Agreements;
 import geniusweb.issuevalue.Bid;
-import geniusweb.pompfan.opponentModels.EntropyWeightedOpponentModel;
 import tudelft.utilities.immutablelist.ImmutableList;
 
 public class OwnUtilTFTAgent extends GenericOpponent {
@@ -122,22 +116,5 @@ public class OwnUtilTFTAgent extends GenericOpponent {
         return result;
     }
 
-    // private void updateOpponentModel(List<ActionWithBid> oppHistory) {
-    // this.getReporter().log(Level.INFO, this.getMe().toString() + ": Update
-    // OppModel!!!");
-    // this.opponentModel = new
-    // EntropyWeightedOpponentModel(this.getUtilitySpace().getDomain(),
-    // oppHistory.stream().map(a -> (Action) a).collect(Collectors.toList()));
-    // this.oppBidsWithUtilities = new BidsWithUtility(this.opponentModel);
-    // BigDecimal minUtility =
-    // this.opponentModel.getUtility(this.oppBidsWithUtilities.getExtremeBid(false));
-    // BigDecimal minUtilityUpperBound = minUtility.multiply(new
-    // BigDecimal("1.5")).min(BigDecimal.ONE);
-    // this.oppBadBids = StreamSupport
-    // .stream(this.oppBidsWithUtilities.getBids(new Interval(minUtility,
-    // minUtilityUpperBound)).spliterator(),
-    // true)
-    // .collect(Collectors.toList());
-    // }
 
 }

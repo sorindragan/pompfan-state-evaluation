@@ -6,7 +6,7 @@
 					"parties": [
 						{
 							"party": {
-								"partyref": "classpath:geniusweb.exampleparties.hardliner.Hardliner",
+								"partyref": "classpath:geniusweb.opponents.AntagonisticAgent",
 								"parameters": {
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"negotiationdata": [
@@ -37,7 +37,7 @@
 									"config": {
 										"confComparer": "UtilityBidDistance",
 										"confBelief": "ParticleFilterWithAcceptBelief",
-										"confEvaluator": "ConcessionUtilityEvaluatorWithHistory",
+										"confEvaluator": "L2BAHPOppModelProdUtilEvaluator",
 										"confState": "HistoryState",
 										"confExplorer": "TimeConcedingExplorationPolicy",
 										"confWidener": "ProgressiveWideningStrategy",
@@ -60,7 +60,7 @@
 			}
 		],
 		"deadline": {
-			"deadlinetime": { "durationms": 10000 }
+			"deadlinetime": { "durationms": 20000 }
 		}
 	}
 }
