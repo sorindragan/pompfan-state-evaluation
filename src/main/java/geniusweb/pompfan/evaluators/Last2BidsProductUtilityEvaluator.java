@@ -29,7 +29,6 @@ public class Last2BidsProductUtilityEvaluator extends Last2BidsMeanUtilityEvalua
         Bid lastBid = lastAction instanceof Offer ? ((Offer) lastAction).getBid() : ((Accept) lastAction).getBid();
         Bid secondToLastBid = secondToLastAction instanceof Offer ? ((Offer) secondToLastAction).getBid() : ((Accept) secondToLastAction).getBid();
         if (lastAction instanceof Accept) {
-            // return state.getUtilitySpace().getUtility(lastBid).doubleValue();
             return state.getUtilitySpace().getUtility(lastBid).multiply(state.getUtilitySpace().getUtility(lastBid)).doubleValue();
         }
         BigDecimal utility1 = lastAction != null ? this.getUtilitySpace().getUtility(lastBid) : BigDecimal.ONE;
