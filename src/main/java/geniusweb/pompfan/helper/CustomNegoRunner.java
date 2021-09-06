@@ -35,7 +35,7 @@ public class CustomNegoRunner extends NegoRunner {
     private final static ObjectWriter jacksonWriter = jacksonReader.writerWithDefaultPrettyPrinter();
     private final static ObjectWriter jacksonWriterCompact = jacksonReader.writer();
     private String timestampString;
-    private SimpleDateFormat tFormatter = new SimpleDateFormat("HH:mm:ss dd-MM-yyyy");
+    private SimpleDateFormat tFormatter = new SimpleDateFormat("HH:mm:ss:SSS dd-MM-yyyy");
     private ResultsWriter intermediateWriter;
     private Integer sessNum = 0;
     private Date startTimeStamp;

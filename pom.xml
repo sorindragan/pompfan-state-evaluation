@@ -137,7 +137,12 @@
             <artifactId>nd4j-native</artifactId>
             <version>${dl4j-master.version}</version>
         </dependency>
-
+		<!-- Guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>30.1.1-jre</version>
+		  </dependency>
 		<!-- CUSTOM: Runner configs -->
 		<dependency>
 			<groupId>geniusweb</groupId>

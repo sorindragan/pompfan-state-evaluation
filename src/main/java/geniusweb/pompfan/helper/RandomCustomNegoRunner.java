@@ -54,10 +54,9 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                         "HammingBidDistance");
         // private final static List<String> setComparer =
         // Arrays.asList("JaccardBidDistance", "HammingBidDistance");
-        // private final static List<String> setBelief =
-        // Arrays.asList("ParticleFilterWithAcceptBelief",
-        // "ParticleFilterBelief", "BayesianFilterBelief", "UniformBelief");
-        private final static List<String> setBelief = Arrays.asList("BayesianFilterBelief", "UniformBelief");
+        private final static List<String> setBelief = Arrays.asList("ParticleFilterWithAcceptBelief",
+                        "ParticleFilterBelief", "BayesianParticleFilterBelief", "BayesianCountFilterBelief", "UniformBelief");
+        // private final static List<String> setBelief = Arrays.asList(, "UniformBelief");
         private final static List<String> setEvaluator = Arrays.asList("Last2BidsProductUtilityEvaluator",
                         "Last2BidsMeanUtilityEvaluator", "L2BWithOppModelProductUtilityEvaluator", "RandomEvaluator",
                         "ConcessionUtilityEvaluator", "ConcessionUtilityEvaluatorWithHistory");
@@ -77,7 +76,7 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                         "classpath:geniusweb.exampleparties.boulware.Boulware",
                         "classpath:geniusweb.exampleparties.hardliner.Hardliner",
                         "classpath:geniusweb.exampleparties.randomparty.RandomParty",
-                        "classpath:geniusweb.exampleparties.timedependentparty.TimeDependantParty");
+                        "classpath:geniusweb.exampleparties.timedependentparty.TimeDependentParty");
 
         public RandomCustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory,
                         Reporter logger, long maxruntime, String settingRef, String name) throws IOException {
@@ -89,7 +88,7 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                                 .readTree(new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8));
 
                 Integer cnt = 0;
-                for (int i = 0; i < 200; i++) {
+                for (int i = 0; i < 500; i++) {
                         cnt++;
                         ObjectNode target = (ObjectNode) settingsJson.get("AllPermutationsSettings").get("teams").get(0)
                                         .get("Team").get(0);
