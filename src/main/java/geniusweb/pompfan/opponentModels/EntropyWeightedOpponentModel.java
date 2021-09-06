@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
+import geniusweb.actions.PartyId;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.DiscreteValue;
 import geniusweb.issuevalue.Domain;
@@ -23,12 +25,23 @@ import geniusweb.progress.Progress;
 
 public class EntropyWeightedOpponentModel extends AbstractOpponentModel {
 
+    private PartyId me;
 
     @JsonCreator
     public EntropyWeightedOpponentModel(@JsonProperty("domain") Domain domain,
-            @JsonProperty("history") List<Action> history) {
+            @JsonProperty("history") List<Action> history, @JsonProperty("me") PartyId me) {
         super(domain, history);
-        this.initializeModel(history);
+        this.setMe(me);
+        this.initializeModel(history.stream().filter(action -> !action.getActor().equals(this.getMe()))
+                .collect(Collectors.toList()));
+    }
+
+    public PartyId getMe() {
+        return me;
+    }
+
+    public void setMe(PartyId me) {
+        this.me = me;
     }
 
     private EntropyWeightedOpponentModel initializeModel(List<Action> realHistoryActions) {
