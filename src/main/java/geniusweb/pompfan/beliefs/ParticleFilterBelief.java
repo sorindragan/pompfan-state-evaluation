@@ -54,8 +54,9 @@ public class ParticleFilterBelief extends AbstractBelief {
                 // This is in a loop in which we try multiple actions to get an
                 // understanding of whether the opponent could generate the real obs.
                 // System.out.println(state.getTime());
+                AbstractState<?> newState = state;
                 Double noisyTime = state.getTime() + (r.nextGaussian() * 0.1);
-                AbstractState<?> newState = state.setTime(Math.min(1.0, Math.max(0.0, noisyTime)));
+                newState = state.setTime(Math.min(1.0, Math.max(0.0, noisyTime)));
                 Bid sampledBid = this.sample(lastAgentAction, lastOppAction, newState, abstractPolicy);
 
                 candidateObservations.add(sampledBid);
