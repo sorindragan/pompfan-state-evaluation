@@ -71,13 +71,4 @@ public class L2BAHPOppModelProdUtilEvaluator extends Last2BidsProductUtilityEval
     public void setOppModel(AbstractOpponentModel oppModel) {
         this.oppModel = oppModel;
     }
-
-    public PartyId getHolder() {
-        return holder;
-    }
-
-    public L2BAHPOppModelProdUtilEvaluator setHolder(PartyId holder) {
-        this.holder = holder;
-        return this;
-    }
 }

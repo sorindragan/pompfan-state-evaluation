@@ -21,6 +21,7 @@ import geniusweb.pompfan.evaluators.IEvalFunction;
 import geniusweb.pompfan.evaluators.L2BAHPOppModelProdUtilEvaluator;
 import geniusweb.pompfan.evaluators.L2BEntropyOppModelProdUtilEvaluator;
 import geniusweb.pompfan.evaluators.L2BFreqOppModelProdUtilEvaluator;
+import geniusweb.pompfan.evaluators.L2BOppProdUtilEvaluator;
 import geniusweb.pompfan.evaluators.Last2BidsMeanUtilityEvaluator;
 import geniusweb.pompfan.evaluators.Last2BidsProductUtilityEvaluator;
 import geniusweb.pompfan.evaluators.RandomEvaluator;
@@ -231,6 +232,8 @@ public class Configurator {
                 this.setEvaluator(new L2BAHPOppModelProdUtilEvaluator(uSpace).setHolder(me));
             } else if (confEvalutator.equals("L2BEntropyOppModelProdUtilEvaluator")) {
                 this.setEvaluator(new L2BEntropyOppModelProdUtilEvaluator(uSpace).setHolder(me));
+            } else if (confEvalutator.equals("L2BOppProdUtilEvaluator")) {
+                this.setEvaluator(new L2BOppProdUtilEvaluator(uSpace).setHolder(me));
             } else if (confEvalutator.equals("ConcessionUtilityEvaluator")) {
                 this.setEvaluator(new ConcessionUtilityEvaluator(uSpace).setHolder(me));
             } else {

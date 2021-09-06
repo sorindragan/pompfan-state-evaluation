@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
+import geniusweb.actions.PartyId;
 import geniusweb.issuevalue.Bid;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.UtilitySpace;
@@ -18,6 +19,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 public class Last2BidsMeanUtilityEvaluator implements IEvalFunction<HistoryState> {
     @JsonBackReference
     private UtilitySpace utilitySpace;
+    private PartyId holder;
 
 
     public Last2BidsMeanUtilityEvaluator() {
@@ -56,6 +58,15 @@ public class Last2BidsMeanUtilityEvaluator implements IEvalFunction<HistoryState
                 : BigDecimal.ZERO;
         BigDecimal mean = utility1.add(utility2).divide(new BigDecimal(2));
         return mean.doubleValue();
+    }
+
+    public PartyId getHolder() {
+        return holder;
+    }
+
+    public IEvalFunction<HistoryState> setHolder(PartyId holder) {
+        this.holder = holder;
+        return this;
     }
 
 }

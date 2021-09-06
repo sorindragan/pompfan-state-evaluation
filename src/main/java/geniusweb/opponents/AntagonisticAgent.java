@@ -74,10 +74,7 @@ public class AntagonisticAgent extends GenericOpponent {
         Bid lastOpponentsBid = oppHistory.get(oppHistory.size() - 1).getBid();
         Integer selectedIdx = this.getRandom().nextInt(this.oppBadBids.size());
         Bid antagonisticBid = this.oppBadBids.get(selectedIdx);
-        // double shouldAccept = this.getRandom().nextDouble();
-        // this.getUtilitySpace().getUtility(lastOpponentsBid).compareTo(new
-        // BigDecimal("0.8")) >= 0
-        // this.getUtilitySpace().getUtility(antagonisticBid);
+
         ActionWithBid result = this.oppBadBids.contains(lastOpponentsBid) ? new Accept(this.getMe(), lastOpponentsBid)
                 : new Offer(this.getMe(), antagonisticBid);
         return result;

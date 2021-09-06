@@ -9,5 +9,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @Type(value = Last2BidsProductUtilityEvaluator.class), @Type(value = RandomEvaluator.class),
         @Type(value = L2BFreqOppModelProdUtilEvaluator.class) })
 public interface IEvalFunction<T> {
+    
     public Double evaluate(T state);
 }

@@ -2,16 +2,16 @@ package geniusweb.pompfan.opponents;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
-import java.util.ArrayList;
 import java.util.Random;
+import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
+import geniusweb.actions.ActionWithBid;
 import geniusweb.actions.Offer;
-import geniusweb.actions.PartyId;
 import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
 import geniusweb.issuevalue.Bid;
@@ -30,7 +30,8 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
      *
      */
     public static final String ANTAGONISTIC = "Antagonistic";
-    private BigDecimal SYMPATHY = new BigDecimal(new Random().doubles(1l, 0.0, 0.5).mapToObj(dbl -> String.valueOf(dbl)).findFirst().get());
+    private BigDecimal SYMPATHY = new BigDecimal(
+            new Random().doubles(1l, 0.0, 0.75).mapToObj(dbl -> String.valueOf(dbl)).findFirst().get());
     @JsonIgnore
     private BidsWithUtility allBids;
     @JsonIgnore
@@ -40,7 +41,8 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
     @JsonIgnore
     private ImmutableList<Bid> possibleBids;
 
-    public AntagonisticOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("e") double e) {
+    public AntagonisticOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace,
+            @JsonProperty("name") String name, @JsonProperty("e") double e) {
         super(utilitySpace, name);
         this.allBids = new BidsWithUtility((LinearAdditive) utilitySpace);
         this.possibleRange = this.allBids.getRange();
@@ -56,11 +58,11 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
         this.searchRange = new Interval(BigDecimal.ZERO,
                 this.possibleRange.getMin().multiply(SYMPATHY.add(new BigDecimal(1))));
         this.possibleBids = this.allBids.getBids(this.searchRange);
-        // this.setPartyId(new PartyId(ANTAGONISTIC+"_"+SYMPATHY.round(new MathContext(4)).toString().replace(".", "")));
+        // this.setPartyId(new PartyId(ANTAGONISTIC+"_"+SYMPATHY.round(new
+        // MathContext(4)).toString().replace(".", "")));
     }
 
-
-	public AntagonisticOpponentPolicy(UtilitySpace uSpace, String name) {
+    public AntagonisticOpponentPolicy(UtilitySpace uSpace, String name) {
         super(uSpace, name);
         this.allBids = new BidsWithUtility((LinearAdditive) uSpace);
         this.possibleRange = this.allBids.getRange();
@@ -83,7 +85,12 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
 
     @Override
     public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
-        return this.chooseAction();
+        ActionWithBid antagonisticAction = (ActionWithBid) this.chooseAction();
+        Bid antagonisticBid = antagonisticAction.getBid();
+        ActionWithBid result = StreamSupport.stream(this.possibleBids.spliterator(), true)
+                .anyMatch(bid -> bid.equals(lastReceivedBid)) ? new Accept(this.getPartyId(), lastReceivedBid)
+                        : new Offer(this.getPartyId(), antagonisticBid);
+        return result;
     }
 
     public BigDecimal getSYMPATHY() {
@@ -93,7 +100,5 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
     public void setSYMPATHY(BigDecimal sYMPATHY) {
         SYMPATHY = sYMPATHY;
     }
-
-    
 
 }
