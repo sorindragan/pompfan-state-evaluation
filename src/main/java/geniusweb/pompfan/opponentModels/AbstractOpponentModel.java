@@ -1,11 +1,13 @@
 package geniusweb.pompfan.opponentModels;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -15,10 +17,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import geniusweb.actions.Action;
-import geniusweb.bidspace.AllBidsList;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.DiscreteValue;
-import geniusweb.issuevalue.DiscreteValueSet;
 import geniusweb.issuevalue.Domain;
 import geniusweb.issuevalue.Value;
 import geniusweb.issuevalue.ValueSet;
@@ -45,7 +45,7 @@ public abstract class AbstractOpponentModel implements LinearAdditive, OpponentM
 		}
 		this.domain = domain;
 		if (history == null || history.isEmpty()) {
-			Map<String, ValueSetUtilities> issueUtilities = new HashMap<>();	
+			Map<String, ValueSetUtilities> issueUtilities = new HashMap<>();
 			Map<String, BigDecimal> issueWeights = new HashMap<>();
 			for (String issueString : this.domain.getIssues()) {
 				Map<DiscreteValue, BigDecimal> valueUtils = new HashMap<>();
@@ -54,7 +54,8 @@ public abstract class AbstractOpponentModel implements LinearAdditive, OpponentM
 					valueUtils.put((DiscreteValue) value, BigDecimal.ZERO);
 				}
 				issueUtilities.put(issueString, new DiscreteValueSetUtilities(valueUtils));
-				issueWeights.put(issueString, BigDecimal.ONE.divide(BigDecimal.valueOf(this.domain.getIssues().size()), 2, RoundingMode.HALF_UP));
+				issueWeights.put(issueString, BigDecimal.ONE.divide(BigDecimal.valueOf(this.domain.getIssues().size()),
+						2, RoundingMode.HALF_UP));
 			}
 			this.issueUtilities = issueUtilities;
 			this.issueWeights = issueWeights;
@@ -198,6 +199,30 @@ public abstract class AbstractOpponentModel implements LinearAdditive, OpponentM
 
 	public void setIssueWeights(Map<String, BigDecimal> issueWeights) {
 		this.issueWeights = issueWeights;
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer buffer = new StringBuffer();
+		for (Entry<String, ValueSetUtilities> ivs : this.getUtilities().entrySet()) {
+			String issue = ivs.getKey();
+			BigDecimal weight = this.getWeight(issue);
+			MathContext mc = new MathContext(4);
+			buffer.append(weight.round(mc)).append("*(");
+			DiscreteValueSetUtilities vs = (DiscreteValueSetUtilities) ivs.getValue();
+			StringBuffer tmpBuffer = new StringBuffer();
+			for (Entry<DiscreteValue, BigDecimal> vEntry : vs.getUtilities().entrySet()) {
+				tmpBuffer.append(vEntry.getValue().round(mc)).append("*")
+						.append(vEntry.getKey().toString().replaceAll("\"", "").replaceAll(" ", "_").toLowerCase())
+						.append(" ");
+			}
+			String midPart = tmpBuffer.toString().trim().replaceAll(" ", " + ");
+			buffer.append(midPart);
+			buffer.append(") + ");
+		}
+		String result = buffer.toString();
+		result.subSequence(0, result.length() - 1);
+		return result;
 	}
 
 }

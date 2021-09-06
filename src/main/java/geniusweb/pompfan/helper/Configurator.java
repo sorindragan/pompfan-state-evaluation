@@ -6,8 +6,8 @@ import java.util.List;
 
 import geniusweb.actions.PartyId;
 import geniusweb.pompfan.beliefs.AbstractBelief;
-import geniusweb.pompfan.beliefs.BayesianFilterBelief;
-import geniusweb.pompfan.beliefs.BayesianUpdateParticleFilterBelief;
+import geniusweb.pompfan.beliefs.BayesianCountFilterBelief;
+import geniusweb.pompfan.beliefs.BayesianParticleFilterBelief;
 import geniusweb.pompfan.beliefs.ParticleFilterBelief;
 import geniusweb.pompfan.beliefs.ParticleFilterWithAcceptBelief;
 import geniusweb.pompfan.beliefs.UniformBelief;
@@ -17,9 +17,10 @@ import geniusweb.pompfan.distances.JaccardBidDistance;
 import geniusweb.pompfan.distances.RandomBidDistance;
 import geniusweb.pompfan.distances.UtilityBidDistance;
 import geniusweb.pompfan.evaluators.ConcessionUtilityEvaluator;
-import geniusweb.pompfan.evaluators.ConcessionUtilityEvaluatorWithHistory;
 import geniusweb.pompfan.evaluators.IEvalFunction;
-import geniusweb.pompfan.evaluators.L2BWithOppModelProductUtilityEvaluator;
+import geniusweb.pompfan.evaluators.L2BAHPOppModelProdUtilEvaluator;
+import geniusweb.pompfan.evaluators.L2BEntropyOppModelProdUtilEvaluator;
+import geniusweb.pompfan.evaluators.L2BFreqOppModelProdUtilEvaluator;
 import geniusweb.pompfan.evaluators.Last2BidsMeanUtilityEvaluator;
 import geniusweb.pompfan.evaluators.Last2BidsProductUtilityEvaluator;
 import geniusweb.pompfan.evaluators.RandomEvaluator;
@@ -203,11 +204,11 @@ public class Configurator {
         case "ParticleFilterBelief":
             this.setBelief(new ParticleFilterBelief(listOfOpponents, distance));
             break;
-        case "BayesianFilterBelief":
-            this.setBelief(new BayesianFilterBelief(listOfOpponents, distance));
+        case "BayesianCountFilterBelief":
+            this.setBelief(new BayesianCountFilterBelief(listOfOpponents, distance));
             break;
-        case "BayesianUpdateParticleFilterBelief":
-            this.setBelief(new BayesianUpdateParticleFilterBelief(listOfOpponents, distance));
+        case "BayesianParticleFilterBelief":
+            this.setBelief(new BayesianParticleFilterBelief(listOfOpponents, distance));
             break;
         default:
             this.setBelief(new UniformBelief(listOfOpponents, distance));
@@ -224,12 +225,14 @@ public class Configurator {
                 this.setEvaluator(new Last2BidsProductUtilityEvaluator(uSpace));
             } else if (confEvalutator.equals("Last2BidsMeanUtilityEvaluator")) {
                 this.setEvaluator(new Last2BidsMeanUtilityEvaluator(uSpace));
-            } else if (confEvalutator.equals("L2BWithOppModelProductUtilityEvaluator")) {
-                this.setEvaluator(new L2BWithOppModelProductUtilityEvaluator(uSpace).setHolder(me));
+            } else if (confEvalutator.equals("L2BFreqOppModelProdUtilEvaluator")) {
+                this.setEvaluator(new L2BFreqOppModelProdUtilEvaluator(uSpace).setHolder(me));
+            } else if (confEvalutator.equals("L2BAHPOppModelProdUtilEvaluator")) {
+                this.setEvaluator(new L2BAHPOppModelProdUtilEvaluator(uSpace).setHolder(me));
+            } else if (confEvalutator.equals("L2BEntropyOppModelProdUtilEvaluator")) {
+                this.setEvaluator(new L2BEntropyOppModelProdUtilEvaluator(uSpace).setHolder(me));
             } else if (confEvalutator.equals("ConcessionUtilityEvaluator")) {
                 this.setEvaluator(new ConcessionUtilityEvaluator(uSpace).setHolder(me));
-            } else if (confEvalutator.equals("ConcessionUtilityEvaluatorWithHistory")) {
-                this.setEvaluator(new ConcessionUtilityEvaluatorWithHistory(uSpace).setHolder(me));
             } else {
                 this.setEvaluator(new RandomEvaluator());
             }
