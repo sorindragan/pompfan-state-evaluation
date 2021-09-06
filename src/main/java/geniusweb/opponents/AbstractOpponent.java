@@ -49,7 +49,7 @@ import geniusweb.references.Parameters;
 import tudelft.utilities.immutablelist.ImmutableList;
 import tudelft.utilities.logging.Reporter;
 
-public abstract class GenericOpponent extends DefaultParty {
+public abstract class AbstractOpponent extends DefaultParty {
     private boolean isLearn;
     private BidsWithUtility bidsWithUtility;
     private ImmutableList<Bid> goodBids;
@@ -72,7 +72,7 @@ public abstract class GenericOpponent extends DefaultParty {
     private String protocol;
     protected boolean DEBUG_TIME;
 
-    public GenericOpponent() {
+    public AbstractOpponent() {
     }
 
     public Random getRandom() {
@@ -91,7 +91,7 @@ public abstract class GenericOpponent extends DefaultParty {
         this.utilitySpace = uSpace;
     }
 
-    public GenericOpponent(Reporter reporter) {
+    public AbstractOpponent(Reporter reporter) {
         super(reporter); // for debugging
     }
 

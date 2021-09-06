@@ -17,7 +17,7 @@ import geniusweb.issuevalue.Bid;
 import geniusweb.pompfan.opponentModels.AHPFreqWeightedOpponentModel;
 import geniusweb.pompfan.opponentModels.AbstractOpponentModel;
 
-public class AntagonisticAgent extends GenericOpponent {
+public class AntagonisticAgent extends AbstractOpponent {
 
     private AbstractOpponentModel opponentModel;
     private BidsWithUtility oppBidsWithUtilities;

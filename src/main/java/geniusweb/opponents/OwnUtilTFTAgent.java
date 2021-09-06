@@ -14,7 +14,7 @@ import geniusweb.inform.Agreements;
 import geniusweb.issuevalue.Bid;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class OwnUtilTFTAgent extends GenericOpponent {
+public class OwnUtilTFTAgent extends AbstractOpponent {
     // private BidsWithUtility oppBidsWithUtilities;
     // private List<Bid> oppBadBids;
     private AllBidsList allPossibleBids;

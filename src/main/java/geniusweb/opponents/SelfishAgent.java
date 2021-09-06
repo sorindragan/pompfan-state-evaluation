@@ -17,7 +17,7 @@ import geniusweb.inform.Settings;
 import geniusweb.issuevalue.Bid;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class SelfishAgent extends GenericOpponent{
+public class SelfishAgent extends AbstractOpponent{
 
 
     private ImmutableList<Bid> possibleBids;

@@ -21,7 +21,7 @@ import geniusweb.pompfan.opponentModels.AHPFreqWeightedOpponentModel;
 import geniusweb.pompfan.opponentModels.AbstractOpponentModel;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class OppUtilTFTAgent extends GenericOpponent {
+public class OppUtilTFTAgent extends AbstractOpponent {
     private AbstractOpponentModel opponentModel;
     private List<Bid> oppBadBids;
     private BidsWithUtility oppBidsWithUtilities;
