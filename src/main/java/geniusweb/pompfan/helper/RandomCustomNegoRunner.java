@@ -50,26 +50,19 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                         .map(BigDecimal::new).map(e -> e.setScale(1, RoundingMode.HALF_UP)).map(String::valueOf)
                         .collect(Collectors.toList());
 
-        private final static List<String> setComparer = Arrays.asList("UtilityBidDistance", "JaccardBidDistance",
-                        "HammingBidDistance");
-        // private final static List<String> setComparer =
-        // Arrays.asList("JaccardBidDistance", "HammingBidDistance");
+        private final static List<String> setComparer = Arrays.asList("UtilityBidDistance", "ExactSameBidDistance",
+                        "JaccardBidDistance", "HammingBidDistance", "RandomBidDistance");
         private final static List<String> setBelief = Arrays.asList("ParticleFilterWithAcceptBelief",
-                        "ParticleFilterBelief", "BayesianParticleFilterBelief", "BayesianCountFilterBelief", "UniformBelief");
-        // private final static List<String> setBelief = Arrays.asList(, "UniformBelief");
+                        "ParticleFilterBelief", "BayesianParticleFilterBelief", "BayesianCountFilterBelief",
+                        "UniformBelief");
         private final static List<String> setEvaluator = Arrays.asList("Last2BidsProductUtilityEvaluator",
-                        "Last2BidsMeanUtilityEvaluator", "L2BWithOppModelProductUtilityEvaluator", "RandomEvaluator",
-                        "ConcessionUtilityEvaluator", "ConcessionUtilityEvaluatorWithHistory");
+                        "Last2BidsMeanUtilityEvaluator", "L2BFreqOppModelProdUtilEvaluator",
+                        "L2BAHPOppModelProdUtilEvaluator", "L2BEntropyOppModelProdUtilEvaluator",
+                        "L2BOppProdUtilEvaluator", "ConcessionUtilityEvaluator", "RandomEvaluator");
         private final static List<String> setExplorer = Arrays.asList("HighSelfEsteemOwnExplorationPolicy",
                         "TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
-        // private final static List<String> setExplorer =
-        // Arrays.asList("TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
         private final static List<String> setWidener = Arrays.asList("ProgressiveWideningStrategy",
                         "MaxWidthWideningStrategy");
-        // private final static List<String> setWidener =
-        // Arrays.asList("MaxWidthWideningStrategy");
-        // private final static List<String> setWidener =
-        // Arrays.asList("ProgressiveWideningStrategy");
         private final static List<String> setOpponents = Arrays.asList("classpath:geniusweb.opponents.OwnUtilTFTAgent",
                         "classpath:geniusweb.opponents.OppUtilTFTAgent",
                         "classpath:geniusweb.opponents.AntagonisticAgent", "classpath:geniusweb.opponents.SelfishAgent",

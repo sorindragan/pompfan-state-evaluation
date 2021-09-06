@@ -12,6 +12,7 @@ import geniusweb.pompfan.beliefs.ParticleFilterBelief;
 import geniusweb.pompfan.beliefs.ParticleFilterWithAcceptBelief;
 import geniusweb.pompfan.beliefs.UniformBelief;
 import geniusweb.pompfan.distances.AbstractBidDistance;
+import geniusweb.pompfan.distances.ExactSameBidDistance;
 import geniusweb.pompfan.distances.HammingBidDistance;
 import geniusweb.pompfan.distances.JaccardBidDistance;
 import geniusweb.pompfan.distances.RandomBidDistance;
@@ -185,6 +186,9 @@ public class Configurator {
             break;
         case "JaccardBidDistance":
             this.setBidDistance(new JaccardBidDistance(uSpace));
+            break;
+        case "ExactSameBidDistance":
+            this.setBidDistance(new ExactSameBidDistance(uSpace));
             break;
         case "HammingBidDistance":
             this.setBidDistance(new HammingBidDistance(uSpace));
