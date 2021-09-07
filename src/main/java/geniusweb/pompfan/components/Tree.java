@@ -55,9 +55,10 @@ public class Tree {
         if (TREE_DEBUG)
             this.originalRoot = tmpRoot;
         this.setRoot(tmpRoot);
-        this.allBidsList = new AllBidsList(this.getUtilitySpace().getDomain()); 
+        this.allBidsList = new AllBidsList(this.getUtilitySpace().getDomain());
         // TODO: This is a very bad code
-        this.lastBestActionNode = new ActionNode(null, startState, new Offer(new PartyId("SomeAgent"), this.allBidsList.get(BigInteger.ZERO)));
+        this.lastBestActionNode = new ActionNode(null, startState,
+                new Offer(new PartyId("SomeAgent"), this.allBidsList.get(BigInteger.ZERO)));
         this.widener = widener;
         this.realHistory = new ArrayList<Action>();
         this.setProgress(progress);
@@ -187,8 +188,11 @@ public class Tree {
     public void construct(Long simulationTime, Progress realProgress) throws StateRepresentationException {
         Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime),
                 System.currentTimeMillis());
+        Progress realShiftedProgress = ProgressFactory.create(
+                new DeadlineTime(realProgress.getTerminationTime().getTime()),
+                System.currentTimeMillis() + simulationTime);
         while (simulatedProgress.isPastDeadline(System.currentTimeMillis()) == false) {
-            this.simulate(realProgress);
+            this.simulate(realShiftedProgress);
         }
     }
 

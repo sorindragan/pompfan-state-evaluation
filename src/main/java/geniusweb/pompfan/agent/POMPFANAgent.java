@@ -139,7 +139,7 @@ public class POMPFANAgent extends DefaultParty {
                         + ": END Cycle - " + info.getClass().getSimpleName());
             cleanupIfGameOver();
         } catch (Exception e) {
-                throw new RuntimeException("Failed to handle info", e);
+            throw new RuntimeException("Failed to handle info", e);
         }
     }
 
@@ -546,7 +546,8 @@ public class POMPFANAgent extends DefaultParty {
             return action;
         }
 
-        if (simTime <= remainingTime) {
+        // 2 * simTime because we shift the progress in the simulation.
+        if (2 * simTime <= remainingTime) {
             this.MCTS.construct(simTime, this.progress);
         }
         if (DEBUG_OFFER)
