@@ -28,16 +28,17 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
     }
 
     @Override
-    public void widen(Progress simulatedProgress, Node currRoot) throws StateRepresentationException {
+    public void widen(Progress simulatedProgress, Long shiftSimTime, Node currRoot) throws StateRepresentationException {
         AbstractPolicy currOpp = currRoot.getState().getOpponent();
         while (currRoot.getChildren().size() == this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {
 
             // Going down the tree - Action Node Level
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
             currRoot.getState().setOpponent(currOpp);
+            
             if (currRoot.getChildren().size() < this.calcProgressiveMaxWidth(currRoot, this.k_b, this.a_b)) {
                 // Widening the Belief level
-                Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
+                Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
 
                 ActionNode currActionNode = (ActionNode) currRoot;
                 BeliefNode receivedObservationNode = (BeliefNode) currActionNode
@@ -59,11 +60,11 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
                         return;
                     }
                     currRoot.setIsResampled(false);
-                    Double simulatedTimeOfNewActReceival = simulatedProgress.get(System.currentTimeMillis());
+                    Double simulatedTimeOfNewActReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
                     ActionNode newActionNode = (ActionNode) ((BeliefNode) currRoot)
                             .act(this.getOwnExplorationStrategy(), simulatedTimeOfNewActReceival);
 
-                    Double simulatedTimeOfNewObsReceival = simulatedProgress.get(System.currentTimeMillis());
+                    Double simulatedTimeOfNewObsReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
                     BeliefNode newBeliefNode = (BeliefNode) newActionNode
                             .receiveObservation(simulatedTimeOfNewObsReceival);
                     currRoot = newBeliefNode;
@@ -87,7 +88,7 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
                 // Safenet in case of terminal children only
                 // Add a new belief node as child
                 if (currRoot == null) {
-                    Double simulatedTimeOfNewNode = simulatedProgress.get(System.currentTimeMillis());
+                    Double simulatedTimeOfNewNode = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
                     BeliefNode newChild = (BeliefNode) oldRoot.receiveObservation(simulatedTimeOfNewNode);
                     currRoot = newChild;
                     currRoot.getState().setOpponent(currOpp);
@@ -100,22 +101,24 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
         }
         if (currRoot.getChildren().size() < this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {
             // Widening the Action level
-            Double simulatedTimeOfActReceival = simulatedProgress.get(System.currentTimeMillis());
+            Double simulatedTimeOfActReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
             BeliefNode currBeliefNode = (BeliefNode) currRoot;
+
 
             ActionNode nextActionNode = (ActionNode) currBeliefNode.act(this.getOwnExplorationStrategy(),
                     simulatedTimeOfActReceival);
+            if (nextActionNode.getIsResampled()) {
+                int a = 2;
+            }
 
-            // if (nextActionNode!= null && nextActionNode.getAction() instanceof Accept) {
-            // System.out.println("WE ACT ACCEPT");
-            // }
-
-            Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
+            Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
             BeliefNode beliefNode = (BeliefNode) nextActionNode.receiveObservation(simulatedTimeOfObsReceival);
             currRoot = beliefNode;
-            // if (beliefNode!=null && beliefNode.getObservation() instanceof Accept) {
-            // System.out.println("OPPONENT SENDS ACCEPT");
-            // }
+
+            if (beliefNode.getIsResampled()) {
+                
+                int a = 2;
+            }
 
             // this if code omits the evaluation when the same accept is sampled again
             if (currRoot == null) {
@@ -131,11 +134,11 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
                 }
                 currRoot.setIsResampled(false);
 
-                Double simulatedTimeOfNewActReceival = simulatedProgress.get(System.currentTimeMillis());
+                Double simulatedTimeOfNewActReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
                 ActionNode newActionNode = (ActionNode) ((BeliefNode) currRoot).act(this.getOwnExplorationStrategy(),
                         simulatedTimeOfNewActReceival);
 
-                Double simulatedTimeOfNewObsReceival = simulatedProgress.get(System.currentTimeMillis());
+                Double simulatedTimeOfNewObsReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
                 BeliefNode newBeliefNode = (BeliefNode) newActionNode.receiveObservation(simulatedTimeOfNewObsReceival);
                 currRoot = newBeliefNode;
             }

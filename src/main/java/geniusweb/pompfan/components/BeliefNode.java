@@ -29,7 +29,7 @@ public class BeliefNode extends Node {
     }
 
     public void setObservation(Action observation) {
-        this.setStoredAction(observation);;
+        this.setStoredAction(observation);
     }
 
     // @JsonCreator
@@ -41,6 +41,8 @@ public class BeliefNode extends Node {
 
     public Node act(AbstractOwnExplorationPolicy strategy, Double time) throws StateRepresentationException {
         AbstractState<?> state = this.getState();
+        
+        // ? both lastOwnAction and lastOpponentAction should be part of the state
         Action lastOwnAction = this.getParent() != null ? ((ActionNode) this.getParent()).getAction() : null;
         Action lastOpponentAction = this.getObservation() instanceof Offer ? (Offer) this.getObservation() : (Accept) this.getObservation();
         Bid lastOwnBid = lastOwnAction instanceof Offer ? ((Offer) lastOwnAction).getBid() : null;

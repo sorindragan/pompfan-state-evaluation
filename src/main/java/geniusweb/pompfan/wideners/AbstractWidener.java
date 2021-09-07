@@ -23,5 +23,5 @@ public abstract class AbstractWidener {
         return this;
     }
 
-    public abstract void widen(Progress simulatedProgress, Node currRoot) throws StateRepresentationException;
+    public abstract void widen(Progress simulatedProgress, Long shiftSimTime, Node currRoot) throws StateRepresentationException;
 }

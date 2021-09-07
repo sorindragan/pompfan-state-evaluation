@@ -38,7 +38,7 @@ public class Tree {
     private AbstractBelief belief;
 
     private AbstractWidener widener; // Used for the action we choose to simulate (expand new node).
-    private static Double C = Math.sqrt(2);
+    private static Double C = 2.0; // Math.sqrt(2);
     private ActionNode lastBestActionNode;
     private List<Action> realHistory;
     private Progress progress;
@@ -46,19 +46,22 @@ public class Tree {
     private BeliefNode originalRoot;
     private Double ACCEPT_SLACK = 0.05;
     private AllBidsList allBidsList;
+    private String lastBestActionNodeInitPartyId = "NoAgent";
 
     public Tree(UtilitySpace utilitySpace, AbstractBelief belief, AbstractState<?> startState, AbstractWidener widener,
             Progress progress) {
         this.setUtilitySpace(utilitySpace);
         this.belief = belief;
         BeliefNode tmpRoot = new BeliefNode(null, startState, null);
-        if (TREE_DEBUG)
-            this.originalRoot = tmpRoot;
+        
+        if (TREE_DEBUG) this.originalRoot = tmpRoot;
+        
         this.setRoot(tmpRoot);
         this.allBidsList = new AllBidsList(this.getUtilitySpace().getDomain());
-        // TODO: This is a very bad code
+        // This is a very bad bit of code: hardcoded initialization of lastBestAction node
         this.lastBestActionNode = new ActionNode(null, startState,
-                new Offer(new PartyId("SomeAgent"), this.allBidsList.get(BigInteger.ZERO)));
+                new Offer(new PartyId(lastBestActionNodeInitPartyId), this.allBidsList.get(BigInteger.ZERO)));
+        
         this.widener = widener;
         this.realHistory = new ArrayList<Action>();
         this.setProgress(progress);
@@ -97,11 +100,24 @@ public class Tree {
         return originalRoot;
     }
 
-    public void simulate(Progress simulatedProgress) throws StateRepresentationException {
+    public void construct(Long simulationTime, Progress realProgress) throws StateRepresentationException {
+        Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime),
+                System.currentTimeMillis());
+        Progress realShiftedProgress = ProgressFactory.create(
+                new DeadlineTime(realProgress.getTerminationTime().getTime()),
+                System.currentTimeMillis() + simulationTime);
+        while (simulatedProgress.isPastDeadline(System.currentTimeMillis()) == false) {
+            // two nodes should be added after each simulation: AN -> BN
+            this.simulate(realShiftedProgress, simulationTime);
+        }
+    }
+
+    public void simulate(Progress simulatedProgress, Long shiftSimTime) throws StateRepresentationException {
         Node currRoot = this.root;
+        // sample a different opponent and add it to the state
         AbstractPolicy currOpp = this.belief.sampleOpponent();
         this.root.getState().setOpponent(currOpp);
-        this.widener.widen(simulatedProgress, currRoot);
+        this.widener.widen(simulatedProgress, shiftSimTime, currRoot);
     }
 
     public static void backpropagate(Node node, Double value) {
@@ -132,17 +148,24 @@ public class Tree {
 
         this.currentTime = this.getProgress().get(time);
         Offer newRealObservation = (Offer) observationAction;
-        Offer lastRealAgentAction = this.lastBestActionNode != null ? (Offer) this.lastBestActionNode.getAction()
-                : null;
+        
+        // this should always happen when data collection is on 
         Offer lastRealOpponentAction = this.realHistory.size() >= 3
-                ? (Offer) this.realHistory.get(this.realHistory.size() - 3)
+                        ? (Offer) this.realHistory.get(this.realHistory.size() - 3)
+                        : null;
+        Offer lastRealAgentAction = this.realHistory.size() >= 3
+                        ? (Offer) this.realHistory.get(this.realHistory.size() - 2)
+                        : null;
+        
+        /* Offer lastRealAgentAction = this.lastBestActionNode != null 
+                ? (Offer) this.lastBestActionNode.getAction()
                 : null;
-        AbstractState<?> stateUpdatedWithRealTime = null;
         if (lastRealAgentAction == null) {
+            // we should construct the tree first
             return this;
-        }
+        } */
         // get the real negotiation time
-        stateUpdatedWithRealTime = this.lastBestActionNode.getState().setTime(this.currentTime);
+        AbstractState<?> stateUpdatedWithRealTime = this.lastBestActionNode.getState().setTime(this.currentTime);
 
         // update the belief based on real observation
         this.belief = this.belief.updateBeliefs(newRealObservation, lastRealAgentAction, lastRealOpponentAction,
@@ -153,11 +176,13 @@ public class Tree {
             System.out.println("New Belief-Probabilities");
         }
 
-        if (this.lastBestActionNode == null) {
+        // if the lastBestActionNode is the inital one
+        if (this.lastBestActionNode.getAction().getActor().getName().compareTo(this.lastBestActionNodeInitPartyId) == 0) {
             // Quickfix: by doing nothing
             // Startphase - opponent bids first
             return this;
         }
+        
         List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream()
                 .filter(node -> node.getIsTerminal() == false).collect(Collectors.toList());
 
@@ -179,21 +204,10 @@ public class Tree {
                 .get();
 
         // changing the root
-        this.root = (BeliefNode) nextRoot;
-        this.root.setParent(null);
+        this.setRoot((BeliefNode) nextRoot);
+        this.getRoot().setParent(null);
 
         return this;
-    }
-
-    public void construct(Long simulationTime, Progress realProgress) throws StateRepresentationException {
-        Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime),
-                System.currentTimeMillis());
-        Progress realShiftedProgress = ProgressFactory.create(
-                new DeadlineTime(realProgress.getTerminationTime().getTime()),
-                System.currentTimeMillis() + simulationTime);
-        while (simulatedProgress.isPastDeadline(System.currentTimeMillis()) == false) {
-            this.simulate(realShiftedProgress);
-        }
     }
 
     public Action chooseBestAction() {
@@ -246,7 +260,7 @@ public class Tree {
         int nodeNumber = 0;
         Node node;
         Stack<Node> nodeStack = new Stack<>();
-        nodeStack.push(this.originalRoot);
+        nodeStack.push(this.root);
 
         while (!nodeStack.isEmpty()) {
             node = nodeStack.pop();
@@ -323,6 +337,7 @@ public class Tree {
 
     public void scrapeSubTree() {
         this.root.setChildren(new ArrayList<Node>());
+        this.root.setValue(0.0).setVisits(0);
     }
 
 }

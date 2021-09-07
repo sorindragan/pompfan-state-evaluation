@@ -32,7 +32,7 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
     }
 
     @Override
-    public void widen(Progress simulatedProgress, Node currRoot) throws StateRepresentationException {
+    public void widen(Progress simulatedProgress, Long shiftSimTime, Node currRoot) throws StateRepresentationException {
         AbstractPolicy currOpp = currRoot.getState().getOpponent();
         while (currRoot.getChildren().size() == this.maxWidth) {
             // Going down the tree - Action Node Level

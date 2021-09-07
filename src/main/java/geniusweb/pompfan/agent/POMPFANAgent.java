@@ -63,7 +63,7 @@ public class POMPFANAgent extends DefaultParty {
      */
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = false;
-    private static boolean DEBUG_OFFER = true;
+    private static boolean DEBUG_OFFER = false;
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
     private static boolean DEBUG_BELIEF = false;
@@ -235,6 +235,7 @@ public class POMPFANAgent extends DefaultParty {
                 YourTurn myTurnInfo = (YourTurn) info;
                 ActionWithBid action = (ActionWithBid) myTurn(myTurnInfo);
                 this.MCTS.getRealHistory().add(action);
+                System.out.println(progress.get(System.currentTimeMillis()));
                 if (DEBUG_OFFER == true) {
                     System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
                     System.out.println("Agent: Util=" + this.uSpace.getUtility(action.getBid()) + " -- "
@@ -314,10 +315,10 @@ public class POMPFANAgent extends DefaultParty {
         // Obtain our utility space, i.e. the problem we are negotiating and our
         // preferences over it.
         try {
+            // Our stuff
             this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(), getReporter());
             this.uSpace = ((UtilitySpace) profileint.getProfile());
             this.bidsWithUtility = new BidsWithUtility((LinearAdditive) this.uSpace);
-            // Our stuff
 
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -332,10 +333,13 @@ public class POMPFANAgent extends DefaultParty {
                 : new Configurator();
         configurator = configurator.setUtilitySpace(this.uSpace).setListOfOpponents(listOfOpponents).setMe(this.me)
                 .build();
+        
         if (DEBUG_PERSIST)
             System.out.println("DEBUG_PERSIST: Init -> " + this.me);
         if (DEBUG_PERSIST)
             System.out.println("DEBUG_PERSIST: Init -> " + configurator.getBelief().toString());
+        
+        // the creation of a monster
         this.MCTS = new Tree(this.uSpace, configurator.getBelief(), configurator.getInitState(),
                 configurator.getWidener(), this.progress);
 
@@ -482,6 +486,7 @@ public class POMPFANAgent extends DefaultParty {
             this.lastReceivedBid = ((Offer) action).getBid();
             this.negotiationData.addBidUtil(this.uSpace.getUtility(this.lastReceivedBid).doubleValue());
             this.MCTS.receiveRealObservation(action, System.currentTimeMillis());
+            
             if (DEBUG_BELIEF) {
                 String contentDetailed = this.MCTS.getBelief().toDetailedString();
                 String content = this.MCTS.getBelief().toString();
@@ -489,6 +494,7 @@ public class POMPFANAgent extends DefaultParty {
                 saveDistributionToLogs("distribution", content, true);
             }
         }
+        
         ActionWithBid aBid = (ActionWithBid) action;
         if (DEBUG_OFFER == true) {
             System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
@@ -527,14 +533,12 @@ public class POMPFANAgent extends DefaultParty {
      */
     protected Action myTurn(YourTurn myTurnInfo) throws IOException, StateRepresentationException {
         Action action;
-        // STEP: Generate offer!
         long negotiationEnd = this.progress.getTerminationTime().getTime();
         long remainingTime = negotiationEnd - System.currentTimeMillis();
         long simTime = this.simulationTime;
-        // if (this.lastReceivedBid != null) {
-        // }
+        
         if (this.progress.get(System.currentTimeMillis()) < this.dataCollectionTime) {
-            // High throughput bidding
+            // High throughput bidding used for data collection
             Bid bid = this.goodBids.get(this.random.nextInt(this.goodBids.size().intValue()));
             action = new Offer(this.me, bid);
             return action;
@@ -549,8 +553,7 @@ public class POMPFANAgent extends DefaultParty {
 
         // 2 * simTime because we shift the progress in the simulation.
         if (2 * simTime <= remainingTime) {
-            System.out.println("Root Node: " + this.MCTS.getRoot().toString());
-            // this.MCTS.scrapeSubTree();
+            this.MCTS.scrapeSubTree();
             // When we start the tree construction we use the last real observation to guide the initial exploration
             // We do this just once at the very beginning after the data collection phase
             BeliefNode tmpRoot = ((BeliefNode) this.MCTS.getRoot());
@@ -558,9 +561,14 @@ public class POMPFANAgent extends DefaultParty {
                 tmpRoot.setObservation(this.MCTS.getRealHistory().get(this.MCTS.getRealHistory().size()-1));
             }
             this.MCTS.construct(simTime, this.progress);
-        }
-        if (DEBUG_OFFER)
             getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
+            // getReporter().log(Level.INFO, String.valueOf(this.MCTS.howManyNodes()));
+
+        } else {
+            getReporter().log(Level.WARNING, this.MCTS.getRoot().toString());
+        }
+        
+        if (DEBUG_OFFER) getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
 
         action = this.MCTS.chooseBestAction();
 
@@ -573,14 +581,14 @@ public class POMPFANAgent extends DefaultParty {
                 action = (ActionWithBid) lastBestActionNode.getAction();
                 return action;
             }
-        }
-        if (action == null) {
+
             this.getReporter().log(Level.WARNING, "Could not get last best action node!!!");
             Bid bid = this.bidsWithUtility.getExtremeBid(true);
             action = new Offer(this.me, bid);
             return action;
         }
 
+        // Logging agent decisions
         if (action instanceof Offer) {
             Bid myBid = ((Offer) action).getBid();
             if (DEBUG_OFFER == true)
