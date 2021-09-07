@@ -63,7 +63,7 @@ public class POMPFANAgent extends DefaultParty {
      */
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = false;
-    private static boolean DEBUG_OFFER = false;
+    private static boolean DEBUG_OFFER = true;
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
     private static boolean DEBUG_BELIEF = false;
@@ -562,10 +562,15 @@ public class POMPFANAgent extends DefaultParty {
             }
             this.MCTS.construct(simTime, this.progress);
             getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
-            // getReporter().log(Level.INFO, String.valueOf(this.MCTS.howManyNodes()));
+            getReporter().log(Level.INFO, "Tree has: " + String.valueOf(this.MCTS.howManyNodes()));
+            getReporter().log(Level.INFO, "Tree root time is: " + this.MCTS.getRoot().getState().getTime());
+
+            if (this.MCTS.howManyNodes() <= 10) {
+                System.out.println("Weird");
+            }
 
         } else {
-            getReporter().log(Level.WARNING, this.MCTS.getRoot().toString());
+            getReporter().log(Level.WARNING, "Not enough time!");
         }
         
         if (DEBUG_OFFER) getReporter().log(Level.INFO, this.MCTS.getRoot().toString());

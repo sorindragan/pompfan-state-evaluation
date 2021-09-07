@@ -53,15 +53,17 @@ public class Tree {
         this.setUtilitySpace(utilitySpace);
         this.belief = belief;
         BeliefNode tmpRoot = new BeliefNode(null, startState, null);
-        
-        if (TREE_DEBUG) this.originalRoot = tmpRoot;
-        
+
+        if (TREE_DEBUG)
+            this.originalRoot = tmpRoot;
+
         this.setRoot(tmpRoot);
         this.allBidsList = new AllBidsList(this.getUtilitySpace().getDomain());
-        // This is a very bad bit of code: hardcoded initialization of lastBestAction node
+        // This is a very bad bit of code: hardcoded initialization of lastBestAction
+        // node
         this.lastBestActionNode = new ActionNode(null, startState,
                 new Offer(new PartyId(lastBestActionNodeInitPartyId), this.allBidsList.get(BigInteger.ZERO)));
-        
+
         this.widener = widener;
         this.realHistory = new ArrayList<Action>();
         this.setProgress(progress);
@@ -101,11 +103,11 @@ public class Tree {
     }
 
     public void construct(Long simulationTime, Progress realProgress) throws StateRepresentationException {
-        Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime),
-                System.currentTimeMillis());
+        long currentTimeMillis = System.currentTimeMillis(); 
+        Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime), currentTimeMillis);
         Progress realShiftedProgress = ProgressFactory.create(
-                new DeadlineTime(realProgress.getTerminationTime().getTime()),
-                System.currentTimeMillis() + simulationTime);
+                new DeadlineTime(realProgress.getTerminationTime().getTime() - currentTimeMillis - simulationTime),
+                currentTimeMillis + simulationTime);
         while (simulatedProgress.isPastDeadline(System.currentTimeMillis()) == false) {
             // two nodes should be added after each simulation: AN -> BN
             this.simulate(realShiftedProgress, simulationTime);
@@ -148,25 +150,22 @@ public class Tree {
 
         this.currentTime = this.getProgress().get(time);
         Offer newRealObservation = (Offer) observationAction;
-        
-        // this should always happen when data collection is on 
-        Offer lastRealOpponentAction = this.realHistory.size() >= 3
-                        ? (Offer) this.realHistory.get(this.realHistory.size() - 3)
-                        : null;
-        Offer lastRealAgentAction = this.realHistory.size() >= 3
-                        ? (Offer) this.realHistory.get(this.realHistory.size() - 2)
-                        : null;
-        
-        /* Offer lastRealAgentAction = this.lastBestActionNode != null 
-                ? (Offer) this.lastBestActionNode.getAction()
-                : null;
-        if (lastRealAgentAction == null) {
-            // we should construct the tree first
-            return this;
-        } */
-        // get the real negotiation time
-        AbstractState<?> stateUpdatedWithRealTime = this.lastBestActionNode.getState().setTime(this.currentTime);
 
+        // this should always happen when data collection is on
+        Offer lastRealOpponentAction = this.realHistory.size() >= 3
+                ? (Offer) this.realHistory.get(this.realHistory.size() - 3)
+                : null;
+        Offer lastRealAgentAction = this.realHistory.size() >= 3
+                ? (Offer) this.realHistory.get(this.realHistory.size() - 2)
+                : null;
+
+        /*
+         * Offer lastRealAgentAction = this.lastBestActionNode != null ? (Offer)
+         * this.lastBestActionNode.getAction() : null; if (lastRealAgentAction == null)
+         * { // we should construct the tree first return this; }
+         */
+        // get the real negotiation time
+        AbstractState<?> stateUpdatedWithRealTime = this.lastBestActionNode.getState().copyState().setTime(this.currentTime);
         // update the belief based on real observation
         this.belief = this.belief.updateBeliefs(newRealObservation, lastRealAgentAction, lastRealOpponentAction,
                 stateUpdatedWithRealTime);
@@ -177,12 +176,13 @@ public class Tree {
         }
 
         // if the lastBestActionNode is the inital one
-        if (this.lastBestActionNode.getAction().getActor().getName().compareTo(this.lastBestActionNodeInitPartyId) == 0) {
+        if (this.lastBestActionNode.getAction().getActor().getName()
+                .compareTo(this.lastBestActionNodeInitPartyId) == 0) {
             // Quickfix: by doing nothing
             // Startphase - opponent bids first
             return this;
         }
-        
+
         List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream()
                 .filter(node -> node.getIsTerminal() == false).collect(Collectors.toList());
 
@@ -338,6 +338,8 @@ public class Tree {
     public void scrapeSubTree() {
         this.root.setChildren(new ArrayList<Node>());
         this.root.setValue(0.0).setVisits(0);
+        // this.root.getState().setTime(0.0);
+        // this.root.getState().setTime(this.progress.get(System.currentTimeMillis()));
     }
 
 }

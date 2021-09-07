@@ -40,6 +40,10 @@ public class BeliefNode extends Node {
     }
 
     public Node act(AbstractOwnExplorationPolicy strategy, Double time) throws StateRepresentationException {
+        if (time > 0.5) {
+            System.out.println("stuff");
+        }
+        
         AbstractState<?> state = this.getState();
         
         // ? both lastOwnAction and lastOpponentAction should be part of the state
@@ -48,6 +52,7 @@ public class BeliefNode extends Node {
         Bid lastOwnBid = lastOwnAction instanceof Offer ? ((Offer) lastOwnAction).getBid() : null;
         Bid lastOpponentBid = lastOpponentAction instanceof Offer ? ((Offer) lastOpponentAction).getBid() : null;
 
+        // WE CAN DO THIS. WE ONLY HAVE TO WHILE THE SHIT OUT OF THE ACTION BRUTE-FORCE AND IF THE CHILD IS STILL ALREADY KNOWN WE JUST CHANGE THE BID A LITTLE
         Action agentAction = strategy.chooseAction(lastOpponentBid, lastOwnBid, state);
         
         if (SIM_DEBUG) {
@@ -68,7 +73,9 @@ public class BeliefNode extends Node {
             child = (ActionNode) Node.buildNode(Node.NODE_TYPE.ACTION, this, newState, state.getOpponent(),
                     agentAction);
             this.addChild(child);
+            return child;
         }
+        child.setIsResampled(true);
         return child;
     }
 

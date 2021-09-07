@@ -78,4 +78,9 @@ public class HistoryState extends AbstractState<ArrayList<Action>> {
         return this.getHistory().equals(secondState.getHistory());
     }
 
+    @Override
+    public AbstractState<ArrayList<Action>> copyState() {
+        return new HistoryState(this.getUtilitySpace(), this.getOpponent(), this.getEvaluator()).init(this.getRepresentation()).setTime(this.getTime());
+    }
+
 }

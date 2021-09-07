@@ -77,4 +77,10 @@ public class FrequencyState extends AbstractState<HashMap<IVPair, Double>> {
         return null;
     }
 
+    @Override
+    public AbstractState<HashMap<IVPair, Double>> copyState() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

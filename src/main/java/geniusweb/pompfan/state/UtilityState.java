@@ -90,4 +90,10 @@ public class UtilityState extends AbstractState<Map<PartyId, BigDecimal>> {
         return null;
     }
 
+    @Override
+    public AbstractState<Map<PartyId, BigDecimal>> copyState() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

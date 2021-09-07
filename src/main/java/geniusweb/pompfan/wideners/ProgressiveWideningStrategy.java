@@ -115,14 +115,14 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
             BeliefNode beliefNode = (BeliefNode) nextActionNode.receiveObservation(simulatedTimeOfObsReceival);
             currRoot = beliefNode;
 
-            if (beliefNode.getIsResampled()) {
-                
-                int a = 2;
-            }
-
+            
             // this if code omits the evaluation when the same accept is sampled again
             if (currRoot == null) {
                 return;
+            }
+            if (beliefNode.getIsResampled()) {
+                
+                int a = 2;
             }
             currRoot.getState().setOpponent(currOpp);
 
