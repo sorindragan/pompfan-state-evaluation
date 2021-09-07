@@ -136,4 +136,11 @@ public class OppUtilTFTAgent extends AbstractOpponent {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void terminate() {
+        super.terminate();
+        this.allPossibleBids =null;
+
+    }
+
 }

@@ -71,5 +71,12 @@ public class SelfishAgent extends AbstractOpponent{
                 : new Offer(this.getMe(), selfishBid);
         return result;
     }
+
+    @Override
+    public void terminate() {
+        super.terminate();
+        this.possibleBids =null;
+
+    }
     
 }

@@ -15,9 +15,10 @@ import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class TimeConcedingExplorationPolicy extends AbstractOwnExplorationPolicy{
+public class TimeConcedingExplorationPolicy extends AbstractOwnExplorationPolicy {
 
     private BidsWithUtility bidutils;
+
     public TimeConcedingExplorationPolicy(UtilitySpace utilitySpace, PartyId id) {
         super(utilitySpace, id);
         this.bidutils = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
@@ -30,18 +31,17 @@ public class TimeConcedingExplorationPolicy extends AbstractOwnExplorationPolicy
         // progressively open the bounds of explored bids
         double lowerBound = 1.0 - (state.getTime() / 2);
 
-        if (lastReceivedBid == null) {
-            return new Offer(this.getPartyId(), this.getAllBids().getExtremeBid(true));
-        }
-        ImmutableList<Bid> options = this.getBidutils()
-                .getBids(new Interval(BigDecimal.valueOf(lowerBound),
-                        this.getUtilitySpace().getUtility(this.getBidutils().getExtremeBid(true))));
+        ImmutableList<Bid> options = this.getBidutils().getBids(new Interval(BigDecimal.valueOf(lowerBound),
+                this.getUtilitySpace().getUtility(this.getBidutils().getExtremeBid(true))));
 
         if (options.size().intValue() < 1) {
             return new Offer(this.getPartyId(), this.getAllBids().getExtremeBid(true));
         }
         bid = options.get(new Random().nextInt(options.size().intValue()));
         action = new Offer(this.getPartyId(), bid);
+        if (lastReceivedBid == null) {
+            return action;
+        }
 
         BigDecimal utilToBeOffered = this.getUtilitySpace().getUtility(bid);
         BigDecimal utilFromOpp = this.getUtilitySpace().getUtility(lastReceivedBid);

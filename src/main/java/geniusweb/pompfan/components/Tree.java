@@ -321,4 +321,8 @@ public class Tree {
         return this;
     }
 
+    public void scrapeSubTree() {
+        this.root.setChildren(new ArrayList<Node>());
+    }
+
 }

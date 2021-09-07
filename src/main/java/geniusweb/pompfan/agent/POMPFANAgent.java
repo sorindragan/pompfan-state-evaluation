@@ -39,6 +39,7 @@ import geniusweb.issuevalue.Bid;
 import geniusweb.party.Capabilities;
 import geniusweb.party.DefaultParty;
 import geniusweb.pompfan.components.ActionNode;
+import geniusweb.pompfan.components.BeliefNode;
 import geniusweb.pompfan.components.Configurator;
 import geniusweb.pompfan.components.OpponentParticleCreator;
 import geniusweb.pompfan.components.Tree;
@@ -62,7 +63,7 @@ public class POMPFANAgent extends DefaultParty {
      */
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = false;
-    private static boolean DEBUG_OFFER = false;
+    private static boolean DEBUG_OFFER = true;
     private static boolean DEBUG_PERSIST = false;
     private static boolean DEBUG_SAVE_TREE = false;
     private static boolean DEBUG_BELIEF = false;
@@ -548,6 +549,14 @@ public class POMPFANAgent extends DefaultParty {
 
         // 2 * simTime because we shift the progress in the simulation.
         if (2 * simTime <= remainingTime) {
+            System.out.println("Root Node: " + this.MCTS.getRoot().toString());
+            // this.MCTS.scrapeSubTree();
+            // When we start the tree construction we use the last real observation to guide the initial exploration
+            // We do this just once at the very beginning after the data collection phase
+            BeliefNode tmpRoot = ((BeliefNode) this.MCTS.getRoot());
+            if (tmpRoot.getObservation() == null) {
+                tmpRoot.setObservation(this.MCTS.getRealHistory().get(this.MCTS.getRealHistory().size()-1));
+            }
             this.MCTS.construct(simTime, this.progress);
         }
         if (DEBUG_OFFER)

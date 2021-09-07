@@ -33,14 +33,13 @@ public class HighSelfEsteemOwnExplorationPolicy extends AbstractOwnExplorationPo
         
         
         if (lastReceivedBid == null) {
-            bid = this.getAllBids().getExtremeBid(true);
-        } else {
-            ImmutableList<Bid> options = this.getBidutils()
-                    .getBids(new Interval(this.getUtilitySpace().getUtility(lastReceivedBid),
-                            this.getUtilitySpace().getUtility(this.getBidutils().getExtremeBid(true))));
-            
-            bid = options.get(new Random().nextInt(options.size().intValue()));
+            return new Offer(this.getPartyId(), this.getAllBids().getExtremeBid(true));
         }
+        ImmutableList<Bid> options = this.getBidutils()
+                .getBids(new Interval(this.getUtilitySpace().getUtility(lastReceivedBid),
+                        this.getUtilitySpace().getUtility(this.getBidutils().getExtremeBid(true))));
+        
+        bid = options.get(new Random().nextInt(options.size().intValue()));
         action = new Offer(this.getPartyId(), bid);
         
         // pcent of the time we do accepts

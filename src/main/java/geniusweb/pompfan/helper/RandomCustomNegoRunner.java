@@ -63,13 +63,16 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                         "TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
         private final static List<String> setWidener = Arrays.asList("ProgressiveWideningStrategy",
                         "MaxWidthWideningStrategy");
-        private final static List<String> setOpponents = Arrays.asList("classpath:geniusweb.opponents.OwnUtilTFTAgent",
-                        "classpath:geniusweb.opponents.OppUtilTFTAgent",
-                        "classpath:geniusweb.opponents.AntagonisticAgent", "classpath:geniusweb.opponents.SelfishAgent",
-                        "classpath:geniusweb.exampleparties.boulware.Boulware",
-                        "classpath:geniusweb.exampleparties.hardliner.Hardliner",
-                        "classpath:geniusweb.exampleparties.randomparty.RandomParty",
-                        "classpath:geniusweb.exampleparties.timedependentparty.TimeDependentParty");
+        private final static List<String> setOpponents = Arrays.asList(
+                        // "classpath:geniusweb.opponents.OwnUtilTFTAgent",
+                        // "classpath:geniusweb.opponents.OppUtilTFTAgent",
+                        "classpath:geniusweb.opponents.AntagonisticAgent", 
+                        // "classpath:geniusweb.opponents.SelfishAgent",
+                        // "classpath:geniusweb.exampleparties.boulware.Boulware",
+                        // "classpath:geniusweb.exampleparties.hardliner.Hardliner",
+                        // "classpath:geniusweb.exampleparties.timedependentparty.TimeDependentParty",
+                        "classpath:geniusweb.exampleparties.randomparty.RandomParty"
+                        );
 
         public RandomCustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory,
                         Reporter logger, long maxruntime, String settingRef, String name) throws IOException {

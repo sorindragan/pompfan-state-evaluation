@@ -12,7 +12,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
 
-    private static final BigDecimal STUBBORNESS = new BigDecimal("0.6");
+    private static final BigDecimal STUBBORNESS = new BigDecimal("0.75");
 
     public RandomOwnExplorerPolicy(UtilitySpace utilitySpace,  PartyId id) {
         super(utilitySpace, id);
@@ -28,7 +28,7 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
 
         if (lastOpponentBid == null) {
             // start with maxbid
-            return new Offer(this.getPartyId(), this.getAllBids().getExtremeBid(true));
+            return new Offer(this.getPartyId(), bid);
         }
 
         // easir to debug
@@ -43,7 +43,7 @@ public class RandomOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
     }
 
     private boolean shouldAccept(Bid bid, Bid oppBid) {
-        if (bid == null)
+        if (bid == null || oppBid == null)
             return false;
         BigDecimal sample = this.getUtilitySpace().getUtility(bid);
         BigDecimal target = this.getUtilitySpace().getUtility(oppBid);

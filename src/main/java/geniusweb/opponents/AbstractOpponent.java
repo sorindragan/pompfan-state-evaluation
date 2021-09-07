@@ -138,6 +138,7 @@ public abstract class AbstractOpponent extends DefaultParty {
                         + ": END Cycle - " + info.getClass().getSimpleName());
             cleanupIfGameOver();
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Failed to handle info", e);
         }
     }
@@ -444,6 +445,11 @@ public abstract class AbstractOpponent extends DefaultParty {
             this.profileint.close();
             this.profileint = null;
         }
+        this.dataPaths = null;
+        this.goodBids = null;
+        this.history = null;
+        this.utilitySpace = null;
+        this.mapper = null;
     }
 
     /**

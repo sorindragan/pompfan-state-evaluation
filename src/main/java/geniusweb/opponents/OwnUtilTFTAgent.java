@@ -115,6 +115,10 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
         }
         return result;
     }
-
+    @Override
+    public void terminate() {
+        super.terminate();
+        this.allPossibleBids =null;
+    }
 
 }

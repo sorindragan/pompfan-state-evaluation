@@ -11,7 +11,8 @@
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"isLearn": true,
 									"numParticlesPerOpponent": "10",
-									"simulationTime": "400",
+									"simulationTime": "250",
+									"dataCollectionTime": "0.25",
 									"config": {
 										"confComparer": "UtilityBidDistance",
 										"confBelief": "BayesianCountFilterBelief",
@@ -56,7 +57,7 @@
 			}
 		],
 		"deadline": {
-			"deadlinetime": {"durationms": 10000 }
+			"deadlinetime": { "durationms": 20000 }
 		}
 	}
 }

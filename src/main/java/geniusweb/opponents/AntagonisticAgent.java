@@ -80,4 +80,12 @@ public class AntagonisticAgent extends AbstractOpponent {
         return result;
     }
 
+    @Override
+    public void terminate() {
+        super.terminate();
+        this.oppBadBids =null;
+        this.oppBidsWithUtilities = null;
+        this.opponentModel = null;
+    }
+
 }

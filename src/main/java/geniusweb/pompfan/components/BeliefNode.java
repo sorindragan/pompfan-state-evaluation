@@ -72,6 +72,12 @@ public class BeliefNode extends Node {
 
     @Override
     public String extraString() {
+        if (this.getState() == null) {
+            return "[no state]";
+        }
+        if (this.getState().getOpponent() == null) {
+            return "[no state & no opponent]";
+        }
         return this.getState().getOpponent().getPartyId().toString();
     }
 
