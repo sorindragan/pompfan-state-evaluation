@@ -565,9 +565,9 @@ public class POMPFANAgent extends DefaultParty {
             getReporter().log(Level.INFO, "Tree has: " + String.valueOf(this.MCTS.howManyNodes()));
             getReporter().log(Level.INFO, "Tree root time is: " + this.MCTS.getRoot().getState().getTime());
 
-            if (this.MCTS.howManyNodes() <= 10) {
-                System.out.println("Weird");
-            }
+            // if (this.MCTS.howManyNodes() <= 10) {
+            //     System.out.println("Weird");
+            // }
 
         } else {
             getReporter().log(Level.WARNING, "Not enough time!");

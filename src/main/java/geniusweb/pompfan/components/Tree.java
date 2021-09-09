@@ -108,6 +108,9 @@ public class Tree {
         Progress realShiftedProgress = ProgressFactory.create(
                 new DeadlineTime(realProgress.getTerminationTime().getTime() - currentTimeMillis - simulationTime),
                 currentTimeMillis + simulationTime);
+        // set the new root time
+        this.root.getState().setTime(realProgress.get(currentTimeMillis + simulationTime));
+        
         while (simulatedProgress.isPastDeadline(System.currentTimeMillis()) == false) {
             // two nodes should be added after each simulation: AN -> BN
             this.simulate(realShiftedProgress, simulationTime);
@@ -338,8 +341,6 @@ public class Tree {
     public void scrapeSubTree() {
         this.root.setChildren(new ArrayList<Node>());
         this.root.setValue(0.0).setVisits(0);
-        // this.root.getState().setTime(0.0);
-        // this.root.getState().setTime(this.progress.get(System.currentTimeMillis()));
     }
 
 }

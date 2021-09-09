@@ -18,10 +18,12 @@ import tudelft.utilities.immutablelist.ImmutableList;
 public class TimeConcedingExplorationPolicy extends AbstractOwnExplorationPolicy {
 
     private BidsWithUtility bidutils;
+    private Double extremeBidUtil;
 
     public TimeConcedingExplorationPolicy(UtilitySpace utilitySpace, PartyId id) {
         super(utilitySpace, id);
         this.bidutils = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
+        this.extremeBidUtil  = this.getUtilitySpace().getUtility(this.getAllBids().getExtremeBid(true)).doubleValue();
     }
 
     @Override
@@ -29,11 +31,9 @@ public class TimeConcedingExplorationPolicy extends AbstractOwnExplorationPolicy
         Action action;
         Bid bid;
         // progressively open the bounds of explored bids
-        double lowerBound = 1.0 - (state.getTime() / 2);
+        double lowerBound = extremeBidUtil - (state.getTime() / 2);
         // System.out.println("Something: " + lowerBound);
-        if (lowerBound < 0.8) {
-            System.out.println("SMAAAAAAAAAAAAAAAAAALLER!");
-        }
+       
         ImmutableList<Bid> options = this.getBidutils()
                 .getBids(new Interval(BigDecimal.valueOf(lowerBound), BigDecimal.ONE));
 
