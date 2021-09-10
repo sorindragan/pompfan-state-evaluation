@@ -1,8 +1,10 @@
 package geniusweb.pompfan.components;
 
 import java.math.BigInteger;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -29,7 +31,6 @@ import geniusweb.progress.ProgressFactory;
 
 public class Tree {
     private static final boolean PARTICLE_DEBUG = false;
-    private static final boolean TREE_DEBUG = false;
     private BeliefNode root;
     private Domain domain;
     @JsonManagedReference
@@ -42,8 +43,6 @@ public class Tree {
     private ActionNode lastBestActionNode;
     private List<Action> realHistory;
     private Progress progress;
-    private Double currentTime = 0.0;
-    private BeliefNode originalRoot;
     private Double ACCEPT_SLACK = 0.05;
     private AllBidsList allBidsList;
     private String lastBestActionNodeInitPartyId = "NoAgent";
@@ -52,13 +51,10 @@ public class Tree {
             Progress progress) {
         this.setUtilitySpace(utilitySpace);
         this.belief = belief;
-        BeliefNode tmpRoot = new BeliefNode(null, startState, null);
-
-        if (TREE_DEBUG)
-            this.originalRoot = tmpRoot;
-
-        this.setRoot(tmpRoot);
         this.allBidsList = new AllBidsList(this.getUtilitySpace().getDomain());
+        
+        BeliefNode initalRoot = new BeliefNode(null, startState, null);
+        this.setRoot(initalRoot);
         // This is a very bad bit of code: hardcoded initialization of lastBestAction
         // node
         this.lastBestActionNode = new ActionNode(null, startState,
@@ -94,14 +90,6 @@ public class Tree {
         this.realHistory = realHistory;
     }
 
-    public void setOriginalRoot(BeliefNode originalRoot) {
-        this.originalRoot = originalRoot;
-    }
-
-    public BeliefNode getOriginalRoot() {
-        return originalRoot;
-    }
-
     public void construct(Long simulationTime, Progress realProgress) throws StateRepresentationException {
         long currentTimeMillis = System.currentTimeMillis(); 
         Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime), currentTimeMillis);
@@ -110,8 +98,8 @@ public class Tree {
                 currentTimeMillis + simulationTime);
         // set the new root time
         this.root.getState().setTime(realProgress.get(currentTimeMillis + simulationTime));
-        
-        while (simulatedProgress.isPastDeadline(System.currentTimeMillis()) == false) {
+
+        while (Boolean.FALSE.equals(simulatedProgress.isPastDeadline(System.currentTimeMillis()))) {
             // two nodes should be added after each simulation: AN -> BN
             this.simulate(realShiftedProgress, simulationTime);
         }
@@ -122,19 +110,22 @@ public class Tree {
         // sample a different opponent and add it to the state
         AbstractPolicy currOpp = this.belief.sampleOpponent();
         this.root.getState().setOpponent(currOpp);
+        // main function
         this.widener.widen(simulatedProgress, shiftSimTime, currRoot);
     }
 
     public static void backpropagate(Node node, Double value) {
         while (node.getParent() != null) {
             node.updateVisits();
-            node.setValue(node.getValue() + value);
             // calculate UCB1
-            node.setValue(UCB1(node));
+            // node.setValue(node.getValue() + value).setValue(UCB1(node));
+            // update value 
+            node.setValue(node.getValue() + value);
+
             node = node.getParent();
         }
         node.updateVisits();
-        // value of the root is not important
+        // value of the root is not important tho
         node.setValue(node.getValue() + value);
     }
 
@@ -145,13 +136,12 @@ public class Tree {
         }
 
         return candidatesChildrenForAdoption.stream().filter(child -> child.getIsTerminal() == false)
-                .max(Comparator.comparing(Node::getValue)).get();
+                .max(Comparator.comparing(node -> UCB1(node))).get();
 
     }
 
     public Tree receiveRealObservation(Action observationAction, Long time) {
 
-        this.currentTime = this.getProgress().get(time);
         Offer newRealObservation = (Offer) observationAction;
 
         // this should always happen when data collection is on
@@ -162,38 +152,33 @@ public class Tree {
                 ? (Offer) this.realHistory.get(this.realHistory.size() - 2)
                 : null;
 
-        /*
-         * Offer lastRealAgentAction = this.lastBestActionNode != null ? (Offer)
-         * this.lastBestActionNode.getAction() : null; if (lastRealAgentAction == null)
-         * { // we should construct the tree first return this; }
-         */
         // get the real negotiation time
-        AbstractState<?> stateUpdatedWithRealTime = this.lastBestActionNode.getState().copyState().setTime(this.currentTime);
+        AbstractState<?> stateUpdatedWithRealTime = this.lastBestActionNode.getState().copyState().setTime(this.getProgress().get(time));
         // update the belief based on real observation
         this.belief = this.belief.updateBeliefs(newRealObservation, lastRealAgentAction, lastRealOpponentAction,
                 stateUpdatedWithRealTime);
 
         if (PARTICLE_DEBUG) {
-            System.out.println(this.belief);
             System.out.println("New Belief-Probabilities");
+            System.out.println(this.belief);
         }
 
         // if the lastBestActionNode is the inital one
         if (this.lastBestActionNode.getAction().getActor().getName()
                 .compareTo(this.lastBestActionNodeInitPartyId) == 0) {
-            // Quickfix: by doing nothing
             // Startphase - opponent bids first
+            // Quickfix: by doing nothing
             return this;
         }
 
         List<Node> rootCandidates = this.lastBestActionNode.getChildren().stream()
                 .filter(node -> node.getIsTerminal() == false).collect(Collectors.toList());
 
-        if (rootCandidates.size() == 0) {
+        if (rootCandidates.isEmpty()) {
             // Downgrade the value of accept nodes in order to facilitate exploration by
             // forcing a root change
             this.lastBestActionNode.setValue(this.lastBestActionNode.getValue() - 1.0);
-            // Quickfix: by doing nothing!
+            // try again
             return this;
         }
 
@@ -208,6 +193,7 @@ public class Tree {
 
         // changing the root
         this.setRoot((BeliefNode) nextRoot);
+        // discard rest of the tree
         this.getRoot().setParent(null);
 
         return this;
@@ -221,14 +207,15 @@ public class Tree {
         do {
 
             if (oldestChildren.isEmpty()) {
+                // should not happen
                 return null;
             }
 
-            this.lastBestActionNode = (ActionNode) oldestChildren.stream()
-                    .max(Comparator.comparing(node -> node.getValue())).get();
-            action = lastBestActionNode.getAction();
+            this.setLastBestActionNode((ActionNode) oldestChildren.stream()
+                    .max(Comparator.comparing(node -> node.getValue())).get());
+            action = this.getLastBestActionNode().getAction();
 
-            if (this.realHistory.size() == 0) {
+            if (this.realHistory.isEmpty()) {
                 return action;
             }
             Action lastOpponentAction = this.realHistory.get(this.realHistory.size() - 1);
@@ -262,7 +249,7 @@ public class Tree {
     public int howManyNodes() {
         int nodeNumber = 0;
         Node node;
-        Stack<Node> nodeStack = new Stack<>();
+        Deque<Node> nodeStack = new ArrayDeque<>();
         nodeStack.push(this.root);
 
         while (!nodeStack.isEmpty()) {
@@ -279,12 +266,6 @@ public class Tree {
     public String toString() {
         StringBuilder buffer = new StringBuilder(50);
         this.buildStringBuffer(buffer, "", "", this.root);
-        return buffer.toString();
-    }
-
-    public String toStringOriginal() {
-        StringBuilder buffer = new StringBuilder(50);
-        this.buildStringBuffer(buffer, "", "", this.getOriginalRoot());
         return buffer.toString();
     }
 
@@ -339,8 +320,9 @@ public class Tree {
     }
 
     public void scrapeSubTree() {
-        this.root.setChildren(new ArrayList<Node>());
-        this.root.setValue(0.0).setVisits(0);
+        this.root.setParent(null)
+        .setChildren(new ArrayList<Node>())
+        .setValue(0.0).setVisits(0);
     }
 
 }

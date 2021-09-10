@@ -1,13 +1,24 @@
 package geniusweb.pompfan.components;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
+import geniusweb.actions.ActionWithBid;
 import geniusweb.actions.Offer;
 import geniusweb.issuevalue.Bid;
+import geniusweb.issuevalue.Value;
+import geniusweb.issuevalue.ValueSet;
 import geniusweb.pompfan.explorers.AbstractOwnExplorationPolicy;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.StateRepresentationException;
@@ -17,7 +28,6 @@ import geniusweb.pompfan.state.StateRepresentationException;
  */
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class BeliefNode extends Node {
-    private static final boolean SIM_DEBUG = false;
 
     public BeliefNode() {
         super();
@@ -40,43 +50,86 @@ public class BeliefNode extends Node {
     }
 
     public Node act(AbstractOwnExplorationPolicy strategy, Double time) throws StateRepresentationException {
-        if (time > 0.5) {
-            System.out.println("stuff");
-        }
         
         AbstractState<?> state = this.getState();
         
-        // ? both lastOwnAction and lastOpponentAction should be part of the state
+        // in the case of the HistoryState, both lastOwnAction and lastOpponentAction should be part of the state
+        // using a different state representation, that is not the case anymore
         Action lastOwnAction = this.getParent() != null ? ((ActionNode) this.getParent()).getAction() : null;
         Action lastOpponentAction = this.getObservation() instanceof Offer ? (Offer) this.getObservation() : (Accept) this.getObservation();
         Bid lastOwnBid = lastOwnAction instanceof Offer ? ((Offer) lastOwnAction).getBid() : null;
         Bid lastOpponentBid = lastOpponentAction instanceof Offer ? ((Offer) lastOpponentAction).getBid() : null;
 
-        // WE CAN DO THIS. WE ONLY HAVE TO WHILE THE SHIT OUT OF THE ACTION BRUTE-FORCE AND IF THE CHILD IS STILL ALREADY KNOWN WE JUST CHANGE THE BID A LITTLE
-        Action agentAction = strategy.chooseAction(lastOpponentBid, lastOwnBid, state);
-        
-        if (SIM_DEBUG) {
-            System.out.println("Choose...");
-            System.out.println(agentAction);
-        }
+        return this.generatePreviouslyUnseenAction(strategy, lastOpponentBid, lastOwnBid, state, time);
+    }
 
-        AbstractState<?> newState = state.updateState(agentAction, time);
-        
-        // choose already present child if the new state happens to be identical
-        ActionNode child = (ActionNode) this.getChildren().stream()
-               .filter(childNode -> childNode.getState().equals(newState))
-               .findFirst().orElse(null);
+    public Node generatePreviouslyUnseenAction(AbstractOwnExplorationPolicy strategy, Bid lastOppBid, Bid lastOwnBid, AbstractState state, Double time) throws StateRepresentationException {
+        int cnt = 0;
+        Action chosenAgentAction;
+        AbstractState<?> newUnseenState;
+        ActionNode child;
+        do {
+            Action agentAction = strategy.chooseAction(lastOppBid, lastOwnBid, state);
+            AbstractState<?> newState = state.updateState(agentAction, time);
+    
+            // choose already present child if the new state happens to be identical
+            child = (ActionNode) this.getChildren().parallelStream()
+                    .filter(childNode -> childNode.getState().equals(newState)).findFirst().orElse(null);
+            cnt++;
+            chosenAgentAction = agentAction;
+            newUnseenState = newState;
+            // try 100 times to generate new action
+        } while(child != null && cnt < 100);
 
+        
         if (child == null) {
+            // QUESTION: Does it make sense to just always propagate the opponent? 
+            // -> Too late to change the design now
+            
             // create new node
-            // QUESTION: Does it make sense to just always propagate the opponent?
-            child = (ActionNode) Node.buildNode(Node.NODE_TYPE.ACTION, this, newState, state.getOpponent(),
-                    agentAction);
+            child = (ActionNode) Node.buildNode(Node.NODE_TYPE.ACTION, this, 
+                    newUnseenState, state.getOpponent(),
+                    chosenAgentAction);
             this.addChild(child);
             return child;
+        } else {
+            // change a value in the bid
+            Set<String> issues = strategy.getDomain().getIssues();
+            String randomIssue = issues.stream().skip(ThreadLocalRandom.current().nextInt(issues.size())).findAny().get();
+            ValueSet values = strategy.getDomain().getValues(randomIssue);
+            Map<String, Value> currentBidStructure = ((ActionWithBid) chosenAgentAction).getBid().getIssueValues();
+            Map<String, Value> alteredBidStructure = new HashMap<>(); 
+            
+            for (String iss : currentBidStructure.keySet()) {
+                if (iss.compareTo(randomIssue) == 0) {
+                    Value currentValue = currentBidStructure.get(iss);
+                    
+                    int randomIdx = new Random().nextInt(values.size().intValue()-1);
+                    Value newValue = values.get(randomIdx);
+                    if (newValue.equals(currentValue)) {
+                        newValue = values.get(values.size().intValue()-1l);
+                    }
+                    alteredBidStructure.put(iss, newValue);
+                }
+                alteredBidStructure.put(iss, currentBidStructure.get(iss));
+            }
+            
+            Action alteredAction = new Offer(chosenAgentAction.getActor(), new Bid(alteredBidStructure));
+            AbstractState<?> anotherNewState = state.updateState(alteredAction, time);
+
+            Node lastAttemptChild = (ActionNode) this.getChildren().parallelStream()
+                    .filter(childNode -> childNode.getState().equals(anotherNewState)).findFirst().orElse(null);
+            if (lastAttemptChild == null) {
+                lastAttemptChild = (ActionNode) Node.buildNode(Node.NODE_TYPE.ACTION, this, newUnseenState, state.getOpponent(),
+                        chosenAgentAction);
+                this.addChild(lastAttemptChild);
+                return lastAttemptChild;
+            }
+            // last safenet returned an already sampled child
+            lastAttemptChild.setIsResampled(true);
+            return lastAttemptChild;
         }
-        child.setIsResampled(true);
-        return child;
+
     }
 
     @Override

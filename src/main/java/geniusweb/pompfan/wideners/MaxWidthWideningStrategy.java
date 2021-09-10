@@ -13,13 +13,19 @@ import geniusweb.progress.Progress;
 
 public class MaxWidthWideningStrategy extends AbstractWidener {
     private Integer maxWidth;
-    // !! AT THIS MOMENT THIS IS JUNK
-    // TODO: This needs to be fixed
 
     public MaxWidthWideningStrategy(AbstractOwnExplorationPolicy ownExplorationStrategy,
             HashMap<String, Object> params) {
         super(ownExplorationStrategy);
+        
+        // this.maxWidth = useMaxWidthAsPercentage(params);
         this.maxWidth = Double.valueOf((String) params.getOrDefault("maxWidth", "42.0")).intValue();
+    }
+
+    private Integer useMaxWidthAsPercentage(HashMap<String, Object> params) {
+        Double proportionOfMaxPossible = Double.valueOf((String) params.getOrDefault("maxWidth", "42.0"));
+        Double calculatedWidth = proportionOfMaxPossible * this.getOwnExplorationStrategy().getBidspace().size().doubleValue(); 
+        return calculatedWidth.intValue();
     }
 
     public Integer getMaxWidth() {
@@ -38,17 +44,19 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
             // Going down the tree - Action Node Level
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
             currRoot.getState().setOpponent(currOpp);
+            
             if (currRoot.getChildren().size() < this.maxWidth) {
                 // Widening the Belief level
 
-                Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
+                Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
                 ActionNode currActionNode = (ActionNode) currRoot;
                 BeliefNode receivedObservationNode = (BeliefNode) currActionNode
                         .receiveObservation(simulatedTimeOfObsReceival);
                 currRoot = receivedObservationNode;
-                if (currRoot == null) {
-                    return;
-                } // !!: finish dealing with exceptions
+                
+                // this if code omits the evaluation when the same accept is sampled again
+                if (currRoot == null) return;
+                
                 currRoot.getState().setOpponent(currOpp);
 
                 Double value = currRoot.getState().evaluate();
@@ -56,35 +64,27 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
                 return;
             } else {
                 // Going down the tree - Belief Node Level
-                ActionNode oldRoot = (ActionNode) currRoot;
-                oldRoot.getState().setOpponent(currOpp);
                 currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
-                if (currRoot == null) {
-                    Double simulatedTimeOfNewNode = simulatedProgress.get(System.currentTimeMillis());
-                    BeliefNode newChild = (BeliefNode) oldRoot.receiveObservation(simulatedTimeOfNewNode);
-                    currRoot = newChild;
-                    currRoot.getState().setOpponent(currOpp);
-                    Double value = currRoot.getState().evaluate();
-                    Tree.backpropagate(currRoot, value);
-                    return;
-                }
+                // safe net
+                if (currRoot == null) return;
 
             }
         }
 
         if (currRoot.getChildren().size() < this.maxWidth) {
             // Widening the Action level
-            Double simulatedTimeOfActReceival = simulatedProgress.get(System.currentTimeMillis());
+            Double simulatedTimeOfActReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
             BeliefNode currBeliefNode = (BeliefNode) currRoot;
             ActionNode receivedActionNode = (ActionNode) currBeliefNode.act(this.getOwnExplorationStrategy(),
                     simulatedTimeOfActReceival);
             ActionNode actionNode = receivedActionNode;
-            Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis());
+            Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
             BeliefNode beliefNode = (BeliefNode) actionNode.receiveObservation(simulatedTimeOfObsReceival);
             currRoot = beliefNode;
-            if (currRoot == null) {
-                return;
-            }
+            
+            // same accept is sampled; skip
+            if (currRoot == null) return;
+            
             currRoot.getState().setOpponent(currOpp);
             Double value = currRoot.getState().evaluate();
             Tree.backpropagate(currRoot, value);

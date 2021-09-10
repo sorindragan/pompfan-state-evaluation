@@ -235,7 +235,6 @@ public class POMPFANAgent extends DefaultParty {
                 YourTurn myTurnInfo = (YourTurn) info;
                 ActionWithBid action = (ActionWithBid) myTurn(myTurnInfo);
                 this.MCTS.getRealHistory().add(action);
-                System.out.println(progress.get(System.currentTimeMillis()));
                 if (DEBUG_OFFER == true) {
                     System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
                     System.out.println("Agent: Util=" + this.uSpace.getUtility(action.getBid()) + " -- "
@@ -243,7 +242,7 @@ public class POMPFANAgent extends DefaultParty {
                 }
                 getConnection().send(action);
             } catch (Exception e) {
-                this.getReporter().log(Level.WARNING, "First level fallback even failed!!!");
+                this.getReporter().log(Level.WARNING, "Problem in YourTurn!!!");
                 e.printStackTrace();
                 if (DEBUG_OFFER == true) {
                     System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
@@ -281,8 +280,7 @@ public class POMPFANAgent extends DefaultParty {
         }
 
         if (DEBUG_SAVE_TREE) {
-            saveTreeToLogs("full_".concat(sessionName), this.MCTS.toStringOriginal());
-            saveTreeToLogs("curr_".concat(sessionName), this.MCTS.toString());
+            saveTreeToLogs("tree_".concat(sessionName), this.MCTS.toString());
         }
 
         // Log the final outcome and terminate
@@ -552,7 +550,7 @@ public class POMPFANAgent extends DefaultParty {
         }
 
         // 2 * simTime because we shift the progress in the simulation.
-        if (2 * simTime <= remainingTime) {
+        if (2 * simTime < remainingTime) {
             this.MCTS.scrapeSubTree();
             // When we start the tree construction we use the last real observation to guide the initial exploration
             // We do this just once at the very beginning after the data collection phase
@@ -561,19 +559,16 @@ public class POMPFANAgent extends DefaultParty {
                 tmpRoot.setObservation(this.MCTS.getRealHistory().get(this.MCTS.getRealHistory().size()-1));
             }
             this.MCTS.construct(simTime, this.progress);
-            getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
-            getReporter().log(Level.INFO, "Tree has: " + String.valueOf(this.MCTS.howManyNodes()));
-            getReporter().log(Level.INFO, "Tree root time is: " + this.MCTS.getRoot().getState().getTime());
-
-            // if (this.MCTS.howManyNodes() <= 10) {
-            //     System.out.println("Weird");
-            // }
 
         } else {
-            getReporter().log(Level.WARNING, "Not enough time!");
+            getReporter().log(Level.WARNING, "Not enough time! Start consuming the tree");
         }
         
-        if (DEBUG_OFFER) getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
+        if (DEBUG_OFFER) {
+            getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
+            // getReporter().log(Level.INFO, "Tree has: " + String.valueOf(this.MCTS.howManyNodes()));
+            getReporter().log(Level.INFO, "Tree root time was: " + this.MCTS.getRoot().getState().getTime());
+        }
 
         action = this.MCTS.chooseBestAction();
 

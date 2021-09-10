@@ -31,7 +31,6 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
     public void widen(Progress simulatedProgress, Long shiftSimTime, Node currRoot) throws StateRepresentationException {
         AbstractPolicy currOpp = currRoot.getState().getOpponent();
         while (currRoot.getChildren().size() == this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {
-
             // Going down the tree - Action Node Level
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
             currRoot.getState().setOpponent(currOpp);
@@ -43,23 +42,22 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
                 ActionNode currActionNode = (ActionNode) currRoot;
                 BeliefNode receivedObservationNode = (BeliefNode) currActionNode
                         .receiveObservation(simulatedTimeOfObsReceival);
-
                 currRoot = receivedObservationNode;
                 
                 // this if code omits the evaluation when the same accept is sampled again
-                if (currRoot == null) {
-                    return;
-                }
+                if (currRoot == null) return;
+                
                 currRoot.getState().setOpponent(currOpp);
 
-                // for some reason, the same shit is sampled (currRoot is already a children)
+                // for some reason, the same thing is sampled
                 // so go deeper and and simulate 1 action node and 1 belief node further
-                // this was not observed at this level tho
-                if (currActionNode.getChildren().contains(currRoot) && currRoot.getIsResampled() == true) {
+                if (Boolean.TRUE.equals(currRoot.getIsResampled())) {
                     if (Boolean.TRUE.equals(currRoot.getIsTerminal())) {
                         return;
                     }
                     currRoot.setIsResampled(false);
+                    currRoot.getParent().setIsResampled(false);
+                    
                     Double simulatedTimeOfNewActReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
                     ActionNode newActionNode = (ActionNode) ((BeliefNode) currRoot)
                             .act(this.getOwnExplorationStrategy(), simulatedTimeOfNewActReceival);
@@ -72,67 +70,45 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
                 
                 // this if code omits the evaluation when the same accept is sampled again
                 // yet again
-                if (currRoot == null) {
-                    return;
-                }
+                if (currRoot == null) return;
+                
                 currRoot.getState().setOpponent(currOpp);
                 
                 Double value = currRoot.getState().evaluate();
                 Tree.backpropagate(currRoot, value);
                 return;
-            } else {
-                ActionNode oldRoot = (ActionNode) currRoot;
-                oldRoot.getState().setOpponent(currOpp);
-                // Going down the tree - Belief Node Level
-                currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
-                // Safenet in case of terminal children only
-                // Add a new belief node as child
-                if (currRoot == null) {
-                    Double simulatedTimeOfNewNode = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
-                    BeliefNode newChild = (BeliefNode) oldRoot.receiveObservation(simulatedTimeOfNewNode);
-                    currRoot = newChild;
-                    currRoot.getState().setOpponent(currOpp);
-                    Double value = currRoot.getState().evaluate();
-                    Tree.backpropagate(currRoot, value);
-                    return;
-                }
-                
             }
+            // Going down the tree - Belief Node Level
+            currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
+
+            // this can happen for a small value of k_b such as 1
+            // stop simulation
+            if (currRoot == null) return;
+            
         }
         if (currRoot.getChildren().size() < this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {
             // Widening the Action level
             Double simulatedTimeOfActReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
             BeliefNode currBeliefNode = (BeliefNode) currRoot;
-
-
             ActionNode nextActionNode = (ActionNode) currBeliefNode.act(this.getOwnExplorationStrategy(),
                     simulatedTimeOfActReceival);
-            if (nextActionNode.getIsResampled()) {
-                int a = 2;
-            }
-
             Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
             BeliefNode beliefNode = (BeliefNode) nextActionNode.receiveObservation(simulatedTimeOfObsReceival);
             currRoot = beliefNode;
 
             
             // this if code omits the evaluation when the same accept is sampled again
-            if (currRoot == null) {
-                return;
-            }
-            if (beliefNode.getIsResampled()) {
-                
-                int a = 2;
-            }
+            if (currRoot == null) return;
             currRoot.getState().setOpponent(currOpp);
 
-            // for some reason, the same shit is sampled (currRoot is already a children)
+            // for some reason, the same thing is sampled (currRoot is already a children)
             // so go deeper and and simulate 1 action node and 1 belief node further
-            if (nextActionNode.getChildren().contains(currRoot) && currRoot.getIsResampled() == true) {
+            if (Boolean.TRUE.equals(currRoot.getIsResampled())) {
                 if (Boolean.TRUE.equals(currRoot.getIsTerminal())) {
                     return;
                 }
                 currRoot.setIsResampled(false);
+                currRoot.getParent().setIsResampled(false);
 
                 Double simulatedTimeOfNewActReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
                 ActionNode newActionNode = (ActionNode) ((BeliefNode) currRoot).act(this.getOwnExplorationStrategy(),
@@ -145,9 +121,7 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
 
             // this if code omits the evaluation when the same accept is sampled again
             // again
-            if (currRoot == null) {
-                return;
-            }
+            if (currRoot == null) return;
 
             currRoot.getState().setOpponent(currOpp);
             Double value = currRoot.getState().evaluate();
