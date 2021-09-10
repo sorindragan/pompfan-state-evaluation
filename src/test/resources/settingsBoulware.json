@@ -16,7 +16,7 @@
 									"config": {
 										"confComparer": "UtilityBidDistance",
 										"confBelief": "BayesianParticleFilterBelief",
-										"confEvaluator": "Last2BidsProductUtilityEvaluator",
+										"confEvaluator": "L2BOppProdUtilEvaluator",
 										"confState": "HistoryState",
 										"confExplorer": "TimeConcedingExplorationPolicy",
 										"confWidener": "MaxWidthWideningStrategy",

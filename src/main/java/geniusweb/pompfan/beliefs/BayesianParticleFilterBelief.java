@@ -6,14 +6,11 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import geniusweb.actions.Offer;
-import geniusweb.bidspace.AllBidsList;
 import geniusweb.pompfan.distances.AbstractBidDistance;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.pompfan.state.AbstractState;
 
 public class BayesianParticleFilterBelief extends ParticleFilterWithAcceptBelief {
-
-    private double allBidsSize;
 
     public BayesianParticleFilterBelief(Map<AbstractPolicy, Double> opponentProbabilities,
             AbstractBidDistance distance) {
