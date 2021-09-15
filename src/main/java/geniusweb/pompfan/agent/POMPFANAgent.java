@@ -280,6 +280,7 @@ public class POMPFANAgent extends DefaultParty {
         }
 
         if (DEBUG_SAVE_TREE) {
+            System.out.println("INNNN");
             saveTreeToLogs("tree_".concat(sessionName), this.MCTS.toString());
         }
 
@@ -493,8 +494,8 @@ public class POMPFANAgent extends DefaultParty {
             }
         }
         
-        ActionWithBid aBid = (ActionWithBid) action;
-        if (DEBUG_OFFER == true) {
+        if (DEBUG_OFFER) {
+            ActionWithBid aBid = (ActionWithBid) action;
             System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
             System.out.println(
                     "Counteroffer: Util=" + this.uSpace.getUtility(aBid.getBid()) + " -- " + aBid.getBid().toString());
@@ -531,41 +532,48 @@ public class POMPFANAgent extends DefaultParty {
      */
     protected Action myTurn(YourTurn myTurnInfo) throws IOException, StateRepresentationException {
         Action action;
+        Bid bid;
         long negotiationEnd = this.progress.getTerminationTime().getTime();
-        long remainingTime = negotiationEnd - System.currentTimeMillis();
         long simTime = this.simulationTime;
         
         if (this.progress.get(System.currentTimeMillis()) < this.dataCollectionTime) {
+            // ?? For some reason this part fills the RAM quickly
             // High throughput bidding used for data collection
-            Bid bid = this.goodBids.get(this.random.nextInt(this.goodBids.size().intValue()));
+            bid = this.goodBids.get(this.random.nextInt(this.goodBids.size().intValue()));
             action = new Offer(this.me, bid);
             return action;
         }
 
         if (this.opponentName == null) {
             // The first one to make the offer
-            Bid bid = this.bidsWithUtility.getExtremeBid(true);
+            bid = this.bidsWithUtility.getExtremeBid(true);
             action = new Offer(this.me, bid);
             return action;
         }
 
-        // 2 * simTime because we shift the progress in the simulation.
+        long remainingTime = negotiationEnd - System.currentTimeMillis();
+        // 2 * simTime (+ other execution delay) because we shift the progress in the simulation.
         if (2 * simTime < remainingTime) {
             this.MCTS.scrapeSubTree();
+            // use when N from -XmxNg setting generally exceeds amount of remianing RAM
+            // force garbage collector; apparently the VM is not that smart :)
+            // System.gc();
+
             // When we start the tree construction we use the last real observation to guide the initial exploration
             // We do this just once at the very beginning after the data collection phase
-            BeliefNode tmpRoot = ((BeliefNode) this.MCTS.getRoot());
-            if (tmpRoot.getObservation() == null) {
-                tmpRoot.setObservation(this.MCTS.getRealHistory().get(this.MCTS.getRealHistory().size()-1));
+            if (this.MCTS.getRoot().getObservation() == null) {
+                this.MCTS.getRoot().setObservation(this.MCTS.getRealHistory().get(this.MCTS.getRealHistory().size()-1));
             }
+            
             this.MCTS.construct(simTime, this.progress);
-
+            
         } else {
             getReporter().log(Level.WARNING, "Not enough time! Start consuming the tree");
         }
         
         if (DEBUG_OFFER) {
             getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
+            // System.out.println(this.MCTS.toString());
             // getReporter().log(Level.INFO, "Tree has: " + String.valueOf(this.MCTS.howManyNodes()));
             getReporter().log(Level.INFO, "Tree root time was: " + this.MCTS.getRoot().getState().getTime());
         }
@@ -573,7 +581,8 @@ public class POMPFANAgent extends DefaultParty {
         action = this.MCTS.chooseBestAction();
 
         // Consuming the whole tree will result in an error
-        // So accept | proposing old bids also possible
+        // So accept
+        // ? proposing old bids also possible
         if (action == null) {
             this.getReporter().log(Level.WARNING, "Could not produce action!!!");
             ActionNode lastBestActionNode = this.MCTS.getLastBestActionNode();
@@ -583,7 +592,7 @@ public class POMPFANAgent extends DefaultParty {
             }
 
             this.getReporter().log(Level.WARNING, "Could not get last best action node!!!");
-            Bid bid = this.bidsWithUtility.getExtremeBid(true);
+            bid = this.bidsWithUtility.getExtremeBid(true);
             action = new Offer(this.me, bid);
             return action;
         }

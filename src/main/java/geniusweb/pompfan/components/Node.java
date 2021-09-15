@@ -154,7 +154,8 @@ public class Node {
         return new StringBuilder().append(this instanceof BeliefNode ? "BN" : "AN").append(": ")
                 .append(this.id.substring(24)).append("[").append("children:").append(this.children.size()).append(",")
                 .append("visits:").append(this.visits).append(",").append("value:").append(this.value).append(",")
-                .append("isTerminal:").append(this.getIsTerminal()).append("]").append("-").append(a).append(" ===> ").append(this.extraString()).toString();
+                .append("isTerminal:").append(this.getIsTerminal()).append("]").append("-").append(a).append(" - ")
+                .append(this.getState().getTime().toString()).append(" :Opp ").append(this.extraString()).toString();
     }
 
     // build factory

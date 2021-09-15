@@ -19,7 +19,7 @@
 										"confEvaluator": "L2BOppProdUtilEvaluator",
 										"confState": "HistoryState",
 										"confExplorer": "TimeConcedingExplorationPolicy",
-										"confWidener": "MaxWidthWideningStrategy",
+										"confWidener": "ProgressiveWideningStrategy",
 										"confExtra": {
 											"widener": {
 												"maxWidth": "15",
@@ -57,7 +57,7 @@
 			}
 		],
 		"deadline": {
-			"deadlinetime": { "durationms": 10000}
+			"deadlinetime": { "durationms": 25000}
 		}
 	}
 }

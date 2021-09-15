@@ -11,29 +11,19 @@ import geniusweb.pompfan.state.AbstractState;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class SelfishReluctantOwnExplorerPolicy extends AbstractOwnExplorationPolicy {
-    private static final BigDecimal STUBBORNESS = new BigDecimal("0.4");
 
     public SelfishReluctantOwnExplorerPolicy(UtilitySpace utilitySpace, PartyId id) {
         super(utilitySpace, id);
     }
 
-    
     @Override
     public Action chooseAction(Bid lastOpponentBid, Bid lastAgentBid, AbstractState<?> state) {
         Action action;
         Bid bid;
-
-        if (lastOpponentBid == null) {
-            return new Offer(this.getPartyId(), this.getAllBids().getExtremeBid(true));
-        }
         
         long i = this.getRandom().nextInt(this.getPossibleBids().size().intValue());
         Bid ownBidCandidate = this.getPossibleBids().get(i);
         bid = shouldAccept(ownBidCandidate, lastOpponentBid) ? ownBidCandidate : lastOpponentBid;
-    
-        if (bid == lastOpponentBid && this.getUtilitySpace().getUtility(lastOpponentBid).doubleValue() < STUBBORNESS.doubleValue()) {
-            return new Offer(this.getPartyId(), this.getAllBids().getExtremeBid(true));
-        }
 
         // 2 pcent of the time we do accepts
         if (this.getRandom().nextInt(100) > 98) {
@@ -49,12 +39,10 @@ public class SelfishReluctantOwnExplorerPolicy extends AbstractOwnExplorationPol
             return false;
         BigDecimal sample = this.getUtilitySpace().getUtility(bid);
         BigDecimal target = this.getUtilitySpace().getUtility(oppBid);
-        return (sample.doubleValue() < target.doubleValue());
+        return (sample.doubleValue() <= target.doubleValue());
     }
 
     @Override
-    protected void init() {
-        this.setSTUBBORNESS(STUBBORNESS);
-    }
+    protected void init() {assert true;}
 
 }

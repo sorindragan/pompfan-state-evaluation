@@ -7,13 +7,12 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class RandomNeverAcceptOwnExplorationPolicy extends AbstractOwnExplorationPolicy {
 
-    private static final BigDecimal STUBBORNESS = new BigDecimal(0.0);
+    private static final BigDecimal STUBBORNESS = BigDecimal.ONE;
 
 
     public RandomNeverAcceptOwnExplorationPolicy(UtilitySpace utilitySpace, PartyId id) {
         super(utilitySpace, id);
     }
-
 
     @Override
     protected void init() {

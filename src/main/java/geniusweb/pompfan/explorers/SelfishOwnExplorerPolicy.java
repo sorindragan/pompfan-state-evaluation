@@ -21,13 +21,8 @@ public class SelfishOwnExplorerPolicy extends RandomOwnExplorerPolicy {
     public Action chooseAction(Bid lastOpponentBid, Bid lastAgentBid, AbstractState<?> state) {
         Action action;
         Bid bid;
-        //class never used
-        if (lastOpponentBid == null) {
-            bid = this.getAllBids().getExtremeBid(true);
-        } else {
-            long i = this.getRandom().nextInt(this.getPossibleBids().size().intValue());
-            bid = this.getPossibleBids().get(i);
-        }
+        long i = this.getRandom().nextInt(this.getPossibleBids().size().intValue());
+        bid = this.getPossibleBids().get(i);
         action = isGood(bid) ? new Offer(this.getPartyId(), bid) : new Accept(this.getPartyId(), lastOpponentBid);
         return action;
     }
@@ -36,7 +31,7 @@ public class SelfishOwnExplorerPolicy extends RandomOwnExplorerPolicy {
         if (bid == null)
             return false;
         BigDecimal sample = this.getUtilitySpace().getUtility(bid);
-        return sample.compareTo(this.getSTUBBORNESS()) >= 0 ? true : false;
+        return (sample.compareTo(this.getSTUBBORNESS()) >= 0);
     }
 
 

@@ -31,8 +31,7 @@ public class TimeConcedingExplorationPolicy extends AbstractOwnExplorationPolicy
         Action action;
         Bid bid;
         // progressively open the bounds of explored bids
-        double lowerBound = extremeBidUtil - (state.getTime() / 2);
-        // System.out.println("Something: " + lowerBound);
+        double lowerBound = extremeBidUtil - state.getTime();
        
         ImmutableList<Bid> options = this.getBidutils()
                 .getBids(new Interval(BigDecimal.valueOf(lowerBound), BigDecimal.ONE));

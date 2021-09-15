@@ -184,7 +184,7 @@
 			],
 			"args": "src/test/resources/settingsBoulware.json",
 			"console": "internalConsole",
-			"vmArgs": "-Xms4g -Xmx24g"
+			"vmArgs": "-Xmx4g"
 
 		},
 		{
@@ -229,7 +229,8 @@
 				"$Auto"
 			],
 			"args": "src/test/resources/settingsHardliner.json",
-			"console": "internalConsole"
+			"console": "internalConsole",
+			"vmArgs": "-Xmx4g"
 		},
 		{
 			"type": "java",

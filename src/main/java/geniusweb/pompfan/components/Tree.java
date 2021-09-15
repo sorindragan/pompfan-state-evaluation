@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -39,7 +38,7 @@ public class Tree {
     private AbstractBelief belief;
 
     private AbstractWidener widener; // Used for the action we choose to simulate (expand new node).
-    private static Double C = 2.0; // Math.sqrt(2);
+    private static final Double C = 2.0; // Math.sqrt(2);
     private ActionNode lastBestActionNode;
     private List<Action> realHistory;
     private Progress progress;
@@ -93,15 +92,15 @@ public class Tree {
     public void construct(Long simulationTime, Progress realProgress) throws StateRepresentationException {
         long currentTimeMillis = System.currentTimeMillis(); 
         Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime), currentTimeMillis);
-        Progress realShiftedProgress = ProgressFactory.create(
-                new DeadlineTime(realProgress.getTerminationTime().getTime() - currentTimeMillis - simulationTime),
-                currentTimeMillis + simulationTime);
+        // Progress realShiftedProgress = ProgressFactory.create(
+        //         new DeadlineTime(realProgress.getTerminationTime().getTime() - currentTimeMillis - simulationTime),
+        //         currentTimeMillis + simulationTime);
         // set the new root time
         this.root.getState().setTime(realProgress.get(currentTimeMillis + simulationTime));
 
         while (Boolean.FALSE.equals(simulatedProgress.isPastDeadline(System.currentTimeMillis()))) {
             // two nodes should be added after each simulation: AN -> BN
-            this.simulate(realShiftedProgress, simulationTime);
+            this.simulate(realProgress, simulationTime);
         }
     }
 
@@ -117,7 +116,7 @@ public class Tree {
     public static void backpropagate(Node node, Double value) {
         while (node.getParent() != null) {
             node.updateVisits();
-            // calculate UCB1
+            // calculate UCB1 while propagating
             // node.setValue(node.getValue() + value).setValue(UCB1(node));
             // update value 
             node.setValue(node.getValue() + value);
@@ -131,12 +130,12 @@ public class Tree {
 
     public static Node selectFavoriteChild(List<Node> candidatesChildrenForAdoption) {
 
-        if (candidatesChildrenForAdoption.stream().allMatch(child -> child.getIsTerminal() == true)) {
-            return null;
-        }
+        // if (candidatesChildrenForAdoption.stream().allMatch(child -> child.getIsTerminal() == true)) {
+        //     return null;
+        // }
 
         return candidatesChildrenForAdoption.stream().filter(child -> child.getIsTerminal() == false)
-                .max(Comparator.comparing(node -> UCB1(node))).get();
+                .max(Comparator.comparing(Tree::UCB1)).orElse(null);
 
     }
 

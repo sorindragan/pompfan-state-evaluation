@@ -18,8 +18,11 @@ public class MaxWidthWideningStrategy extends AbstractWidener {
             HashMap<String, Object> params) {
         super(ownExplorationStrategy);
         
-        // this.maxWidth = useMaxWidthAsPercentage(params);
         this.maxWidth = Double.valueOf((String) params.getOrDefault("maxWidth", "42.0")).intValue();
+        if (this.maxWidth <= 1.0) {
+            // expand a percentage of total possible bids at each level
+            this.maxWidth = useMaxWidthAsPercentage(params);
+        } 
     }
 
     private Integer useMaxWidthAsPercentage(HashMap<String, Object> params) {
