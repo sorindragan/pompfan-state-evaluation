@@ -7,24 +7,23 @@
 						"partyref": "classpath:geniusweb.pompfan.agent.POMPFANAgent",
 						"parameters": {
 							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
-							"negotiationdata": [
-							],
 							"isLearn": false,
 							"numParticlesPerOpponent": "10",
-							"simulationTime": "400",
+							"simulationTime": "250",
+							"dataCollectionTime": "0.25",
 							"config": {
 								"confComparer": "UtilityBidDistance",
-								"confBelief": "ParticleFilterWithAcceptBelief",
-								"confEvaluator": "Last2BidsProductUtilityEvaluator",
+								"confBelief": "BayesianParticleFilterBelief",
+								"confEvaluator": "L2BOppProdUtilEvaluator",
 								"confState": "HistoryState",
 								"confExplorer": "TimeConcedingExplorationPolicy",
 								"confWidener": "ProgressiveWideningStrategy",
 								"confExtra": {
 									"widener": {
-										"maxWidth": "10",
+										"maxWidth": "15",
 										"k_a": "2.0",
 										"a_a": "0.5",
-										"k_b": "1.0",
+										"k_b": "2.0",
 										"a_b": "0.5"
 									}
 								}
@@ -96,7 +95,7 @@
 			"SAOPSettings": {
 				"participants": [],
 				"deadline": {
-					"deadlinetime": { "durationms": 8000 }
+					"deadlinetime": { "durationms": 20000 }
 				}
 			}
 		},
