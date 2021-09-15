@@ -33,9 +33,9 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
          */
         private static final Random RANDOM = new Random();
         private final static ObjectMapper jacksonReader = new ObjectMapper();
-        private final static List<String> setNumParticlesPerOpponent = IntStream.range(1, 15).boxed()
+        private final static List<String> setNumParticlesPerOpponent = IntStream.range(1, 20).boxed()
                         .map(String::valueOf).map(e -> e + "0").collect(Collectors.toList());
-        private final static List<String> setSimulationTime = IntStream.range(1, 10).boxed().map(String::valueOf)
+        private final static List<String> setSimulationTime = IntStream.range(1, 5).boxed().map(String::valueOf)
                         .map(e -> e + "00").collect(Collectors.toList());
         private final static List<String> setDataCollectionTime = RANDOM.doubles(10, 0.0, 0.5).mapToObj(String::valueOf)
                         .map(BigDecimal::new).map(e -> e.setScale(2, RoundingMode.HALF_UP)).map(String::valueOf)
@@ -46,32 +46,33 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
         private final static List<String> setA = RANDOM.doubles(10, 0.1, 1.0).mapToObj(String::valueOf)
                         .map(BigDecimal::new).map(e -> e.setScale(1, RoundingMode.HALF_UP)).map(String::valueOf)
                         .collect(Collectors.toList());
-        private final static List<String> setMaxWidth = RANDOM.ints(10, 2, 15).mapToObj(String::valueOf)
+        private final static List<String> setMaxWidth = RANDOM.ints(10, 4, 20).mapToObj(String::valueOf)
                         .map(BigDecimal::new).map(e -> e.setScale(1, RoundingMode.HALF_UP)).map(String::valueOf)
                         .collect(Collectors.toList());
 
         private final static List<String> setComparer = Arrays.asList("UtilityBidDistance", "ExactSameBidDistance",
-                        "JaccardBidDistance", "HammingBidDistance", "RandomBidDistance");
+                        "JaccardBidDistance", "RandomBidDistance");
         private final static List<String> setBelief = Arrays.asList("ParticleFilterWithAcceptBelief",
-                        "ParticleFilterBelief", "BayesianParticleFilterBelief", "BayesianCountFilterBelief",
+                        "ParticleFilterBelief", "BayesianParticleFilterBelief",
                         "UniformBelief");
         private final static List<String> setEvaluator = Arrays.asList("Last2BidsProductUtilityEvaluator",
                         "Last2BidsMeanUtilityEvaluator", "L2BFreqOppModelProdUtilEvaluator",
-                        "L2BAHPOppModelProdUtilEvaluator", "L2BEntropyOppModelProdUtilEvaluator",
-                        "L2BOppProdUtilEvaluator", "ConcessionUtilityEvaluator", "RandomEvaluator");
+                        "L2BOppProdUtilEvaluator", "RandomEvaluator");
         private final static List<String> setExplorer = Arrays.asList("HighSelfEsteemOwnExplorationPolicy",
                         "TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
         private final static List<String> setWidener = Arrays.asList("ProgressiveWideningStrategy",
                         "MaxWidthWideningStrategy");
         private final static List<String> setOpponents = Arrays.asList(
-                        // "classpath:geniusweb.opponents.OwnUtilTFTAgent",
-                        // "classpath:geniusweb.opponents.OppUtilTFTAgent",
-                        "classpath:geniusweb.opponents.AntagonisticAgent", 
+                        "classpath:geniusweb.opponents.OwnUtilTFTAgent",
+                        "classpath:geniusweb.opponents.OppUtilTFTAgent",
+                        // "classpath:geniusweb.opponents.AntagonisticAgent", 
                         // "classpath:geniusweb.opponents.SelfishAgent",
-                        // "classpath:geniusweb.exampleparties.boulware.Boulware",
+                        "classpath:geniusweb.exampleparties.boulware.Boulware",
                         // "classpath:geniusweb.exampleparties.hardliner.Hardliner",
-                        // "classpath:geniusweb.exampleparties.timedependentparty.TimeDependentParty",
-                        "classpath:geniusweb.exampleparties.randomparty.RandomParty"
+                        "classpath:geniusweb.exampleparties.timedependentparty.TimeDependentParty",
+                        "classpath:geniusweb.exampleparties.randomparty.RandomParty",
+                        "classpath:geniusweb.exampleparties.conceder.Conceder",
+                        "classpath:geniusweb.exampleparties.simpleboa.SimpleBoa"
                         );
 
         public RandomCustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory,
@@ -84,7 +85,7 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                                 .readTree(new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8));
 
                 Integer cnt = 0;
-                for (int i = 0; i < 500; i++) {
+                for (int i = 0; i < 100; i++) {
                         cnt++;
                         ObjectNode target = (ObjectNode) settingsJson.get("AllPermutationsSettings").get("teams").get(0)
                                         .get("Team").get(0);
@@ -115,7 +116,7 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
 
                         widener.put("maxWidth", setMaxWidth.get(RANDOM.nextInt(setK.size())));
                         widener.put("k_a", setK.get(RANDOM.nextInt(setMaxWidth.size())));
-                        widener.put("k_b", "1.0");
+                        widener.put("k_b", setK.get(RANDOM.nextInt(setMaxWidth.size())));
                         widener.put("a_a", setA.get(RANDOM.nextInt(setA.size())));
                         widener.put("a_b", setA.get(RANDOM.nextInt(setA.size())));
 

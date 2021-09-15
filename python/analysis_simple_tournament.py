@@ -83,7 +83,7 @@ fig.tight_layout()
 plt.show()
 
 # %%
-interesting_cols = ["POMPFANAgent", "Hardliner"]
+interesting_cols = ["POMPFANAgent", "Boulware"]
 groups = df[df["party"].isin(interesting_cols)].groupby(["party", "no_agreement"]).count().reset_index("no_agreement")
 num_pies = len(interesting_cols)
 fig, axes = plt.subplots(1, num_pies, figsize=(5 * num_pies, 5))
@@ -94,7 +94,7 @@ for idx, ax in zip(groups.index.unique(), axes):
         data=grp,
         x="session",
         autopct="%.3f%%",
-        explode=[0.02] * len(interesting_cols),
+        explode=[0.02] * num_pies,
         labels="no_agreement",
     )
     ax.set_xlabel(idx)
