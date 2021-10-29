@@ -63,7 +63,7 @@ public class POMPFANAgent extends DefaultParty {
      */
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = false;
-    private static final boolean DEBUG_OFFER = true;
+    private static final boolean DEBUG_OFFER = false;
     private static final boolean DEBUG_PERSIST = false;
     private static final boolean DEBUG_SAVE_TREE = false;
     private static final boolean DEBUG_BELIEF = false;

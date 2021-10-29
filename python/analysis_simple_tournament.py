@@ -52,6 +52,7 @@ plt.show()
 # %%
 fig, ax = plt.subplots(1, 1, figsize=(10, 10))
 df_utility_sum = df.groupby("party").sum()
+print(df_utility_sum.sort_values(by='utility', ascending=False))
 unique_agents = df_utility_sum.index.unique()
 num_agents = len(unique_agents)
 (ax, ) = df_utility_sum["utility"].plot.bar(
