@@ -18,8 +18,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-@JsonSubTypes({ @Type(value = HistoryState.class), @Type(value = FrequencyState.class),
-        @Type(value = UtilityState.class) })
+@JsonSubTypes({ @Type(value = HistoryState.class)})
 public abstract class AbstractState<T>
         implements Comparable<AbstractState<T>>, CosineSimilarity, L2Distance, ExactSame<T> {
     @JsonBackReference
