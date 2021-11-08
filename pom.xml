@@ -29,7 +29,6 @@
 
 	<dependencies>
 
-
 		<dependency>
 			<groupId>geniusweb</groupId>
 			<artifactId>party</artifactId>

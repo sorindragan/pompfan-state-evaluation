@@ -19,7 +19,7 @@
 		},
 		{
 			"type": "java",
-			"name": "Launch RandomCustomNegoRunner (Big)",
+			"name": "Launch RandomCustomNegoRunner (12GB)",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.RandomCustomNegoRunner",
 			"classPaths": [
@@ -29,7 +29,7 @@
 				"src/test/resources/tournament_random.json",
 			],
 			"console": "externalTerminal",
-			"vmArgs": "-Xms4g -Xmx24g"
+			"vmArgs": "-Xms4g -Xmx12g"
 		},
 		{
 			"type": "java",
@@ -69,42 +69,21 @@
 		},
 		{
 			"type": "java",
-			"name": "Tournament early wideness",
+			"name": "Tournament simulation",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": [
 				"$Auto"
 			],
 			"args": [
-				"src/test/resources/earlySimulation/t0.json",
-				"src/test/resources/earlySimulation/t1.json",
-				"src/test/resources/earlySimulation/t2.json",
-				"src/test/resources/earlySimulation/t3.json",
-				"src/test/resources/earlySimulation/t4.json",
-				"src/test/resources/earlySimulation/t5.json",
-				"src/test/resources/earlySimulation/t6.json",
-				"src/test/resources/earlySimulation/t7.json"
-			],
-			"console": "internalConsole"
-		},
-		{
-			"type": "java",
-			"name": "Tournament later wideness",
-			"request": "launch",
-			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": [
-				"$Auto"
-			],
-			"args": [
-				"src/test/resources/laterSimulation/t0.json",
-				"src/test/resources/laterSimulation/t1.json",
-				"src/test/resources/laterSimulation/t2.json",
-				"src/test/resources/laterSimulation/t3.json",
-				"src/test/resources/laterSimulation/t4.json",
-				"src/test/resources/laterSimulation/t5.json",
-				"src/test/resources/laterSimulation/t6.json",
-				"src/test/resources/laterSimulation/t7.json",
-				"src/test/resources/laterSimulation/t8.json"
+				"src/test/resources/simulationTime/t0.json",
+				"src/test/resources/simulationTime/t1.json",
+				"src/test/resources/simulationTime/t2.json",
+				"src/test/resources/simulationTime/t3.json",
+				"src/test/resources/simulationTime/t4.json",
+				"src/test/resources/simulationTime/t5.json",
+				"src/test/resources/simulationTime/t6.json",
+				"src/test/resources/simulationTime/t7.json"
 			],
 			"console": "internalConsole"
 		},
@@ -142,17 +121,6 @@
 			],
 			"args": "src/test/resources/tournament_test.json",
 			"console": "internalConsole"
-		},
-		{
-			"type": "java",
-			"name": "Test",
-			"request": "launch",
-			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
-			"classPaths": [
-				"$Auto"
-			],
-			"args": "src/test/resources/settingsTest.json",
-			"console": "externalTerminal"
 		},
 		{
 			"type": "java",
@@ -236,17 +204,15 @@
 		},
 		{
 			"type": "java",
-			"name": "vs. Random",
+			"name": "vs. AgentFO",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
 			"classPaths": [
-				"./libs/simplerunner-1.6.1-jar-with-dependencies.jar",
-				"./libs/boulware-1.6.1.jar",
-				"./target/classes",
 				"$Auto"
 			],
-			"args": "src/test/resources/settingsRandom.json",
-			"console": "internalConsole"
+			"args": "src/test/resources/settingsAgentFo.json",
+			"console": "internalConsole",
+			"vmArgs": "-Xmx8g"
 		}
 	]
 }
