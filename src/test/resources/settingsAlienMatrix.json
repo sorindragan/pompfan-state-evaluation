@@ -42,7 +42,7 @@
 					"parties": [
 						{
 							"party": {
-								"partyref": "classpath:geniusweb.exampleparties.anac2021.agentfo.AgentFO",
+								"partyref": "classpath:geniusweb.exampleparties.anac2021.alienmatrixagent.MatrixAlienAgent",
 								"parameters": {
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f1"
 								}

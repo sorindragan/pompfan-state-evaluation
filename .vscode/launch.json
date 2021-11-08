@@ -213,6 +213,18 @@
 			"args": "src/test/resources/settingsAgentFo.json",
 			"console": "internalConsole",
 			"vmArgs": "-Xmx8g"
+		},
+		{
+			"type": "java",
+			"name": "vs. AlienMatrix",
+			"request": "launch",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
+			"classPaths": [
+				"$Auto"
+			],
+			"args": "src/test/resources/settingsAlienMatrix.json",
+			"console": "internalConsole",
+			"vmArgs": "-Xmx8g"
 		}
 	]
 }
