@@ -159,6 +159,8 @@
 			<version>${geniusweb.version}</version>
 		</dependency>
 		<!-- CUSTOM: Parties -->
+
+		<!-- CUSTOM: ANAC 2021 local repo Parties -->
 		<dependency>
 			<groupId>geniusweb.exampleparties.anac2021</groupId>
 			<artifactId>agentfo</artifactId>
@@ -169,7 +171,32 @@
 			<artifactId>alienmatrixagent</artifactId>
 			<version>${geniusweb.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>geniusweb.exampleparties.anac2021</groupId>
+			<artifactId>alphabiu</artifactId>
+			<version>${geniusweb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>geniusweb.exampleparties.anac2021</groupId>
+			<artifactId>aorta</artifactId>
+			<version>${geniusweb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>geniusweb.exampleparties.anac2021</groupId>
+			<artifactId>dicehaggler</artifactId>
+			<version>${geniusweb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>geniusweb.exampleparties.anac2021</groupId>
+			<artifactId>gambleragent</artifactId>
+			<version>${geniusweb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>geniusweb.exampleparties.anac2021</groupId>
+			<artifactId>tripleagent</artifactId>
+			<version>${geniusweb.version}</version>
+		</dependency>
+		<!-- CUSTOM: basic Parties from Genius Web -->
 		<dependency>
 			<groupId>geniusweb.exampleparties</groupId>
 			<artifactId>boulware</artifactId>
