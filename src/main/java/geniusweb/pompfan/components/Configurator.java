@@ -37,7 +37,6 @@ import geniusweb.pompfan.explorers.TimeConcedingExplorationPolicy;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.HistoryState;
-import geniusweb.pompfan.state.UtilityState;
 import geniusweb.pompfan.wideners.AbstractWidener;
 import geniusweb.pompfan.wideners.MaxWidthWideningStrategy;
 import geniusweb.pompfan.wideners.ProgressiveWideningStrategy;
@@ -246,11 +245,6 @@ public class Configurator {
             IEvalFunction<HistoryState> evaluator1 = (IEvalFunction<HistoryState>) this.getEvaluator();
             this.setState(new HistoryState(this.uSpace, null, evaluator1));
             this.getInitState().setTime(0.0);
-            break;
-        case "UtilityState":
-            this.setEvaluator(new RandomEvaluator());
-            IEvalFunction<UtilityState> evaluator2 = (IEvalFunction<UtilityState>) this.getEvaluator();
-            this.setState(new UtilityState(uSpace, null, evaluator2));
             break;
         default:
             // ??
