@@ -80,17 +80,19 @@ public class OppUtilTFTAgent extends AbstractOpponent {
                 .multiply(BigDecimal.valueOf(2));
         difference = this.getUtilitySpace().getUtility(lastLastOpponentBid)
                 .subtract(this.getUtilitySpace().getUtility(justLastOpponentBid));
-        Bid lastOwnBid = ownHistory.get(ownHistory.size() - 1).getBid();
         isConcession = difference.compareTo(concessionThreshold) >= 0 ? true : false;
-
+                
+        Bid lastOwnBid = ownHistory.get(ownHistory.size() - 1).getBid();
         BigDecimal utilityForOpponentOfLastOwnBid = this.opponentModel.getUtility(lastOwnBid);
         Interval fullRange = this.oppBidsWithUtilities.getRange();
         Interval newInterval = new Interval(this.getUtilitySpace().getUtility(lastOwnBid),
                 this.getBidsWithUtility().getRange().getMax());
+        // in case of no concession
         ImmutableList<Bid> candiateBids = this.oppBidsWithUtilities.getBids(newInterval);
         if (isConcession) {
             newInterval = new Interval(utilityForOpponentOfLastOwnBid,
-                    utilityForOpponentOfLastOwnBid.add(difference.multiply(BigDecimal.valueOf(2))).min(BigDecimal.ONE));
+                    utilityForOpponentOfLastOwnBid.add(difference.multiply(BigDecimal.valueOf(2)))
+                    .min(BigDecimal.ONE));
             candiateBids = this.oppBidsWithUtilities.getBids(newInterval);
             if (candiateBids.size().compareTo(BigInteger.ZERO) <= 0) {
                 newInterval = new Interval(utilityForOpponentOfLastOwnBid, utilityForOpponentOfLastOwnBid
@@ -102,6 +104,7 @@ public class OppUtilTFTAgent extends AbstractOpponent {
             }
 
         }
+        // safety behaviour in case of unexpected behaviour
         if (candiateBids.size().compareTo(BigInteger.ZERO) == 0) {
             Bid bid = this.getBidsWithUtility().getExtremeBid(true);
             action = new Offer(this.getMe(), bid);
@@ -130,6 +133,7 @@ public class OppUtilTFTAgent extends AbstractOpponent {
         this.oppBidsWithUtilities = new BidsWithUtility(this.opponentModel);
         BigDecimal minUtility = this.opponentModel.getUtility(this.oppBidsWithUtilities.getExtremeBid(false));
         BigDecimal minUtilityUpperBound = minUtility.multiply(new BigDecimal("1.5")).min(BigDecimal.ONE);
+        // what do we do with them?
         this.oppBadBids = StreamSupport
                 .stream(this.oppBidsWithUtilities.getBids(new Interval(minUtility, minUtilityUpperBound)).spliterator(),
                         true)

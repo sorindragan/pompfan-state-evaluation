@@ -66,6 +66,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
                 isConcession = difference > utilGapForConcession ? true : false;
                 lastOfferedBid = bidHistory.get(historySize - 2);
             } else {
+                // friendly start by making concessions
                 isConcession = true;
             }
 

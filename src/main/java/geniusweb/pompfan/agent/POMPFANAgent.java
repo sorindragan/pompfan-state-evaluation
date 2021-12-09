@@ -42,6 +42,7 @@ import geniusweb.pompfan.components.ActionNode;
 import geniusweb.pompfan.components.BeliefNode;
 import geniusweb.pompfan.components.Configurator;
 import geniusweb.pompfan.components.OpponentParticleCreator;
+import geniusweb.pompfan.components.OpponentParticleCreatorHardcoded;
 import geniusweb.pompfan.components.Tree;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.pompfan.state.StateRepresentationException;
@@ -66,7 +67,7 @@ public class POMPFANAgent extends DefaultParty {
     private static final boolean DEBUG_OFFER = false;
     private static final boolean DEBUG_PERSIST = false;
     private static final boolean DEBUG_SAVE_TREE = false;
-    private static final boolean DEBUG_BELIEF = false;
+    private static final boolean DEBUG_BELIEF = true;
     private static final boolean DEBUG_TIME = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -325,7 +326,9 @@ public class POMPFANAgent extends DefaultParty {
         if (DEBUG_PERSIST)
             System.out.println("DEBUG_PERSIST: Opp -> " + this.opponentName);
 
-        List<AbstractPolicy> listOfOpponents = OpponentParticleCreator.generateOpponentParticles(this.uSpace,
+        // List<AbstractPolicy> listOfOpponents = OpponentParticleCreator.generateOpponentParticles(this.uSpace,
+        //         this.numParticlesPerOpponent);
+        List<AbstractPolicy> listOfOpponents = OpponentParticleCreatorHardcoded.generateOpponentParticles(this.uSpace,
                 this.numParticlesPerOpponent);
 
         Configurator configurator = this.config != null ? this.mapper.convertValue(config, Configurator.class)

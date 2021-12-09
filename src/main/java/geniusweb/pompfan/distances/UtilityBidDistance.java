@@ -1,9 +1,7 @@
 package geniusweb.pompfan.distances;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

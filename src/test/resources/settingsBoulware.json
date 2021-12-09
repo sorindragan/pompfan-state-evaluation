@@ -10,9 +10,9 @@
 								"parameters": {
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"isLearn": false,
-									"numParticlesPerOpponent": "10",
+									"numParticlesPerOpponent": "1",
 									"simulationTime": "250",
-									"dataCollectionTime": "0.25",
+									"dataCollectionTime": "0.1",
 									"config": {
 										"confComparer": "UtilityBidDistance",
 										"confBelief": "BayesianParticleFilterBelief",
