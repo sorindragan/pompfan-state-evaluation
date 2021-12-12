@@ -19,8 +19,13 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @Type(value = RandomBidDistance.class, name = "RandomBidDistance"),
+        @Type(value = ExactSameBidDistance.class, name = "ExactSameBidDistance"),
         @Type(value = UtilityBidDistance.class, name = "UtilityBidDistance"),
-        @Type(value = JaccardBidDistance.class, name = "JaccardBidDistance"),})
+        @Type(value = OppUtilityBidDistance.class, name = "OppUtilityBidDistance"),
+        @Type(value = BothUtilityBidDistance.class, name = "BothUtilityBidDistance"),
+        @Type(value = JaccardBidDistance.class, name = "JaccardBidDistance"),
+        @Type(value = SDiceBidDistance.class, name = "SDiceBidDistance"),
+        @Type(value = IssueValueCountBidDistance.class, name = "IssueValueCountBidDistance"),})
 public abstract class AbstractBidDistance {
     private Domain domain;
     private UtilitySpace utilitySpace;

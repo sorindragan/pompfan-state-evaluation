@@ -19,11 +19,12 @@ import geniusweb.inform.Agreements;
 import geniusweb.issuevalue.Bid;
 import geniusweb.pompfan.opponentModels.AHPFreqWeightedOpponentModel;
 import geniusweb.pompfan.opponentModels.AbstractOpponentModel;
+import geniusweb.pompfan.opponentModels.BetterFreqOppModel;
 import tudelft.utilities.immutablelist.ImmutableList;
 
 public class OppUtilTFTAgent extends AbstractOpponent {
     private AbstractOpponentModel opponentModel;
-    private List<Bid> oppBadBids;
+    // private List<Bid> oppBadBids;
     private BidsWithUtility oppBidsWithUtilities;
     private AllBidsList allPossibleBids;
     private boolean DEBUG_TFT;
@@ -128,16 +129,17 @@ public class OppUtilTFTAgent extends AbstractOpponent {
 
     private void updateOpponentModel(List<ActionWithBid> history) {
         this.getReporter().log(Level.INFO, this.getMe().toString() + ": Update OppModel!!!");
-        this.opponentModel = new AHPFreqWeightedOpponentModel(this.getUtilitySpace().getDomain(),
+        this.opponentModel = new BetterFreqOppModel(this.getUtilitySpace().getDomain(),
                 history.stream().map(a -> (Action) a).collect(Collectors.toList()), this.getMe());
         this.oppBidsWithUtilities = new BidsWithUtility(this.opponentModel);
-        BigDecimal minUtility = this.opponentModel.getUtility(this.oppBidsWithUtilities.getExtremeBid(false));
-        BigDecimal minUtilityUpperBound = minUtility.multiply(new BigDecimal("1.5")).min(BigDecimal.ONE);
-        // what do we do with them?
-        this.oppBadBids = StreamSupport
-                .stream(this.oppBidsWithUtilities.getBids(new Interval(minUtility, minUtilityUpperBound)).spliterator(),
-                        true)
-                .collect(Collectors.toList());
+        // maybe used for something else
+        // BigDecimal minUtility = this.opponentModel.getUtility(this.oppBidsWithUtilities.getExtremeBid(false));
+        // BigDecimal minUtilityUpperBound = minUtility.multiply(new BigDecimal("1.5")).min(BigDecimal.ONE);
+        // // what do we do with them?
+        // this.oppBadBids = StreamSupport
+        //         .stream(this.oppBidsWithUtilities.getBids(new Interval(minUtility, minUtilityUpperBound)).spliterator(),
+        //                 true)
+        //         .collect(Collectors.toList());
     }
 
     @Override

@@ -23,6 +23,7 @@ import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.opponentModels.AHPFreqWeightedOpponentModel;
 import geniusweb.pompfan.opponentModels.AbstractOpponentModel;
+import geniusweb.pompfan.opponentModels.BetterFreqOppModel;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.LinearAdditive;
@@ -32,7 +33,7 @@ import tudelft.utilities.immutablelist.ImmutableList;
 public class NiceTFTOpponentPolicy extends AbstractPolicy {
 
     // private static double utilGapForConcession = 0.02;
-    private List<Bid> oppBadBids;
+    // private List<Bid> oppBadBids;
     @JsonIgnore
     BidsWithUtility bidsWithinUtil;
     private AbstractOpponentModel opponentModel;
@@ -42,12 +43,12 @@ public class NiceTFTOpponentPolicy extends AbstractPolicy {
     
     @JsonCreator
     public NiceTFTOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace uSpace) {
-        super(uSpace, "OwnUtilTFT");
+        super(uSpace, "OppUtilTFT");
         this.setBidsWithinUtil(new BidsWithUtility((LinearAdditive) this.getUtilitySpace()));
     }
     
     public NiceTFTOpponentPolicy(Domain domain) {
-        super(domain, "OwnUtilTFT");
+        super(domain, "OppUtilTFT");
         this.setBidsWithinUtil(new BidsWithUtility((LinearAdditive) this.getUtilitySpace()));;
     }
 
@@ -148,15 +149,16 @@ public class NiceTFTOpponentPolicy extends AbstractPolicy {
     }
 
     private void updateOpponentModel(List<ActionWithBid> history) {
-        this.opponentModel = new AHPFreqWeightedOpponentModel(this.getUtilitySpace().getDomain(),
+        this.opponentModel = new BetterFreqOppModel(this.getUtilitySpace().getDomain(),
                 history.stream().map(a -> (Action) a).collect(Collectors.toList()), this.getPartyId());
         this.oppBidsWithUtilities = new BidsWithUtility(this.opponentModel);
-        BigDecimal minUtility = this.opponentModel.getUtility(this.oppBidsWithUtilities.getExtremeBid(false));
-        BigDecimal minUtilityUpperBound = minUtility.multiply(new BigDecimal("1.5")).min(BigDecimal.ONE);
-        this.oppBadBids = StreamSupport
-                .stream(this.oppBidsWithUtilities.getBids(new Interval(minUtility, minUtilityUpperBound)).spliterator(),
-                        true)
-                .collect(Collectors.toList());
+        // maybe used for other opponent types
+        // BigDecimal minUtility = this.opponentModel.getUtility(this.oppBidsWithUtilities.getExtremeBid(false));
+        // BigDecimal minUtilityUpperBound = minUtility.multiply(new BigDecimal("1.5")).min(BigDecimal.ONE);
+        // this.oppBadBids = StreamSupport
+        //         .stream(this.oppBidsWithUtilities.getBids(new Interval(minUtility, minUtilityUpperBound)).spliterator(),
+        //                 true)
+        //         .collect(Collectors.toList());
     }
 
     @JsonIgnore

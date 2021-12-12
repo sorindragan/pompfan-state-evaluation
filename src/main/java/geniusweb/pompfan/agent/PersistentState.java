@@ -210,7 +210,7 @@ public class PersistentState {
   }
 
   public PersistentState learn() {
-    // Future TODO: Move all the learning here
+    // Future Competition TODO: Move all the learning here
     return this;
   }
 }

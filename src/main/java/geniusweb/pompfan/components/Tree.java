@@ -22,6 +22,7 @@ import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.beliefs.AbstractBelief;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.pompfan.state.AbstractState;
+import geniusweb.pompfan.state.HistoryState;
 import geniusweb.pompfan.state.StateRepresentationException;
 import geniusweb.pompfan.wideners.AbstractWidener;
 import geniusweb.profile.utilityspace.UtilitySpace;
@@ -189,9 +190,22 @@ public class Tree {
         Node nextRoot = rootCandidates.parallelStream()
                 .filter(node -> ((Offer) ((BeliefNode) node).getObservation()).getBid() == closestBid).findFirst()
                 .get();
+        
+        // in case of the real observation needs to be forced inside the history state
+        // not used as a top-down change to all the states in all the deeper levels ndoes would be necessary
+        // Action simulatedAction = nextRoot.getStoredAction();
+        // ArrayList<Action> updatedHistory = ((HistoryState) nextRoot.getState()).getHistory();
+        // updatedHistory.set(updatedHistory.indexOf(simulatedAction), newRealObservation);
 
+        // HistoryState updatedState = (HistoryState) nextRoot.getState().copyState();
+        // updatedState.setHistory(updatedHistory);
+        // nextRoot.setState(updatedState);
+
+        // Exchange the simulated observation with the real one for future simulations
+        BeliefNode updatedRoot = (BeliefNode) nextRoot;
+        updatedRoot.setObservation(newRealObservation);
         // changing the root
-        this.setRoot((BeliefNode) nextRoot);
+        this.setRoot(updatedRoot);
         // discard rest of the tree
         this.getRoot().setParent(null);
 

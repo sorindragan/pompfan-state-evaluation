@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import geniusweb.actions.Action;
-import geniusweb.pompfan.distances.CosineSimilarity;
 import geniusweb.pompfan.distances.ExactSame;
 import geniusweb.pompfan.distances.L2Distance;
 import geniusweb.pompfan.opponents.AbstractPolicy;
@@ -20,7 +19,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @Type(value = HistoryState.class)})
 public abstract class AbstractState<T>
-        implements Comparable<AbstractState<T>>, CosineSimilarity, L2Distance, ExactSame<T> {
+        implements Comparable<AbstractState<T>>, L2Distance, ExactSame<T> {
     @JsonBackReference
     private UtilitySpace utilitySpace;
     private AbstractPolicy opponent;
@@ -77,11 +76,6 @@ public abstract class AbstractState<T>
     @Override
     public int compareTo(AbstractState<T> o) {
         return this.toString().compareTo(o.toString());
-    }
-
-    @Override
-    public Double computeCosineSimiliarity(INDArray arr1, INDArray arr2) {
-        return null;
     }
 
     @Override

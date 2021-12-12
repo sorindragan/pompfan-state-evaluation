@@ -35,7 +35,7 @@ public class ParticleFilterWithAcceptBelief extends ParticleFilterBelief {
     @Override
     protected Bid sample(Offer lastAgentAction, Offer lastOppAction, AbstractState<?> state,
             AbstractPolicy abstractPolicy) {
-        // TODO: actions that are the same should count in calculating the distance
+        // TODO: maybe actions that are the same should count in calculating the distance
         Action chosenAction;
         if (lastAgentAction != null) {
             chosenAction = lastOppAction != null

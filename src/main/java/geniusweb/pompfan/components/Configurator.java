@@ -12,9 +12,13 @@ import geniusweb.pompfan.beliefs.ParticleFilterBelief;
 import geniusweb.pompfan.beliefs.ParticleFilterWithAcceptBelief;
 import geniusweb.pompfan.beliefs.UniformBelief;
 import geniusweb.pompfan.distances.AbstractBidDistance;
+import geniusweb.pompfan.distances.BothUtilityBidDistance;
 import geniusweb.pompfan.distances.ExactSameBidDistance;
+import geniusweb.pompfan.distances.IssueValueCountBidDistance;
 import geniusweb.pompfan.distances.JaccardBidDistance;
+import geniusweb.pompfan.distances.OppUtilityBidDistance;
 import geniusweb.pompfan.distances.RandomBidDistance;
+import geniusweb.pompfan.distances.SDiceBidDistance;
 import geniusweb.pompfan.distances.UtilityBidDistance;
 import geniusweb.pompfan.evaluators.ConcessionUtilityEvaluator;
 import geniusweb.pompfan.evaluators.IEvalFunction;
@@ -182,11 +186,23 @@ public class Configurator {
         case DEFAULT_COMPARER:
             this.setBidDistance(new UtilityBidDistance(uSpace));
             break;
+        case "OppUtilityBidDistance":
+            this.setBidDistance(new OppUtilityBidDistance(uSpace));
+            break;
+        case "BothUtilityBidDistance":
+            this.setBidDistance(new BothUtilityBidDistance(uSpace));
+            break;
+        case "SDiceBidDistance":
+            this.setBidDistance(new SDiceBidDistance(uSpace));
+            break;
         case "JaccardBidDistance":
             this.setBidDistance(new JaccardBidDistance(uSpace));
             break;
         case "ExactSameBidDistance":
             this.setBidDistance(new ExactSameBidDistance(uSpace));
+            break;
+        case "IssueValueCountBidDistance":
+            this.setBidDistance(new IssueValueCountBidDistance(uSpace));
             break;
         default:
             this.setBidDistance(new RandomBidDistance(uSpace));

@@ -381,7 +381,7 @@ public class POMPFANAgent extends DefaultParty {
             this.config = Configurator.generateDefaultConfig();
         }
 
-        // The PersistentState is loaded here (see 'PersistenData,java')
+        // The PersistentState is loaded here (see 'PersistenData.java')
         if (this.parameters.containsKey("persistentstate")) {
             if (DEBUG_LEARN)
                 System.out.println("DEBUG_LEARN_PERSISTENCE: Found Persistence!");

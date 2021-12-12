@@ -35,17 +35,6 @@ public class BetterFreqOppModel extends AbstractOpponentModel {
         this.allIssues = this.getDomain().getIssues();
 
         this.subFreqModel = new FrequencyOpponentModel().with(domain, null);
-        // Map<String, Map<Value, Integer>> table = new HashMap<>();
-        // for (String issue : allIssues) {
-        // Map<Value, Integer> vSet = new HashMap<>();
-        // ValueSet allValues = this.getDomain().getValues(issue);
-        // for (Value value1 : allValues) {
-        // DiscreteValue v1 = (DiscreteValue) value1;
-        // vSet.put(v1, 1);
-        // }
-        // table.put(issue, vSet);
-        // }
-        // this.subFreqModel = new FrequencyOpponentModel(domain, table);
 
         for (String issue1 : allIssues) {
             this.iChanges.put(issue1, 1.0 / allIssues.size());
@@ -67,6 +56,7 @@ public class BetterFreqOppModel extends AbstractOpponentModel {
             Action oppAction = oppActions.get(i);
             Bid secondBid = ((ActionWithBid) oppAction).getBid();
             for (String nextIssue : this.getDomain().getIssues()) {
+                // my action is not used
                 DiscreteValue firstVal = (DiscreteValue) firstBid.getValue(nextIssue);
                 DiscreteValue secondVal = (DiscreteValue) secondBid.getValue(nextIssue);
                 DiscreteValue lastOpponentValue = (DiscreteValue) lastBid.getValue(nextIssue);
@@ -106,14 +96,7 @@ public class BetterFreqOppModel extends AbstractOpponentModel {
             issueValues = completeAllCounts.entrySet().stream()
                     .map(cnt -> new SimpleEntry<>(cnt.getKey(), cnt.getValue() / sumValues))
                     .collect(Collectors.toMap(e -> (DiscreteValue) e.getKey(), e -> new BigDecimal(e.getValue())));
-            // sumValues = Math.log(sumValues + 0.0000000000001);
 
-            // for (DiscreteValue v : allValues) {
-            // Integer vCntInt = allCounts.get(v);
-            // Double vCnt = vCntInt != null ? vCntInt * 1.0 : 0.0;
-            // // vCnt = Math.log(vCnt + 0.0000000000001) ;
-            // issueValues.put(v, new BigDecimal(vCnt / sumValues));
-            // }
             issueUtilities.put(issue, new DiscreteValueSetUtilities(issueValues));
 
         }
