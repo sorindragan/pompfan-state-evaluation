@@ -6,19 +6,21 @@ import java.util.ArrayList;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.ActionWithBid;
-import geniusweb.actions.Offer;
+import geniusweb.actions.PartyId;
 import geniusweb.issuevalue.Bid;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
-public class L2BOppProdUtilEvaluator extends Last2BidsProductUtilityEvaluator {
-
-    public L2BOppProdUtilEvaluator(UtilitySpace utilitySpace) {
+public class Last2BidsMixtInverseDifferenceUtilEvaluator extends Last2BidsProductUtilityEvaluator {
+    private PartyId holder;
+    public static final double EPSILON = 0.25;
+    
+    public Last2BidsMixtInverseDifferenceUtilEvaluator(UtilitySpace utilitySpace) {
         super(utilitySpace);
     }
 
-    public L2BOppProdUtilEvaluator() {
+    public Last2BidsMixtInverseDifferenceUtilEvaluator() {
     }
 
     @Override
@@ -34,8 +36,8 @@ public class L2BOppProdUtilEvaluator extends Last2BidsProductUtilityEvaluator {
             return state.getUtilitySpace().getUtility(lastBid).doubleValue();
         }
 
-        BigDecimal utility1 = BigDecimal.ONE;
-        BigDecimal utility2 = BigDecimal.ONE;
+        BigDecimal utility1 = BigDecimal.ZERO;
+        BigDecimal utility2 = BigDecimal.ZERO;
 
         if (lastAction != null) {
             utility1 = lastAction.getActor().equals(currOpp.getPartyId()) ? currOpp.getUtilitySpace().getUtility(lastBid)
@@ -46,8 +48,17 @@ public class L2BOppProdUtilEvaluator extends Last2BidsProductUtilityEvaluator {
                     ? this.getUtilitySpace().getUtility(secondToLastBid)
                     : currOpp.getUtilitySpace().getUtility(secondToLastBid);
         }
-        BigDecimal prod = utility1.multiply(utility2);
-        return prod.doubleValue();
+        Double diff = Math.abs(utility1.subtract(utility2).doubleValue());
+        return 1 / (diff + EPSILON);
+    }
+
+    public PartyId getHolder() {
+        return holder;
+    }
+
+    public IEvalFunction<HistoryState> setHolder(PartyId holder) {
+        this.holder = holder;
+        return this;
     }
 
 }

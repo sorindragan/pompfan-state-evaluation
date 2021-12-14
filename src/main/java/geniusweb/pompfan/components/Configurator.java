@@ -20,13 +20,16 @@ import geniusweb.pompfan.distances.OppUtilityBidDistance;
 import geniusweb.pompfan.distances.RandomBidDistance;
 import geniusweb.pompfan.distances.SDiceBidDistance;
 import geniusweb.pompfan.distances.UtilityBidDistance;
-import geniusweb.pompfan.evaluators.ConcessionUtilityEvaluator;
+import geniusweb.pompfan.evaluators.OppConcessionUtilityEvaluator;
 import geniusweb.pompfan.evaluators.IEvalFunction;
 import geniusweb.pompfan.evaluators.L2BAHPOppModelProdUtilEvaluator;
 import geniusweb.pompfan.evaluators.L2BEntropyOppModelProdUtilEvaluator;
 import geniusweb.pompfan.evaluators.L2BFreqOppModelProdUtilEvaluator;
-import geniusweb.pompfan.evaluators.L2BOppProdUtilEvaluator;
+import geniusweb.pompfan.evaluators.Last2BidsMixtProdUtilEvaluator;
+import geniusweb.pompfan.evaluators.Last2BidsOneMinusDifferenceUtilityEvaluator;
 import geniusweb.pompfan.evaluators.Last2BidsMeanUtilityEvaluator;
+import geniusweb.pompfan.evaluators.Last2BidsMixtInverseDifferenceUtilEvaluator;
+import geniusweb.pompfan.evaluators.Last2BidsMixtMeanUtilityEvaluator;
 import geniusweb.pompfan.evaluators.Last2BidsProductUtilityEvaluator;
 import geniusweb.pompfan.evaluators.RandomEvaluator;
 import geniusweb.pompfan.explorers.AbstractOwnExplorationPolicy;
@@ -241,21 +244,27 @@ public class Configurator {
                 this.setEvaluator(new Last2BidsProductUtilityEvaluator(uSpace));
             } else if (confEvalutator.equals("Last2BidsMeanUtilityEvaluator")) {
                 this.setEvaluator(new Last2BidsMeanUtilityEvaluator(uSpace));
+            } else if (confEvalutator.equals("Last2BidsOneMinusDifferenceUtilityEvaluator")) {
+                this.setEvaluator(new Last2BidsOneMinusDifferenceUtilityEvaluator(uSpace));
+            } else if (confEvalutator.equals("Last2BidsMixtMeanUtilityEvaluator")) {
+                this.setEvaluator(new Last2BidsMixtMeanUtilityEvaluator(uSpace).setHolder(me));
+            } else if (confEvalutator.equals("Last2BidsMixtProdUtilEvaluator")) {
+                this.setEvaluator(new Last2BidsMixtProdUtilEvaluator(uSpace).setHolder(me));
+            } else if (confEvalutator.equals("Last2BidsMixtInverseDifferenceUtilEvaluator")) {
+                this.setEvaluator(new Last2BidsMixtInverseDifferenceUtilEvaluator(uSpace).setHolder(me));
             } else if (confEvalutator.equals("L2BFreqOppModelProdUtilEvaluator")) {
                 this.setEvaluator(new L2BFreqOppModelProdUtilEvaluator(uSpace).setHolder(me));
             } else if (confEvalutator.equals("L2BAHPOppModelProdUtilEvaluator")) {
                 this.setEvaluator(new L2BAHPOppModelProdUtilEvaluator(uSpace).setHolder(me));
             } else if (confEvalutator.equals("L2BEntropyOppModelProdUtilEvaluator")) {
                 this.setEvaluator(new L2BEntropyOppModelProdUtilEvaluator(uSpace).setHolder(me));
-            } else if (confEvalutator.equals("L2BOppProdUtilEvaluator")) {
-                this.setEvaluator(new L2BOppProdUtilEvaluator(uSpace).setHolder(me));
-            } else if (confEvalutator.equals("ConcessionUtilityEvaluator")) {
-                this.setEvaluator(new ConcessionUtilityEvaluator(uSpace).setHolder(me));
+            } else if (confEvalutator.equals("OppConcessionUtilityEvaluator")) {
+                this.setEvaluator(new OppConcessionUtilityEvaluator(uSpace).setHolder(me));
             } else {
                 this.setEvaluator(new RandomEvaluator());
             }
-            IEvalFunction<HistoryState> evaluator1 = (IEvalFunction<HistoryState>) this.getEvaluator();
-            this.setState(new HistoryState(this.uSpace, null, evaluator1));
+            IEvalFunction<HistoryState> evaluator_ = (IEvalFunction<HistoryState>) this.getEvaluator();
+            this.setState(new HistoryState(this.uSpace, null, evaluator_));
             this.getInitState().setTime(0.0);
             break;
         default:

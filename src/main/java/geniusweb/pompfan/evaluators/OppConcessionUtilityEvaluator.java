@@ -12,15 +12,15 @@ import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
-public class ConcessionUtilityEvaluator extends Last2BidsMeanUtilityEvaluator {
+public class OppConcessionUtilityEvaluator extends Last2BidsMeanUtilityEvaluator {
     protected PartyId holder;
     // protected Double lastConsession;
 
-    public ConcessionUtilityEvaluator() {
+    public OppConcessionUtilityEvaluator() {
         super();
     }
 
-    public ConcessionUtilityEvaluator(UtilitySpace utilitySpace) {
+    public OppConcessionUtilityEvaluator(UtilitySpace utilitySpace) {
         super(utilitySpace);
     }
 
@@ -51,7 +51,7 @@ public class ConcessionUtilityEvaluator extends Last2BidsMeanUtilityEvaluator {
         return holder;
     }
 
-    public ConcessionUtilityEvaluator setHolder(PartyId holder) {
+    public OppConcessionUtilityEvaluator setHolder(PartyId holder) {
         this.holder = holder;
         return this;
     }
