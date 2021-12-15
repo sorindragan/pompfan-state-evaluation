@@ -1,8 +1,6 @@
 package geniusweb.pompfan.helper;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -27,41 +25,33 @@ import geniusweb.simplerunner.ClassPathConnectionFactory;
 import geniusweb.simplerunner.NegoRunner;
 import tudelft.utilities.logging.Reporter;
 
-public class RandomCustomNegoRunner extends CustomNegoRunner {
+public class Experiment1CostumRunner extends CustomNegoRunner {
         /**
          *
          */
         private static final Random RANDOM = new Random();
         private final static ObjectMapper jacksonReader = new ObjectMapper();
-        private final static List<String> setNumParticlesPerOpponent = IntStream.range(1, 20).boxed()
+        private final static List<String> setNumParticlesPerOpponent = IntStream.range(1, 2).boxed()
                         .map(String::valueOf).map(e -> e + "0").collect(Collectors.toList());
-        private final static List<String> setSimulationTime = IntStream.range(1, 5).boxed().map(String::valueOf)
-                        .map(e -> e + "00").collect(Collectors.toList());
-        private final static List<String> setDataCollectionTime = RANDOM.doubles(10, 0.0, 0.5).mapToObj(String::valueOf)
-                        .map(BigDecimal::new).map(e -> e.setScale(2, RoundingMode.HALF_UP)).map(String::valueOf)
-                        .collect(Collectors.toList());
-        private final static List<String> setK = RANDOM.doubles(10, 2.0, 5.0).mapToObj(String::valueOf)
-                        .map(BigDecimal::new).map(e -> e.setScale(0, RoundingMode.DOWN)).map(String::valueOf)
-                        .map(e -> e + ".0").collect(Collectors.toList());
-        private final static List<String> setA = RANDOM.doubles(10, 0.1, 1.0).mapToObj(String::valueOf)
-                        .map(BigDecimal::new).map(e -> e.setScale(1, RoundingMode.HALF_UP)).map(String::valueOf)
-                        .collect(Collectors.toList());
-        private final static List<String> setMaxWidth = RANDOM.ints(10, 4, 20).mapToObj(String::valueOf)
-                        .map(BigDecimal::new).map(e -> e.setScale(1, RoundingMode.HALF_UP)).map(String::valueOf)
-                        .collect(Collectors.toList());
+        private final static List<String> setSimulationTime = Arrays.asList("200");
+        private final static List<String> setDataCollectionTime = Arrays.asList("0.05");
+        private final static List<String> setK = Arrays.asList("2.0");
+        private final static List<String> setA = Arrays.asList("0.5");
+        private final static List<String> setMaxWidth = Arrays.asList("15");
 
-        private final static List<String> setComparer = Arrays.asList("UtilityBidDistance", "ExactSameBidDistance",
-                        "JaccardBidDistance", "RandomBidDistance");
-        private final static List<String> setBelief = Arrays.asList("ParticleFilterWithAcceptBelief",
-                        "ParticleFilterBelief", "BayesianParticleFilterBelief",
-                        "UniformBelief");
+        private final static List<String> setExplorer = Arrays.asList("TimeConcedingExplorationPolicy");
+        private final static List<String> setWidener = Arrays.asList("ProgressiveWideningStrategy");
+        private final static List<String> setBelief = Arrays.asList("BayesianParticleFilterBelief");
+        
         private final static List<String> setEvaluator = Arrays.asList("Last2BidsProductUtilityEvaluator",
-                        "Last2BidsMeanUtilityEvaluator", "L2BFreqOppModelProdUtilEvaluator",
-                        "L2BOppProdUtilEvaluator", "RandomEvaluator");
-        private final static List<String> setExplorer = Arrays.asList("HighSelfEsteemOwnExplorationPolicy",
-                        "TimeConcedingExplorationPolicy", "RandomOwnExplorerPolicy");
-        private final static List<String> setWidener = Arrays.asList("ProgressiveWideningStrategy",
-                        "MaxWidthWideningStrategy");
+        "Last2BidsMeanUtilityEvaluator", "Last2BidsOneMinusDifferenceUtilityEvaluator",
+        "Last2BidsMixtMeanUtilityEvaluator", "Last2BidsMixtProdUtilEvaluator",
+        "Last2BidsMixtInverseDifferenceUtilEvaluator", "RandomEvaluator");
+        
+        private final static List<String> setComparer = Arrays.asList("UtilityBidDistance", "OppUtilityBidDistance",
+        "BothUtilityBidDistance",  "JaccardBidDistance", "SDiceBidDistance",
+        "ExactSameBidDistance", "IssueValueCountBidDistance", "RandomBidDistance");
+        
         private final static List<String> setOpponents = Arrays.asList(
                         "classpath:geniusweb.opponents.OwnUtilTFTAgent",
                         "classpath:geniusweb.opponents.OppUtilTFTAgent",
@@ -69,13 +59,13 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                         // "classpath:geniusweb.opponents.SelfishAgent",
                         "classpath:geniusweb.exampleparties.boulware.Boulware",
                         // "classpath:geniusweb.exampleparties.hardliner.Hardliner",
-                        "classpath:geniusweb.exampleparties.timedependentparty.TimeDependentParty",
+                        // "classpath:geniusweb.exampleparties.timedependentparty.TimeDependentParty",
                         "classpath:geniusweb.exampleparties.randomparty.RandomParty",
-                        "classpath:geniusweb.exampleparties.conceder.Conceder",
-                        "classpath:geniusweb.exampleparties.simpleboa.SimpleBoa"
+                        "classpath:geniusweb.exampleparties.conceder.Conceder"
+                        // "classpath:geniusweb.exampleparties.simpleboa.SimpleBoa"
                         );
 
-        public RandomCustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory,
+        public Experiment1CostumRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory,
                         Reporter logger, long maxruntime, String settingRef, String name) throws IOException {
                 super(settings, connectionfactory, logger, maxruntime, settingRef, name);
         }
@@ -84,11 +74,10 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                 JsonNode settingsJson = jacksonReader
                                 .readTree(new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8));
 
-                Integer cnt = 0;
-                for (int i = 0; i <= 100; i++) {
-                        cnt++;
-                        ObjectNode target = (ObjectNode) settingsJson.get("AllPermutationsSettings").get("teams").get(0)
-                                        .get("Team").get(0);
+                for (int i = 0; i < 3; i++) {
+                        Integer cnt = i+1;
+                        ObjectNode target = (ObjectNode) settingsJson.get("SAOPSettings").get("participants").get(0)
+                                        .get("TeamInfo").get("parties").get(0).get("party");
 
                         Map<String, Object> parameters = new HashMap<String, Object>();
                         Map<String, Object> config = new HashMap<String, Object>();
@@ -122,8 +111,8 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
 
                         target.set("parameters", jacksonReader.convertValue(parameters, JsonNode.class));
 
-                        ObjectNode opponent = (ObjectNode) settingsJson.get("AllPermutationsSettings").get("teams")
-                                        .get(1).get("Team").get(0);
+                        ObjectNode opponent = (ObjectNode) settingsJson.get("SAOPSettings").get("participants").get(1)
+                                        .get("TeamInfo").get("parties").get(0).get("party");
 
                         Map<String, Object> oppParameters = new HashMap<String, Object>();
                         String ref = setOpponents.get(RANDOM.nextInt(setOpponents.size()));
@@ -136,11 +125,14 @@ public class RandomCustomNegoRunner extends CustomNegoRunner {
                         Reporter logger = new StdOutReporter();
                         NegoSettings settings = jacksonReader.readValue(settingsJson.toString(), NegoSettings.class);
 
-                        logger.log(Level.INFO, "Starting Tournament " + cnt);
+                        logger.log(Level.INFO, "Starting Session " + cnt);
                         logger.log(Level.INFO, settingsJson.toString());
-                        NegoRunner runner = new RandomCustomNegoRunner(settings, new ClassPathConnectionFactory(),
-                                        logger, 0, settingRef, "random");
+                        NegoRunner runner = new Experiment1CostumRunner(settings, new ClassPathConnectionFactory(),
+                                        logger, 0, settingRef, "Experiment1A");
                         runner.run();
+                        // if (runner.isProperlyStopped()) {
+                        //         // do something        
+                        // }
                 }
 
                 System.exit(0);

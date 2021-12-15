@@ -290,6 +290,15 @@ public class POMPFANAgent extends DefaultParty {
             System.out.println(agreements.getMap());
             getReporter().log(Level.INFO, "Final outcome: " + this.me.getName() + ": "
                     + this.uSpace.getUtility(agreements.getMap().get(this.me)) + " " + info);
+            
+            FileWriter finalLogWriter = new FileWriter("eval/result_" + "last_experiment" + ".jsonl", true);
+            String content = this.me.getName() + ","
+                    + this.opponentName + "," + this.uSpace.getUtility(agreements.getMap().get(this.me)) + "\n";
+            // TODO: get the utility of the opponent somehow
+            // TODO: see if can get other metrics
+            finalLogWriter.write(content);
+            finalLogWriter.close();
+
         }
         terminate();
     }
@@ -492,6 +501,7 @@ public class POMPFANAgent extends DefaultParty {
             if (DEBUG_BELIEF) {
                 String contentDetailed = this.MCTS.getBelief().toDetailedString();
                 String content = this.MCTS.getBelief().toString();
+                // String diferentiator = Long.toString(System.currentTimeMillis());
                 saveDistributionToLogs("distribution_detailed", contentDetailed, true);
                 saveDistributionToLogs("distribution", content, true);
             }

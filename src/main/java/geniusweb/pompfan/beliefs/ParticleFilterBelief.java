@@ -22,7 +22,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class ParticleFilterBelief extends AbstractBelief {
 
-    public static final int NUMBER_SAMPLES = 100; // Needs to be tuned
+    public static final int NUMBER_SAMPLES = 20; // Needs to be tuned
     protected Double EPSILON = 1.0; // Also needs tuning
     private AbstractPolicy mostProbablePolicy = null;
     protected Random r = new Random();

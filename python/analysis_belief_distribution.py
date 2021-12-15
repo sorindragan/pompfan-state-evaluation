@@ -38,7 +38,7 @@ df.columns = [f"{STEP_PREFIX}_{col}" for col in df.columns]
 df[['cls', 'profile']] = list(df.index.str.split('.', 1, expand=True))
 df['profile_id'] = df['profile'].apply(lambda x: hashlib.md5(x.encode('utf-8')).hexdigest()[:8])  #.str.decode('utf-8')
 df.index = df["cls"] + "_" + df["profile_id"]
-df.head(3)
+# df.head(3)
 # %%
 
 
@@ -74,3 +74,5 @@ most_likely = df[df[last_col] == df[last_col].max()]
 id_, profl = most_likely.index[0], most_likely['profile'][0]
 print(f"Most likely profile:\n{id_} => {profl}")
 # %%
+df['total_weight'] = df[list(df.columns)[:-3]].sum(axis=1)
+df['total_weight']

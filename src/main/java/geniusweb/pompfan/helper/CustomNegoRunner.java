@@ -25,6 +25,7 @@ import geniusweb.protocol.NegoState;
 import geniusweb.protocol.partyconnection.ProtocolToPartyConnFactory;
 import geniusweb.protocol.session.SessionResult;
 import geniusweb.protocol.session.SessionState;
+import geniusweb.protocol.session.saop.SAOPSettings;
 import geniusweb.protocol.tournament.allpermutations.AllPermutationsState;
 import geniusweb.simplerunner.ClassPathConnectionFactory;
 import geniusweb.simplerunner.NegoRunner;
@@ -44,7 +45,7 @@ public class CustomNegoRunner extends NegoRunner {
             long maxruntime, String settingRef, String name) throws IOException {
         super(settings, connectionfactory, logger, maxruntime);
         this.startTimeStamp = new Date();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
         this.timestampString = formatter.format(this.startTimeStamp);
         FileWriter collectorFile = new FileWriter("eval/tournament_results_" + name + ".jsonl", true);
         this.intermediateWriter = new ResultsWriter(this.getProtocol().getState(),
