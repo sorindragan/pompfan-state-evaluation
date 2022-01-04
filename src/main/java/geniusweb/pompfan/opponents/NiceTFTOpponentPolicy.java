@@ -42,8 +42,8 @@ public class NiceTFTOpponentPolicy extends AbstractPolicy {
 
     
     @JsonCreator
-    public NiceTFTOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace uSpace) {
-        super(uSpace, "OppUtilTFT");
+    public NiceTFTOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace uSpace, @JsonProperty("name") String name) {
+        super(uSpace, name);
         this.setBidsWithinUtil(new BidsWithUtility((LinearAdditive) this.getUtilitySpace()));
     }
     

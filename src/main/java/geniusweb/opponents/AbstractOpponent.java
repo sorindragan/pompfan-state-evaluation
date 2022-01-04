@@ -159,7 +159,9 @@ public abstract class AbstractOpponent extends DefaultParty {
             try {
                 this.mapper.writerWithDefaultPrettyPrinter().writeValue(sessionFile, this.negotiationData);
             } catch (IOException e) {
-                throw new RuntimeException("Failed to write negotiation data to disk", e);
+                // throw new RuntimeException("Failed to write negotiation data to disk", e);
+                System.err.println("Failed to write negotiation data to disk" + e);
+                System.exit(0);
             }
         }
         // Log the final outcome and terminate

@@ -42,8 +42,11 @@ public abstract class OpponentParticleCreatorHardcoded {
                 profile, reporter);
         UtilitySpace utilitySpace = ((UtilitySpace) profileint.getProfile());
         
-        AbstractPolicy correctOpponent = new BoulwareOpponentPolicy(utilitySpace, "ExactOpponentBoulware", 0.2);
-        
+        // AbstractPolicy correctOpponent = new BoulwareOpponentPolicy(utilitySpace, "ExactOpponentBoulware", 0.2);
+        // AbstractPolicy correctOpponent = new ConcederOpponentPolicy(utilitySpace, "ExactOpponentConceder", 2.0);
+        // AbstractPolicy correctOpponent = new LinearOpponentPolicy(utilitySpace, "ExactOpponentLinear", 1.0);
+        AbstractPolicy correctOpponent = new NiceTFTOpponentPolicy(utilitySpace, "ExactOpponentOppTFT");
+
         listOfOpponents.add(correctOpponent);
 
         for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {

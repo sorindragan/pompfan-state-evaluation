@@ -181,7 +181,9 @@ public class POMPFANAgent extends DefaultParty {
         if (DEBUG_BELIEF) {
             String contentDetailed = this.MCTS.getBelief().toDetailedString();
             String content = this.MCTS.getBelief().toCoarseString();
-            saveDistributionToLogs("distribution_detailed", contentDetailed, false);
+            saveDistributionToLogs(
+                    "distribution_detailed", "{\"Distance\": \"" + this.MCTS.getBelief().getDistance().getClass().getSimpleName() + "\"}", false);
+            saveDistributionToLogs("distribution_detailed", contentDetailed, true);
             saveDistributionToLogs("distribution", content, false);
         }
     }
@@ -281,7 +283,7 @@ public class POMPFANAgent extends DefaultParty {
         }
 
         if (DEBUG_SAVE_TREE) {
-            System.out.println("INNNN");
+            System.out.println("INSIDE: Saving the tree.");
             saveTreeToLogs("tree_".concat(sessionName), this.MCTS.toString());
         }
 
@@ -292,6 +294,7 @@ public class POMPFANAgent extends DefaultParty {
                     + this.uSpace.getUtility(agreements.getMap().get(this.me)) + " " + info);
             
             FileWriter finalLogWriter = new FileWriter("eval/result_" + "last_experiment" + ".jsonl", true);
+            // FileWriter finalLogWriter = new FileWriter("eval/tournament_results_Experiment1A.jsonl", true);
             String content = this.me.getName() + ","
                     + this.opponentName + "," + this.uSpace.getUtility(agreements.getMap().get(this.me)) + "\n";
             // TODO: get the utility of the opponent somehow
@@ -337,6 +340,7 @@ public class POMPFANAgent extends DefaultParty {
 
         // List<AbstractPolicy> listOfOpponents = OpponentParticleCreator.generateOpponentParticles(this.uSpace,
         //         this.numParticlesPerOpponent);
+        // Experiment1B
         List<AbstractPolicy> listOfOpponents = OpponentParticleCreatorHardcoded.generateOpponentParticles(this.uSpace,
                 this.numParticlesPerOpponent);
 
@@ -502,6 +506,7 @@ public class POMPFANAgent extends DefaultParty {
                 String contentDetailed = this.MCTS.getBelief().toDetailedString();
                 String content = this.MCTS.getBelief().toString();
                 // String diferentiator = Long.toString(System.currentTimeMillis());
+                
                 saveDistributionToLogs("distribution_detailed", contentDetailed, true);
                 saveDistributionToLogs("distribution", content, true);
             }

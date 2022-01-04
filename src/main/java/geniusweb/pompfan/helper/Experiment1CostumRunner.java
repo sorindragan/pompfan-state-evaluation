@@ -1,5 +1,6 @@
 package geniusweb.pompfan.helper;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -34,7 +35,7 @@ public class Experiment1CostumRunner extends CustomNegoRunner {
         private final static List<String> setNumParticlesPerOpponent = IntStream.range(1, 2).boxed()
                         .map(String::valueOf).map(e -> e + "0").collect(Collectors.toList());
         private final static List<String> setSimulationTime = Arrays.asList("200");
-        private final static List<String> setDataCollectionTime = Arrays.asList("0.05");
+        private final static List<String> setDataCollectionTime = Arrays.asList("0.1");
         private final static List<String> setK = Arrays.asList("2.0");
         private final static List<String> setA = Arrays.asList("0.5");
         private final static List<String> setMaxWidth = Arrays.asList("15");
@@ -74,7 +75,7 @@ public class Experiment1CostumRunner extends CustomNegoRunner {
                 JsonNode settingsJson = jacksonReader
                                 .readTree(new String(Files.readAllBytes(Paths.get(args[0])), StandardCharsets.UTF_8));
 
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < 336; i++) {
                         Integer cnt = i+1;
                         ObjectNode target = (ObjectNode) settingsJson.get("SAOPSettings").get("participants").get(0)
                                         .get("TeamInfo").get("parties").get(0).get("party");
@@ -127,6 +128,16 @@ public class Experiment1CostumRunner extends CustomNegoRunner {
 
                         logger.log(Level.INFO, "Starting Session " + cnt);
                         logger.log(Level.INFO, settingsJson.toString());
+                        
+                        FileWriter finalLogWriter = new FileWriter("eval/tournament_results_Experiment1A.jsonl", true);
+                        String content = settings.toString().split("confEvaluator=")[1].split(",")[0].split("}")[0] + "," +
+                                         settings.toString().split("confComparer=")[1].split(",")[0].split("}")[0] + ",";
+                        // TODO: get the utility of the opponent somehow
+                        // TODO: see if can get other metrics
+                        finalLogWriter.write(content);
+                        finalLogWriter.close();
+
+
                         NegoRunner runner = new Experiment1CostumRunner(settings, new ClassPathConnectionFactory(),
                                         logger, 0, settingRef, "Experiment1A");
                         runner.run();

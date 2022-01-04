@@ -15,7 +15,7 @@ public class ConcederOpponentPolicy extends TimeDependentOpponentPolicy{
 
     @JsonCreator
     public ConcederOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("e") double e) {
-        super(utilitySpace, CONCEDER, e);
+        super(utilitySpace, name, e);
     }
 
     public ConcederOpponentPolicy(Domain domain) {

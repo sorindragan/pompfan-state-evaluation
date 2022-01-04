@@ -10,7 +10,7 @@ public class LinearOpponentPolicy extends TimeDependentOpponentPolicy {
     private static final String LINEAR = "Linear";
 
     public LinearOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("e") double e) {
-        super(utilitySpace, LINEAR, e);
+        super(utilitySpace, name, e);
     }
 
     public LinearOpponentPolicy(Domain domain) {

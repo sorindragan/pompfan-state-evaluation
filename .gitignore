@@ -5,6 +5,7 @@ logs/**/*
 !logs/.gitkeep
 eval/**/*
 repo/**/*
+visuals/**/*
 
 
 # DEFAULT

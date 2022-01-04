@@ -30,18 +30,22 @@ display(f"Found {file_to_analyse} !!!")
 display(f"Start loading file...")
 # %%
 all_results = list(jsonlines.open(file_to_analyse))
-# display(all_results[:4])
-df = pd.json_normalize(all_results).T
+display(all_results[:4])
+
+#  %%
+df = pd.json_normalize(all_results[1:]).T
 # df["profile"] = df.index
 # df = df.reset_index().rename(columns={"index":"profile"})
 df.columns = [f"{STEP_PREFIX}_{col}" for col in df.columns]
 df[['cls', 'profile']] = list(df.index.str.split('.', 1, expand=True))
 df['profile_id'] = df['profile'].apply(lambda x: hashlib.md5(x.encode('utf-8')).hexdigest()[:8])  #.str.decode('utf-8')
 df.index = df["cls"] + "_" + df["profile_id"]
-# df.head(3)
+df.head(3)
 # %%
+# graph showing the evolution of the probability for the particle containing the real opponent
+df[df['cls'].str.contains("Exact")].iloc[:,1:-3]
 
-
+#  %%
 def generate_animate(df: pd.DataFrame, skip=5):
     candindate_cols = list(df.columns[df.columns.str.startswith(STEP_PREFIX)])
     candindate_cols = candindate_cols[::skip] + [candindate_cols[-1]]
@@ -67,12 +71,27 @@ fig = plt.figure(figsize=(15, 15))
 # Don't skip frames/lines; 1 is actually not skipping shit
 animate, num_frames = generate_animate(df, skip=1)
 anim = animation.FuncAnimation(fig, animate, frames=num_frames, interval=1000, repeat=True, blit=False)
+anim.save('../visuals/particleUpdates.gif', writer='imagemagick', fps=2)
 HTML(anim.to_jshtml())
+
 # %%
 last_col = list(df.columns[df.columns.str.startswith(STEP_PREFIX)])[-1]
 most_likely = df[df[last_col] == df[last_col].max()]
 id_, profl = most_likely.index[0], most_likely['profile'][0]
 print(f"Most likely profile:\n{id_} => {profl}")
 # %%
-df['total_weight'] = df[list(df.columns)[:-3]].sum(axis=1)
-df['total_weight']
+df['weight'] = df[list(df.columns)[:-3]].sum(axis=1)
+# df['distance'] = pd.Series([all_results[0]['Distance']
+#                            for _ in range(len(df.index))
+#                            ])
+df['distance'] = all_results[0]['Distance']
+# df['particle'] = df.index
+df.reset_index(inplace=True)
+df.rename(columns={'index': 'particle'}, inplace=True)
+
+append_file_name = "realtft"
+df.loc[:, ["distance", "particle", "weight"]].to_csv(
+    f"../eval/{append_file_name}.csv", mode="a", index=False, header=False)
+
+
+# %%

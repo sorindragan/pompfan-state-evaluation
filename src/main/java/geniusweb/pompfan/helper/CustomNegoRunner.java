@@ -71,9 +71,16 @@ public class CustomNegoRunner extends NegoRunner {
             resultsJsonFileWriter.write(jacksonWriter.writeValueAsString(finalResults));
             resultsJsonFileWriter.close();
 
+            // String content = this.negSettings.toString().split("confEvaluator=")[1].split(",")[0] + "," +
+            //     this.negSettings.toString().split("confComparer=")[1].split(",")[0] + "," +
+            //     state.toString();
+            
+            // this.collectFile.write(content);
+            // this.collectFile.close();
+            
             // System.exit(0);
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             System.exit(0);
         }
     }

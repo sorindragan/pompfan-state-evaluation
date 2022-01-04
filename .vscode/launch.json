@@ -205,6 +205,17 @@
 		},
 		{
 			"type": "java",
+			"name": "vs. (Nice)OppTFT",
+			"request": "launch",
+			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",
+			"classPaths": [
+				"$Auto"
+			],
+			"args": "src/test/resources/settingsNTFT.json",
+			"console": "internalConsole"
+		},
+		{
+			"type": "java",
 			"name": "vs. Hardliner",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.CustomNegoRunner",

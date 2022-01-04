@@ -16,8 +16,9 @@ public class IssueValueCountBidDistance extends AbstractBidDistance {
         Bid tmpb1 = b1;
         Bid tmpb2 = b2;
         for (String issue : this.getDomain().getIssues()) {
+            // System.out.println(issue);
             if (tmpb1.containsIssue(issue) && tmpb2.containsIssue(issue)) {
-                differentValues = tmpb1.getValue(issue).equals(tmpb1.getValue(issue)) ? ++differentValues : differentValues;
+                differentValues = tmpb1.getValue(issue).equals(tmpb2.getValue(issue)) ? differentValues : ++differentValues;
             }
             noOfValueas++;
         }
