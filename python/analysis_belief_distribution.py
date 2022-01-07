@@ -18,6 +18,7 @@ import matplotlib.animation as animation
 import seaborn as sns
 import uuid
 import hashlib
+from scipy.interpolate import make_interp_spline, BSpline
 STEP_PREFIX = 'update'
 # %%
 filename = "log_distribution_detailed.jsonl"
@@ -30,7 +31,7 @@ display(f"Found {file_to_analyse} !!!")
 display(f"Start loading file...")
 # %%
 all_results = list(jsonlines.open(file_to_analyse))
-display(all_results[:4])
+# display(all_results[:2])
 
 #  %%
 df = pd.json_normalize(all_results[1:]).T
@@ -40,10 +41,39 @@ df.columns = [f"{STEP_PREFIX}_{col}" for col in df.columns]
 df[['cls', 'profile']] = list(df.index.str.split('.', 1, expand=True))
 df['profile_id'] = df['profile'].apply(lambda x: hashlib.md5(x.encode('utf-8')).hexdigest()[:8])  #.str.decode('utf-8')
 df.index = df["cls"] + "_" + df["profile_id"]
-df.head(3)
+df.head(5)
 # %%
-# graph showing the evolution of the probability for the particle containing the real opponent
-df[df['cls'].str.contains("Exact")].iloc[:,1:-3]
+# data for graph showing the evolution of the probability for the particle containing the real opponent
+# df[df['cls'].str.contains("Exact")].iloc[:, 1:-3].to_csv(
+#     "../eval/tmpevolution.csv", mode = "a", index = False, header = False)
+
+# %%
+# strategytype = "OwnTFT"
+fig = plt.figure(figsize=(20, 5))
+for cls in df['cls']:
+    vals = list(df.loc[df["cls"] == cls].iloc[0, 0:-3])
+    updates = df.shape[1]-3
+    cls = str(cls).split("_")[1]
+    xnew = np.linspace(0, updates-1, 200)
+    spl = make_interp_spline(list(range(updates)), vals, k=3)
+    y_smooth = spl(xnew)
+    plt.plot(xnew, y_smooth,
+             label=f"{cls} Strategy",
+                      linestyle='-',
+                      linewidth=2,
+                      color=np.random.rand(3,))
+
+    # plt.plot(list(range(updates)), vals,
+    #          label=f"{cls} Strategy",
+    #          linestyle='-',
+    #          linewidth=2,
+    #          color=np.random.rand(3,))
+
+plt.legend()
+plt.title(f"Evolution of particle probabilities in the case of a known profile, but unknown strategy")
+plt.xlabel("Belief Update Step")
+plt.ylabel("Probability of Strategy type")
+plt.show()
 
 #  %%
 def generate_animate(df: pd.DataFrame, skip=5):
@@ -71,7 +101,7 @@ fig = plt.figure(figsize=(15, 15))
 # Don't skip frames/lines; 1 is actually not skipping shit
 animate, num_frames = generate_animate(df, skip=1)
 anim = animation.FuncAnimation(fig, animate, frames=num_frames, interval=1000, repeat=True, blit=False)
-anim.save('../visuals/particleUpdates.gif', writer='imagemagick', fps=2)
+# anim.save('../visuals/particleUpdates.gif', writer='imagemagick', fps=2)
 HTML(anim.to_jshtml())
 
 # %%
@@ -89,9 +119,10 @@ df['distance'] = all_results[0]['Distance']
 df.reset_index(inplace=True)
 df.rename(columns={'index': 'particle'}, inplace=True)
 
-append_file_name = "realtft"
-df.loc[:, ["distance", "particle", "weight"]].to_csv(
-    f"../eval/{append_file_name}.csv", mode="a", index=False, header=False)
+df.loc[:, ["distance", "particle", "weight"]]
+# append_file_name = "realboulwarestrategy"
+# df.loc[:, ["distance", "particle", "weight"]].to_csv(
+#     f"../eval/{append_file_name}.csv", mode="a", index=False, header=False)
 
 
 # %%

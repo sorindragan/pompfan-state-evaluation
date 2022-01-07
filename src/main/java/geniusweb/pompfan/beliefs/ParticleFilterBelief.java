@@ -66,10 +66,13 @@ public class ParticleFilterBelief extends AbstractBelief {
                 // System.out.println(state.getTime());
                 AbstractState<?> newState = state;
                 // the noisy time makes nonreactive agents bid diffrently
-                Double noisyTime = state.getTime() + (r.nextGaussian() * 0.1);
+                Double noisyTime = state.getTime() + (r.nextGaussian() * 0.05);
                 newState = state.setTime(Math.min(1.0, Math.max(0.0, noisyTime)));
+                // no noise
+                // Double noisyTime = state.getTime();
+                // newState = state.setTime(noisyTime);
+                
                 Bid sampledBid = this.sample(lastAgentAction, lastOppAction, newState, abstractPolicy);
-
                 candidateObservations.add(sampledBid);
             }
             Double weightOpponentLikelihood = candidateObservations.parallelStream().filter(Objects::nonNull)

@@ -86,7 +86,7 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
      */
     private Bid makeBid(Double currTime) {
 
-        BigDecimal utilityGoal = getUtilityGoal(currTime, getE(), extendedspace.getMin(), extendedspace.getMax());
+        BigDecimal utilityGoal = getUtilityGoal(currTime, this.e, extendedspace.getMin(), extendedspace.getMax());
         ImmutableList<Bid> options = extendedspace.getBids(utilityGoal);
         if (options.size().compareTo(BigInteger.ONE) == -1) {
             // if we can't find good bid, get max util bid and if no max bid take min bid as

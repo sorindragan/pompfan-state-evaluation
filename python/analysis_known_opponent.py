@@ -91,3 +91,16 @@ plt.show()
 
 
 # %%
+dfr = pd.read_csv(f"../eval/tmpevolution.csv", header=0)
+bu = list(dfr.iloc[0,:])
+ivc = list(dfr.iloc[1,:])
+plt.plot(list(range(len(bu))), bu, label="BothUtilityDistance", color="darkgreen")
+plt.plot(list(range(len(bu))), ivc, label="IssueValueCountDistance", color="orchid")
+plt.legend()
+# plt.title("Certanty the model has that the particle containing the real NTFT opponent is indeed the real one")
+plt.title("Evolution of the probability assigned to the particle \n containing the real Boulware opponent \n using two different distance metrics")
+plt.xlabel("Belief Update Step")
+plt.ylabel("Probability")
+plt.show()
+
+# %%

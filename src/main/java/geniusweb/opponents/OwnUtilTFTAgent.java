@@ -80,21 +80,34 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
         ImmutableList<Bid> candiateBids = this.getBidsWithUtility().getBids(newInterval);
         if (isConcession) {
             newInterval = new Interval(
-                    utilityForOpponentOfLastOwnBid.subtract(difference.multiply(BigDecimal.valueOf(1))),
+                    utilityForOpponentOfLastOwnBid.subtract(difference.multiply(BigDecimal.valueOf(1))).max(BigDecimal.ZERO),
                     utilityForOpponentOfLastOwnBid);
             candiateBids = this.getBidsWithUtility().getBids(newInterval);
             if (candiateBids.size().compareTo(BigInteger.ZERO) <= 0) {
                 newInterval = new Interval(
-                        utilityForOpponentOfLastOwnBid.subtract(difference.multiply(BigDecimal.valueOf(2))),
+                        utilityForOpponentOfLastOwnBid.subtract(difference.multiply(BigDecimal.valueOf(2))).max(BigDecimal.ZERO),
                         utilityForOpponentOfLastOwnBid);
             }
             candiateBids = this.getBidsWithUtility().getBids(newInterval);
             if (candiateBids.size().compareTo(BigInteger.ZERO) <= 0) {
                 newInterval = fullRange;
 
+            } else {
+                newInterval = new Interval(
+                        utilityForOpponentOfLastOwnBid,
+                        utilityForOpponentOfLastOwnBid.add(difference.multiply(BigDecimal.valueOf(1))).min(
+                                BigDecimal.ONE));
+                candiateBids = this.getBidsWithUtility().getBids(newInterval);
+                if (candiateBids.size().compareTo(BigInteger.ZERO) <= 0) {
+                    newInterval = new Interval(
+                            utilityForOpponentOfLastOwnBid,
+                            utilityForOpponentOfLastOwnBid.add(difference.multiply(BigDecimal.valueOf(2))).min(BigDecimal.ONE));
+                }
+                candiateBids = this.getBidsWithUtility().getBids(newInterval);
             }
-
         }
+
+        // this should not be reached
         if (candiateBids.size().compareTo(BigInteger.ZERO) == 0) {
             Bid bid = this.getBidsWithUtility().getExtremeBid(true);
             action = new Offer(this.getMe(), bid);

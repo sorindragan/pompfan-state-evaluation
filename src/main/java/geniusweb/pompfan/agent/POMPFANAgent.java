@@ -572,7 +572,7 @@ public class POMPFANAgent extends DefaultParty {
         long remainingTime = negotiationEnd - System.currentTimeMillis();
         // 2 * simTime (+ other execution delay) because we shift the progress in the simulation.
         if (2 * simTime < remainingTime) {
-            this.MCTS.scrapeSubTree();
+            // this.MCTS.scrapeSubTree();
             // use when N from -XmxNg setting generally exceeds amount of remianing RAM
             // force garbage collector; apparently the VM is not that smart :)
             // System.gc();
@@ -602,7 +602,7 @@ public class POMPFANAgent extends DefaultParty {
         // So accept
         // ? proposing old bids also possible
         if (action == null) {
-            this.getReporter().log(Level.WARNING, "Could not produce action!!!");
+            this.getReporter().log(Level.WARNING, "Could not produce new action!!!");
             ActionNode lastBestActionNode = this.MCTS.getLastBestActionNode();
             if (lastBestActionNode != null) {
                 action = (ActionWithBid) lastBestActionNode.getAction();

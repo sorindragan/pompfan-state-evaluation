@@ -90,19 +90,23 @@ public class OppUtilTFTAgent extends AbstractOpponent {
                 this.getBidsWithUtility().getRange().getMax());
         // in case of no concession
         ImmutableList<Bid> candiateBids = this.oppBidsWithUtilities.getBids(newInterval);
+        
+        // concession
         if (isConcession) {
             newInterval = new Interval(utilityForOpponentOfLastOwnBid,
                     utilityForOpponentOfLastOwnBid.add(difference.multiply(BigDecimal.valueOf(2)))
                     .min(BigDecimal.ONE));
             candiateBids = this.oppBidsWithUtilities.getBids(newInterval);
             if (candiateBids.size().compareTo(BigInteger.ZERO) <= 0) {
-                newInterval = new Interval(utilityForOpponentOfLastOwnBid, utilityForOpponentOfLastOwnBid
-                        .add(difference.multiply(BigDecimal.valueOf(2))).min(BigDecimal.ONE));
+                newInterval = new Interval(utilityForOpponentOfLastOwnBid,
+                    utilityForOpponentOfLastOwnBid.add(difference.multiply(BigDecimal.valueOf(2)))
+                    .min(BigDecimal.ONE));
             }
             candiateBids = this.oppBidsWithUtilities.getBids(newInterval);
             if (candiateBids.size().compareTo(BigInteger.ZERO) <= 0) {
                 newInterval = fullRange;
             }
+            candiateBids = this.oppBidsWithUtilities.getBids(newInterval);
 
         }
         // safety behaviour in case of unexpected behaviour

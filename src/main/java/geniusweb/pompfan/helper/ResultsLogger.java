@@ -65,6 +65,8 @@ public class ResultsLogger {
             Agreements agreements = sess.getAgreements();
             Map<PartyId, PartyWithProfile> allParties = sess.getParticipants();
             Map<PartyId, Bid> allAgreements = agreements.getMap();
+            // System.out.println(allParties);
+            // System.out.println(allAgreements);
             List<Result> collectedResults = allParties.keySet().stream()
                     .map(k -> new Result(this.sessionNum, k, allParties.get(k), allAgreements.get(k))
                             .setSessionStart(this.startTime).computeUtility())
@@ -153,23 +155,28 @@ public class ResultsLogger {
 
         private Result computeUtility() {
             try {
+                
                 this.profile = this.getPwp().getProfile();
                 ProfileInterface profileint = ProfileConnectionFactory.create(this.profile.getURI(), this.reporter);
+                // System.out.println(profileint);
                 UtilitySpace utilitySpace = ((UtilitySpace) profileint.getProfile());
                 this.utility = this.getAggreeBid() != null ? utilitySpace.getUtility(this.getAggreeBid()).doubleValue()
                         : 0.0;
+                // System.out.println(this.utility);
             } catch (IOException e) {
                 this.utility = -1.0;
-                e.printStackTrace();
+                this.reporter.log(Level.WARNING, "IOException");
+                // e.printStackTrace();
                 return this;
             } catch (DeploymentException e) {
                 this.utility = -1.0;
-                e.printStackTrace();
+                this.reporter.log(Level.WARNING, "ServerException");
+                // e.printStackTrace();
                 return this;
             } catch (IllegalArgumentException e) {
                 this.reporter.log(Level.WARNING, "Couldn't create profile from: " + this.profile.getURI());
                 this.utility = -2.0;
-                e.printStackTrace();
+                // e.printStackTrace();
                 return this;
             }
             return this;

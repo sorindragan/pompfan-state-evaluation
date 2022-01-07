@@ -43,8 +43,9 @@ public class Tree {
     private ActionNode lastBestActionNode;
     private List<Action> realHistory;
     private Progress progress;
-    private Double ACCEPT_SLACK = 0.05;
+    private Double ACCEPT_SLACK = 0.02;
     private AllBidsList allBidsList;
+    BeliefNode initRoot;
     private String lastBestActionNodeInitPartyId = "NoAgent";
 
     public Tree(UtilitySpace utilitySpace, AbstractBelief belief, AbstractState<?> startState, AbstractWidener widener,
@@ -54,6 +55,7 @@ public class Tree {
         this.allBidsList = new AllBidsList(this.getUtilitySpace().getDomain());
         
         BeliefNode initalRoot = new BeliefNode(null, startState, null);
+        this.initRoot = initalRoot;
         this.setRoot(initalRoot);
         // This is a very bad bit of code: hardcoded initialization of lastBestAction
         // node
@@ -279,6 +281,8 @@ public class Tree {
     public String toString() {
         StringBuilder buffer = new StringBuilder(50);
         this.buildStringBuffer(buffer, "", "", this.root);
+        // this.buildStringBuffer(buffer, "", "", this.initRoot);
+
         return buffer.toString();
     }
 
