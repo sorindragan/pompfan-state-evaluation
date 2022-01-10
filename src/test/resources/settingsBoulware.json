@@ -32,7 +32,7 @@
 									}
 								}
 							},
-							"profile": "file:src/test/resources/party1.json"
+							"profile": "file:src/test/resources/flightbooking1.json"
 						}
 					]
 				}
@@ -50,7 +50,7 @@
 									]
 								}
 							},
-							"profile": "file:src/test/resources/party4.json"
+							"profile": "file:src/test/resources/flightbooking2.json"
 						}
 					]
 				}

@@ -37,8 +37,8 @@ public abstract class OpponentParticleCreatorHardcoded {
 
         // hardcoded profile/utility
         ReportToLogger reporter = new ReportToLogger("HardcodedProfile");
-        String profileString = "file:src/test/resources/party4.json";
-        // String profileString = "file:src/test/resources/flightbooking2.json";
+        // String profileString = "file:src/test/resources/party4.json";
+        String profileString = "file:src/test/resources/flightbooking2.json";
         URI profile = new URI(profileString);
         ProfileInterface profileint = ProfileConnectionFactory.create(
                 profile, reporter);
@@ -53,12 +53,12 @@ public abstract class OpponentParticleCreatorHardcoded {
         // does knowing the opponent matter?
         for (int cnt = 0; cnt < 5*numParticlesPerOpponent; cnt++) {
             // listOfOpponents.add(new NiceTFTOpponentPolicy(utilitySpace, "OppTFT"));
-            // listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(utilitySpace, "OwnTFT"));
-            listOfOpponents.add(new BoulwareOpponentPolicy(utilitySpace, "Boulware", 0.2));
-            // listOfOpponents.add(new LinearOpponentPolicy(utilitySpace, "Linear", 1));
-            // listOfOpponents.add(new ConcederOpponentPolicy(utilitySpace, "Conceder", 2.0));
-            // listOfOpponents.add(new RandomOpponentPolicy(utilitySpace, "Random"));
-
+            // listOfOpponents.add(new BoulwareOpponentPolicy(utilitySpace, "Boulware", 0.2));
+            
+            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
+            listOfOpponents.add(new NiceTFTOpponentPolicy(domain));
+            listOfOpponents.add(new ConcederOpponentPolicy(domain));
+            // listOfOpponents.add(new LinearOpponentPolicy(domain));
         }
 
 
