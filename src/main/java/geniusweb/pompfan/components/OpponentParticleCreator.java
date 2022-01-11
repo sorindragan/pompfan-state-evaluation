@@ -12,25 +12,29 @@ import geniusweb.pompfan.opponents.BoulwareOpponentPolicy;
 import geniusweb.pompfan.opponents.ConcederOpponentPolicy;
 import geniusweb.pompfan.opponents.HardLinerOpponentPolicy;
 import geniusweb.pompfan.opponents.LinearOpponentPolicy;
+import geniusweb.pompfan.opponents.OppUtilityTFTOpponentPolicy;
 import geniusweb.pompfan.opponents.OwnUtilityTFTOpponentPolicy;
 import geniusweb.pompfan.opponents.SelfishOpponentPolicy;
 import geniusweb.pompfan.opponents.TimeDependentOpponentPolicy;
 import geniusweb.profile.utilityspace.UtilitySpace;
+import geniusweb.progress.Progress;
 
 public abstract class OpponentParticleCreator {
 
-    public static List<AbstractPolicy> generateOpponentParticles(UtilitySpace uSpace, Long numParticlesPerOpponent) {
+    public static List<AbstractPolicy> generateOpponentParticles(UtilitySpace uSpace, Long numParticlesPerOpponent, Progress progress) {
         Domain domain = uSpace.getDomain();
         AllBidsList bidspace = new AllBidsList(domain);
         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
+        // TODO: fix arguments
         for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
-            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain)); // QUESTION: Why own utility space?
+            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
+            listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain));
             listOfOpponents.add(new AntagonisticOpponentPolicy(uSpace));
-            listOfOpponents.add(new SelfishOpponentPolicy(domain));
-            listOfOpponents.add(new HardLinerOpponentPolicy(domain));
+            // listOfOpponents.add(new SelfishOpponentPolicy(domain));
+            // listOfOpponents.add(new HardLinerOpponentPolicy(domain));
             listOfOpponents.add(new BoulwareOpponentPolicy(domain));
             listOfOpponents.add(new LinearOpponentPolicy(domain));
-            listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
+            // listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
             listOfOpponents.add(new ConcederOpponentPolicy(domain));
         }
         listOfOpponents = listOfOpponents.stream().map(opponent -> opponent.setBidspace(bidspace))

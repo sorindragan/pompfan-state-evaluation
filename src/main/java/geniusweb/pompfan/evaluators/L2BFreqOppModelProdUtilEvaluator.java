@@ -18,7 +18,7 @@ public class L2BFreqOppModelProdUtilEvaluator extends L2BAHPOppModelProdUtilEval
 
     @Override
     protected void initOppModel(ArrayList<Action> currState, Domain domain) {
-        this.setOppModel(new BetterFreqOppModel(domain, currState, this.getHolder()));
+        // this.setOppModel(new BetterFreqOppModel(domain, currState, this.getHolder()));
     }
 
 }

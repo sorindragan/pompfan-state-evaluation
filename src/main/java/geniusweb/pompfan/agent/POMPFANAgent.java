@@ -293,14 +293,14 @@ public class POMPFANAgent extends DefaultParty {
             getReporter().log(Level.INFO, "Final outcome: " + this.me.getName() + ": "
                     + this.uSpace.getUtility(agreements.getMap().get(this.me)) + " " + info);
             
-            FileWriter finalLogWriter = new FileWriter("eval/result_" + "last_experiment" + ".jsonl", true);
-            // FileWriter finalLogWriter = new FileWriter("eval/tournament_results_Experiment1A.jsonl", true);
-            String content = this.me.getName() + ","
-                    + this.opponentName + "," + this.uSpace.getUtility(agreements.getMap().get(this.me)) + "\n";
-            // TODO: get the utility of the opponent somehow
-            // TODO: see if can get other metrics
-            finalLogWriter.write(content);
-            finalLogWriter.close();
+            // FileWriter finalLogWriter = new FileWriter("eval/result_" + "last_experiment" + ".jsonl", true);
+            // // FileWriter finalLogWriter = new FileWriter("eval/tournament_results_Experiment1A.jsonl", true);
+            // String content = this.me.getName() + ","
+            //         + this.opponentName + "," + this.uSpace.getUtility(agreements.getMap().get(this.me)) + "\n";
+            // // TODO: get the utility of the opponent somehow
+            // // TODO: see if can get other metrics
+            // finalLogWriter.write(content);
+            // finalLogWriter.close();
 
         }
         terminate();
@@ -339,10 +339,10 @@ public class POMPFANAgent extends DefaultParty {
             System.out.println("DEBUG_PERSIST: Opp -> " + this.opponentName);
 
         // List<AbstractPolicy> listOfOpponents = OpponentParticleCreator.generateOpponentParticles(this.uSpace,
-        //         this.numParticlesPerOpponent);
-        // Experiment1B
+        //         this.numParticlesPerOpponent, this.progress);
+        // Experiment1
         List<AbstractPolicy> listOfOpponents = OpponentParticleCreatorHardcoded.generateOpponentParticles(this.uSpace,
-                this.numParticlesPerOpponent);
+                this.numParticlesPerOpponent, this.progress);
 
         Configurator configurator = this.config != null ? this.mapper.convertValue(config, Configurator.class)
                 : new Configurator();
@@ -571,17 +571,15 @@ public class POMPFANAgent extends DefaultParty {
 
         long remainingTime = negotiationEnd - System.currentTimeMillis();
         // 2 * simTime (+ other execution delay) because we shift the progress in the simulation.
-        if (2 * simTime < remainingTime) {
+        if (1.5 * simTime < remainingTime) {
             // this.MCTS.scrapeSubTree();
-            // use when N from -XmxNg setting generally exceeds amount of remianing RAM
-            // force garbage collector; apparently the VM is not that smart :)
             // System.gc();
 
             // When we start the tree construction we use the last real observation to guide the initial exploration
             // We do this just once at the very beginning after the data collection phase
-            if (this.MCTS.getRoot().getObservation() == null) {
-                this.MCTS.getRoot().setObservation(this.MCTS.getRealHistory().get(this.MCTS.getRealHistory().size()-1));
-            }
+            
+            this.MCTS.getRoot().setObservation(this.MCTS.getRealHistory().get(this.MCTS.getRealHistory().size()-1));
+
             
             this.MCTS.construct(simTime, this.progress);
             

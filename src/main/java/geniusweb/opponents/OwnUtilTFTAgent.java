@@ -9,16 +9,20 @@ import geniusweb.actions.Accept;
 import geniusweb.actions.ActionWithBid;
 import geniusweb.actions.Offer;
 import geniusweb.bidspace.AllBidsList;
+import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
+import geniusweb.boa.biddingstrategy.ExtendedUtilSpace;
 import geniusweb.inform.Agreements;
 import geniusweb.issuevalue.Bid;
+import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import tudelft.utilities.immutablelist.ImmutableList;
 
 public class OwnUtilTFTAgent extends AbstractOpponent {
-    // private BidsWithUtility oppBidsWithUtilities;
-    // private List<Bid> oppBadBids;
-    private AllBidsList allPossibleBids;
-    private boolean DEBUG_TFT;
+   
+    private ExtendedUtilSpace extendedspace;
+    private Bid myLastbid = null;
+    private BidsWithUtility bidutils;
+    private boolean DEBUG_TFT = true;
 
     public OwnUtilTFTAgent() {
         super();
@@ -45,93 +49,70 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
 
     @Override
     protected ActionWithBid myTurn(Object param) {
-
         ActionWithBid action;
+        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
+        this.bidutils = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         List<ActionWithBid> oppHistory = this.getOpponentHistory();
         List<ActionWithBid> ownHistory = this.getOwnHistory();
-        if (this.allPossibleBids == null) {
-            this.allPossibleBids = new AllBidsList(this.getUtilitySpace().getDomain());
-        }
-        if (this.getHistory().size() <= 5) {
-            // this.getReporter().log(Level.WARNING, this.getMe().toString() + ": Could not
-            // get last opponent action node!!!");
+        
+        if (oppHistory.size() < 3) {
+            // not enough information known
             Bid bid = this.getBidsWithUtility().getExtremeBid(true);
             action = new Offer(this.getMe(), bid);
+            myLastbid = bid;
             return action;
         }
 
-        boolean isConcession = false;
-        BigDecimal difference = BigDecimal.ZERO;
         int historySize = oppHistory.size();
+        BigDecimal difference = BigDecimal.ZERO;
         Bid lastLastOpponentBid = oppHistory.get(historySize - 2).getBid();
         Bid justLastOpponentBid = oppHistory.get(historySize - 1).getBid();
-        BigDecimal cntBidSpace = new BigDecimal(this.allPossibleBids.size());
-        BigDecimal concessionThreshold = BigDecimal.ONE.divide(cntBidSpace, 5, RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(2));
         difference = this.getUtilitySpace().getUtility(lastLastOpponentBid)
                 .subtract(this.getUtilitySpace().getUtility(justLastOpponentBid));
-        Bid lastOwnBid = ownHistory.get(ownHistory.size() - 1).getBid();
-        isConcession = difference.compareTo(concessionThreshold) >= 0 ? true : false;
+        boolean isConcession = difference.doubleValue() > 0 ? true : false;
 
-        BigDecimal utilityForOpponentOfLastOwnBid = this.getUtilitySpace().getUtility(lastOwnBid);
-        Interval fullRange = this.getBidsWithUtility().getRange();
-        Interval newInterval = new Interval(this.getUtilitySpace().getUtility(lastOwnBid),
-                this.getBidsWithUtility().getRange().getMax());
-        ImmutableList<Bid> candiateBids = this.getBidsWithUtility().getBids(newInterval);
-        if (isConcession) {
-            newInterval = new Interval(
-                    utilityForOpponentOfLastOwnBid.subtract(difference.multiply(BigDecimal.valueOf(1))).max(BigDecimal.ZERO),
-                    utilityForOpponentOfLastOwnBid);
-            candiateBids = this.getBidsWithUtility().getBids(newInterval);
-            if (candiateBids.size().compareTo(BigInteger.ZERO) <= 0) {
-                newInterval = new Interval(
-                        utilityForOpponentOfLastOwnBid.subtract(difference.multiply(BigDecimal.valueOf(2))).max(BigDecimal.ZERO),
-                        utilityForOpponentOfLastOwnBid);
-            }
-            candiateBids = this.getBidsWithUtility().getBids(newInterval);
-            if (candiateBids.size().compareTo(BigInteger.ZERO) <= 0) {
-                newInterval = fullRange;
+        BigDecimal utilityGoal = isConcession
+                ? this.getUtilitySpace().getUtility(myLastbid).subtract(difference.abs())
+                        .max((this.extendedspace.getMax().subtract(this.extendedspace.getMin()))
+                                .divide(new BigDecimal("2.0")))
+                : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
+                        .min(this.extendedspace.getMax());
+        
+        Bid selectedBid = computeNextBid(utilityGoal);
+        double time = this.getProgress().get(System.currentTimeMillis());
 
-            } else {
-                newInterval = new Interval(
-                        utilityForOpponentOfLastOwnBid,
-                        utilityForOpponentOfLastOwnBid.add(difference.multiply(BigDecimal.valueOf(1))).min(
-                                BigDecimal.ONE));
-                candiateBids = this.getBidsWithUtility().getBids(newInterval);
-                if (candiateBids.size().compareTo(BigInteger.ZERO) <= 0) {
-                    newInterval = new Interval(
-                            utilityForOpponentOfLastOwnBid,
-                            utilityForOpponentOfLastOwnBid.add(difference.multiply(BigDecimal.valueOf(2))).min(BigDecimal.ONE));
-                }
-                candiateBids = this.getBidsWithUtility().getBids(newInterval);
-            }
-        }
-
-        // this should not be reached
-        if (candiateBids.size().compareTo(BigInteger.ZERO) == 0) {
-            Bid bid = this.getBidsWithUtility().getExtremeBid(true);
-            action = new Offer(this.getMe(), bid);
-            return action;
-        }
-
-        int selectedIdx = this.getRandom().nextInt(candiateBids.size().intValue());
-        Bid selectedBid = candiateBids.get(selectedIdx);
-        ActionWithBid result = this.getUtilitySpace().isPreferredOrEqual(justLastOpponentBid, selectedBid)
-                ? new Accept(this.getMe(), justLastOpponentBid)
-                : new Offer(this.getMe(), selectedBid);
         if (DEBUG_TFT) {
             System.out.println("============================");
-            System.out.println(newInterval);
-            System.out.println(result);
+            System.out.println(time);
+            System.out.println(selectedBid);
+            System.out.println("TFT-Last-Utility: " + this.getUtilitySpace().getUtility(myLastbid));
             System.out.println("TFT-Difference: " + difference);
-            System.out.println("TFT-Utility: " + this.getUtilitySpace().getUtility(result.getBid()));
+            System.out.println("TFT-Utility-Goal: " + utilityGoal);
         }
-        return result;
+
+        myLastbid = selectedBid;
+
+        return this.getUtilitySpace().isPreferredOrEqual(justLastOpponentBid, selectedBid) 
+                && time > 0.8 
+                ? new Accept(this.getMe(), justLastOpponentBid)
+                : new Offer(this.getMe(), selectedBid);
     }
+
+    private Bid computeNextBid(BigDecimal utilityGoal) {
+        ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
+        if (options.size() == BigInteger.ZERO) {
+            // System.out.println("WARNING: TOLERANCE TOO LOW");
+            // if we can't find good bid, iterate until you find a good bid
+
+            options = this.bidutils.getBids(
+	                new Interval(utilityGoal.subtract(new BigDecimal("0.1")), utilityGoal));
+        }
+        return options.get(options.size().intValue() - 1);
+    }
+
     @Override
     public void terminate() {
         super.terminate();
-        this.allPossibleBids =null;
     }
 
 }

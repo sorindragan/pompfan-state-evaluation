@@ -44,8 +44,13 @@ df.index = df["cls"] + "_" + df["profile_id"]
 df.head(5)
 # %%
 # data for graph showing the evolution of the probability for the particle containing the real opponent
+df[df['cls'].str.contains("Exact")].iloc[:, 1:-3]
 # df[df['cls'].str.contains("Exact")].iloc[:, 1:-3].to_csv(
 #     "../eval/tmpevolution.csv", mode = "a", index = False, header = False)
+
+# %%
+# sum of weights
+df[list(df.columns)[:-3]].sum(axis=1)
 
 # %%
 # strategytype = "OwnTFT"

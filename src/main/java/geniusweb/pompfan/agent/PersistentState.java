@@ -152,7 +152,7 @@ public class PersistentState {
     AbstractBelief belief = allBeliefs.get(opponent);
     List<AbstractPolicy> listOfOpponents;
     if (belief == null) {
-      listOfOpponents = OpponentParticleCreator.generateOpponentParticles(utilitySpace, numParticlesPerOpponent);
+      listOfOpponents = OpponentParticleCreator.generateOpponentParticles(utilitySpace, numParticlesPerOpponent, progress);
     } else {
       listOfOpponents = belief.getOpponents();
     }

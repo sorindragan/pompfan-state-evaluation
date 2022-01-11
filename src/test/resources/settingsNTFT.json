@@ -14,7 +14,7 @@
 									"simulationTime": "200",
 									"dataCollectionTime": "0.05",
 									"config": {
-										"confComparer": "BothUtilityBidDistance",
+										"confComparer": "IssueValueCountBidDistance",
 										"confBelief": "BayesianParticleFilterBelief",
 										"confEvaluator": "Last2BidsProductUtilityEvaluator",
 										"confState": "HistoryState",
@@ -32,7 +32,7 @@
 									}
 								}
 							},
-							"profile": "file:src/test/resources/flightbooking1.json"
+							"profile": "file:src/test/resources/party1.json"
 						}
 					]
 				}
@@ -50,7 +50,7 @@
 									]
 								}
 							},
-							"profile": "file:src/test/resources/flightbooking2.json"
+							"profile": "file:src/test/resources/party2.json"
 						}
 					]
 				}

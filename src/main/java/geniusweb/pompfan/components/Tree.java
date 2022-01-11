@@ -43,7 +43,7 @@ public class Tree {
     private ActionNode lastBestActionNode;
     private List<Action> realHistory;
     private Progress progress;
-    private Double ACCEPT_SLACK = 0.02;
+    private Double ACCEPT_SLACK = 0.00;
     private AllBidsList allBidsList;
     BeliefNode initRoot;
     private String lastBestActionNodeInitPartyId = "NoAgent";
@@ -95,9 +95,7 @@ public class Tree {
     public void construct(Long simulationTime, Progress realProgress) throws StateRepresentationException {
         long currentTimeMillis = System.currentTimeMillis(); 
         Progress simulatedProgress = ProgressFactory.create(new DeadlineTime(simulationTime), currentTimeMillis);
-        // Progress realShiftedProgress = ProgressFactory.create(
-        //         new DeadlineTime(realProgress.getTerminationTime().getTime() - currentTimeMillis - simulationTime),
-        //         currentTimeMillis + simulationTime);
+       
         // set the new root time
         this.root.getState().setTime(realProgress.get(currentTimeMillis + simulationTime));
 
@@ -107,13 +105,13 @@ public class Tree {
         }
     }
 
-    public void simulate(Progress simulatedProgress, Long shiftSimTime) throws StateRepresentationException {
+    public void simulate(Progress negProgress, Long shiftSimTime) throws StateRepresentationException {
         Node currRoot = this.root;
         // sample a different opponent and add it to the state
         AbstractPolicy currOpp = this.belief.sampleOpponent();
         this.root.getState().setOpponent(currOpp);
         // main function
-        this.widener.widen(simulatedProgress, shiftSimTime, currRoot);
+        this.widener.widen(negProgress, shiftSimTime, currRoot);
     }
 
     public static void backpropagate(Node node, Double value) {
@@ -121,6 +119,7 @@ public class Tree {
             node.updateVisits();
             // calculate UCB1 while propagating
             // node.setValue(node.getValue() + value).setValue(UCB1(node));
+            
             // update value 
             node.setValue(node.getValue() + value);
 
@@ -132,10 +131,6 @@ public class Tree {
     }
 
     public static Node selectFavoriteChild(List<Node> candidatesChildrenForAdoption) {
-
-        // if (candidatesChildrenForAdoption.stream().allMatch(child -> child.getIsTerminal() == true)) {
-        //     return null;
-        // }
 
         return candidatesChildrenForAdoption.stream().filter(child -> child.getIsTerminal() == false)
                 .max(Comparator.comparing(Tree::UCB1)).orElse(null);
@@ -243,6 +238,7 @@ public class Tree {
             // if we want to propose something worse than what we received
             if (distanceValue + ACCEPT_SLACK < 0) {
                 action = new Accept(action.getActor(), lastOpponentBid);
+                System.out.println("MCTS SENT ACCEPT");
                 break;
             }
             if (action instanceof Accept) {

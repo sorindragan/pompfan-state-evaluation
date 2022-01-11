@@ -32,6 +32,7 @@ import geniusweb.profile.utilityspace.ValueSetUtilities;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @Type(value = ParticleFilterBelief.class, name = "ParticleFilterBelief"),
         @Type(value = ParticleFilterWithAcceptBelief.class, name = "ParticleFilterWithAcceptBelief"),
+        @Type(value = BayesianParticleFilterBelief.class, name = "BayesianParticleFilterBelief"),
         @Type(value = UniformBelief.class, name = "UniformBelief") })
 public abstract class AbstractBelief {
 

@@ -28,10 +28,12 @@ public class BetterFreqOppModel extends AbstractOpponentModel {
     private PartyId me;
     private Set<String> allIssues;
     private Map<String, Double> iChanges = new HashMap<>();
+    Progress p;
 
-    public BetterFreqOppModel(Domain domain, List<Action> history, PartyId me) {
+    public BetterFreqOppModel(Domain domain, List<Action> history, PartyId me, Progress p) {
         super(domain, history);
         this.me = me;
+        this.p = p;
         this.allIssues = this.getDomain().getIssues();
 
         this.subFreqModel = new FrequencyOpponentModel().with(domain, null);
@@ -39,7 +41,7 @@ public class BetterFreqOppModel extends AbstractOpponentModel {
         for (String issue1 : allIssues) {
             this.iChanges.put(issue1, 1.0 / allIssues.size());
         }
-        if (history != null && history.size() > 4) {
+        if (history != null && history.size() > 2) {
             this.initializeModel(history);
         }
     }
@@ -52,7 +54,8 @@ public class BetterFreqOppModel extends AbstractOpponentModel {
         Integer numPairs = Math.min(myActions.size(), oppActions.size());
         Bid lastBid = ((ActionWithBid) oppActions.get(0)).getBid();
         for (int i = 0; i < numPairs; i++) {
-            Bid firstBid = ((ActionWithBid) myActions.get(i)).getBid();
+            Action myAction = myActions.get(i);
+            Bid firstBid = ((ActionWithBid) myAction).getBid();
             Action oppAction = oppActions.get(i);
             Bid secondBid = ((ActionWithBid) oppAction).getBid();
             for (String nextIssue : this.getDomain().getIssues()) {
@@ -64,7 +67,7 @@ public class BetterFreqOppModel extends AbstractOpponentModel {
                     this.iChanges = incrementIssueTable(nextIssue, this.iChanges);
                 }
             }
-            this.subFreqModel = this.subFreqModel.with(oppAction, null);
+            this.subFreqModel = this.subFreqModel.with(oppAction, this.p);
             lastBid = secondBid;
         }
         this.updateWeights(this.iChanges, this.subFreqModel);

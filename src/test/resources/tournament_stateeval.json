@@ -1,0 +1,110 @@
+{
+	"AllPermutationsSettings": {
+		"teams": [
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.pompfan.agent.POMPFANAgent",
+						"parameters": {
+							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
+							"isLearn": false,
+							"numParticlesPerOpponent": "2",
+							"simulationTime": "200",
+							"dataCollectionTime": "0.05",
+							"config": {
+								"confComparer": "BothUtilityBidDistance",
+								"confBelief": "BayesianParticleFilterBelief",
+								"confEvaluator": "Last2BidsProductUtilityEvaluator",
+								"confState": "HistoryState",
+								"confExplorer": "TimeConcedingExplorationPolicy",
+								"confWidener": "ProgressiveWideningStrategy",
+								"confExtra": {
+									"widener": {
+										"maxWidth": "15",
+										"k_a": "2.0",
+										"a_a": "0.5",
+										"k_b": "2.0",
+										"a_b": "0.5"
+									}
+								}
+							}
+						}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.anac2021.alphabiu.AlphaBIU",
+						"parameters": {
+							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f1"
+						}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.anac2021.alienmatrixagent.MatrixAlienAgent",
+						"parameters": {
+							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f2"
+						}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.anac2021.tripleagent.TripleAgent",
+						"parameters": {
+							"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f3"
+						}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.randomparty.RandomParty",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.exampleparties.boulware.Boulware",
+						"parameters": {}
+					}
+				]
+			},
+			{
+				"Team": [
+					{
+						"partyref": "classpath:geniusweb.opponents.OppUtilTFTAgent",
+						"parameters": {}
+					}
+				]
+			}
+		],
+		"reuseTeams": false,
+		"profileslists": [
+			{
+				"ProfileList": ["file:src/test/resources/party1.json"]
+			},
+			{
+				"ProfileList": ["file:src/test/resources/party2.json"]
+			}
+		],
+		"teamsPerSession": 2,
+		"sessionsettings": {
+			"SAOPSettings": {
+				"participants": [],
+				"deadline": {
+					"deadlinetime": { "durationms": 20000 }
+				}
+			}
+		},
+		"numberTournaments": 1
+	}
+}

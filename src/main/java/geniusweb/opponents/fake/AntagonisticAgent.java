@@ -1,4 +1,4 @@
-package geniusweb.opponents;
+package geniusweb.opponents.fake;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,6 +14,7 @@ import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
 import geniusweb.inform.Agreements;
 import geniusweb.issuevalue.Bid;
+import geniusweb.opponents.AbstractOpponent;
 import geniusweb.pompfan.opponentModels.AHPFreqWeightedOpponentModel;
 import geniusweb.pompfan.opponentModels.AbstractOpponentModel;
 

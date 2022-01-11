@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
+import geniusweb.actions.PartyId;
 import geniusweb.exampleparties.timedependentparty.ExtendedUtilSpace;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
@@ -60,22 +61,16 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
 
     private Action myTurn(Bid lastReceivedBid, AbstractState<?> state) {
         Bid bid = makeBid(state.getTime());
-
-        if (bid == null) {
-            // we failed to suggest next bid.
-            return new Accept(this.getPartyId(), lastReceivedBid);
-        }
+        PartyId me = this.getPartyId();
+        UtilitySpace utilspace = this.getUtilitySpace();
         Action myAction;
-        boolean isLastReceivedIsBiggerThanOwnOffer = false;
-        if (lastReceivedBid != null) {
-            BigDecimal lastReceivedUtility = this.getUtilitySpace().getUtility(lastReceivedBid);
-            isLastReceivedIsBiggerThanOwnOffer = lastReceivedUtility.compareTo(this.getUtilitySpace().getUtility(bid)) >= 0;
-        }
-        if (isLastReceivedIsBiggerThanOwnOffer) {
-            // System.out.println(this.getName() + " generated ACCEPT");
-            myAction = new Accept(this.getPartyId(), lastReceivedBid);
+        if (bid == null || (lastReceivedBid != null
+                && utilspace.getUtility(lastReceivedBid)
+                        .compareTo(utilspace.getUtility(bid)) >= 0)) {
+            // if bid==null we failed to suggest next bid.
+            myAction = new Accept(me, lastReceivedBid);
         } else {
-            myAction = new Offer(this.getPartyId(), bid);
+            myAction = new Offer(me, bid);
         }
         return myAction;
     }
@@ -86,18 +81,14 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
      */
     private Bid makeBid(Double currTime) {
 
-        BigDecimal utilityGoal = getUtilityGoal(currTime, this.e, extendedspace.getMin(), extendedspace.getMax());
-        ImmutableList<Bid> options = extendedspace.getBids(utilityGoal);
+        BigDecimal utilityGoal = getUtilityGoal(currTime, this.e, this.extendedspace.getMin(), this.extendedspace.getMax());
+        ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
         if (options.size().compareTo(BigInteger.ONE) == -1) {
-            // if we can't find good bid, get max util bid and if no max bid take min bid as
-            // tolerance....
-            ImmutableList<Bid> alternativeOptions = extendedspace.getBids(extendedspace.getMax());
-            alternativeOptions = alternativeOptions.size().compareTo(BigInteger.ONE) < 1
-                    ? extendedspace.getBids(extendedspace.getMin())
-                    : alternativeOptions;
-            return alternativeOptions.get(0l);
+            // this should not happen!
+            options = extendedspace.getBids(this.extendedspace.getMax());
         }
-        return options.get(new Random().nextInt(options.size().intValue()));
+        return options.get(options.size().intValue()-1);
+
 
     }
 
@@ -115,10 +106,12 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
      */
     protected BigDecimal getUtilityGoal(double t, double e, BigDecimal minUtil, BigDecimal maxUtil) {
 
-        BigDecimal ft1 = BigDecimal.ONE;
-        if (e != 0)
-            ft1 = BigDecimal.valueOf(1 - Math.pow(t, 1 / e)).setScale(6, RoundingMode.HALF_UP);
-        return minUtil.add((maxUtil.subtract(minUtil).multiply(ft1))).min(maxUtil).max(minUtil);
+        double ft = 0.0;
+        if (e != 0) ft = Math.pow(t, 1 / e);
+        // we subtract epsilon to correct possibly small round-up errors
+        return new BigDecimal(minUtil.doubleValue()
+                        + (maxUtil.doubleValue() - minUtil.doubleValue()) * (1 - ft))
+                                        .min(maxUtil).max(minUtil);
     }
 
     /**

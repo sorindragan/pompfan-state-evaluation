@@ -1,12 +1,16 @@
-package geniusweb.opponents;
+package geniusweb.pompfan.opponents;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
@@ -15,93 +19,106 @@ import geniusweb.actions.Offer;
 import geniusweb.bidspace.AllBidsList;
 import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
-import geniusweb.boa.biddingstrategy.ExtendedUtilSpace;
-import geniusweb.inform.Agreements;
 import geniusweb.issuevalue.Bid;
+import geniusweb.issuevalue.Domain;
+import geniusweb.pompfan.opponentModels.AHPFreqWeightedOpponentModel;
 import geniusweb.pompfan.opponentModels.AbstractOpponentModel;
 import geniusweb.pompfan.opponentModels.BetterFreqOppModel;
+import geniusweb.pompfan.state.AbstractState;
+import geniusweb.pompfan.state.HistoryState;
+import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
+import geniusweb.profile.utilityspace.UtilitySpace;
+import geniusweb.progress.Progress;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class OppUtilTFTAgent extends AbstractOpponent {
+public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
+
+    // private static double utilGapForConcession = 0.02;
+    // private List<Bid> oppBadBids;
+    @JsonIgnore
+    BidsWithUtility bidsWithinUtil;
     private AbstractOpponentModel opponentModel = null;
     private Bid myLastbid = null;
     private BidsWithUtility oppBidsWithUtilities;
-    private boolean DEBUG_TFT = false;
+    private final boolean DEBUG = false;
+    private Progress progress;
 
-    public OppUtilTFTAgent() {
-        super();
-
+    
+    @JsonCreator
+    public OppUtilityTFTOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace uSpace, @JsonProperty("name") String name, Progress progress) {
+        super(uSpace, name);
+        this.progress = progress;
+    }
+    
+    public OppUtilityTFTOpponentPolicy(Domain domain) {
+        super(domain, "OppUtilTFT");
     }
 
     @Override
-    protected void processOpponentAction(ActionWithBid action) {
-        // TODO Auto-generated method stub
-
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
+        return this.chooseAction(lastReceivedBid, state);
     }
 
     @Override
-    protected void processAgreements(Agreements agreements) {
-        // TODO Auto-generated method stub
-
+    public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
+        return this.chooseAction(state);
     }
 
     @Override
-    protected void processNonAgreements(Agreements agreements) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    protected ActionWithBid myTurn(Object param) {
-
+    public Action chooseAction(AbstractState<?> state) {
         ActionWithBid action;
-        List<ActionWithBid> oppHistory = this.getOpponentHistory();
-        // List<ActionWithBid> ownHistory = this.getOwnHistory();
+        ArrayList<ActionWithBid> bidHistory = new ArrayList<>(((HistoryState) state).getHistory().stream()
+                .map(b -> ((ActionWithBid) b)).collect(Collectors.toList()));
+
         
-        if (oppHistory.size() > 4) {
-            this.updateOpponentModel(this.getHistory());
+        int historySize = bidHistory.size();
+
+        if (historySize > 8) {
+            this.updateOpponentModel(bidHistory, state);
         }
-        
         if (this.opponentModel == null) {
-            Bid bid = this.getBidsWithUtility().getExtremeBid(true);
-            action = new Offer(this.getMe(), bid);
+            Bid bid = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace()).getExtremeBid(true);
+            action = new Offer(this.getPartyId(), bid);
             myLastbid = bid;
             return action;
         }
 
         BigDecimal difference = BigDecimal.ZERO;
-        int historySize = oppHistory.size();
-        Bid lastLastOpponentBid = oppHistory.get(historySize - 2).getBid();
-        Bid justLastOpponentBid = oppHistory.get(historySize - 1).getBid();
+        Bid lastLastOpponentBid = bidHistory.get(historySize - 3).getBid();
+        Bid justLastOpponentBid = bidHistory.get(historySize - 1).getBid();
+        
         difference = this.getUtilitySpace().getUtility(lastLastOpponentBid)
                 .subtract(this.getUtilitySpace().getUtility(justLastOpponentBid));
         boolean isConcession = difference.doubleValue() > 0 ? true : false;
         
+
         BigDecimal opponentUtilityOfmyLastOwnBid = this.opponentModel.getUtility(myLastbid);
+
         BigDecimal utilityGoal = isConcession
                 ? opponentUtilityOfmyLastOwnBid.add(difference.abs())
                         .min(BigDecimal.ONE)
                 : opponentUtilityOfmyLastOwnBid.subtract(difference.abs())
                         .max(new BigDecimal("0.2"));
         
-        Bid selectedBid = computeNextBid(utilityGoal);                           
-        double time = this.getProgress().get(System.currentTimeMillis());
+        Bid selectedBid = computeNextBid(utilityGoal);
+        double time = state.getTime();
         
-        if (DEBUG_TFT) {
-            System.out.println("============================");
+        if (DEBUG) {
+            System.out.println("ppppppppppppppppppppppppppp");
             System.out.println(time);
             System.out.println(selectedBid);
             System.out.println("TFT-Last-Utility-For-Opp: " + this.opponentModel.getUtility(myLastbid));
             System.out.println("TFT-Difference: " + difference);
             System.out.println("TFT-Utility-Goal-For-Opp: " + utilityGoal);
         }
-        myLastbid = selectedBid;
         
+        myLastbid = selectedBid;
+            
         return this.getUtilitySpace().isPreferredOrEqual(justLastOpponentBid, selectedBid)
-                 && time > 0.8
-                ? new Accept(this.getMe(), justLastOpponentBid)
-                : new Offer(this.getMe(), selectedBid);
+                && time > 0.8
+                ? new Accept(this.getPartyId(), justLastOpponentBid)
+                : new Offer(this.getPartyId(), selectedBid);              
     }
 
     private Bid computeNextBid(BigDecimal utilityGoal) {
@@ -111,29 +128,22 @@ public class OppUtilTFTAgent extends AbstractOpponent {
             options = this.oppBidsWithUtilities.getBids(
                     new Interval(utilityGoal.subtract(new BigDecimal("0.4")), utilityGoal));
         }
-        // System.out.println("TFTOpp");
-        // System.out.println(utilityGoal.doubleValue());
-        // System.out.println(options.size());
+        
         try {
+            // this is already crazy
             return options.get(options.size().intValue() - 1);
         } catch (Exception e) {
             options = this.oppBidsWithUtilities.getBids(
-                    new Interval(utilityGoal.subtract(new BigDecimal("0.5")).max(BigDecimal.ZERO)
-                    , utilityGoal.add(new BigDecimal("0.5")).min(BigDecimal.ONE)));
+                    new Interval(utilityGoal.subtract(new BigDecimal("0.5")).max(BigDecimal.ZERO),
+                            utilityGoal.add(new BigDecimal("0.5")).min(BigDecimal.ONE)));
             return options.get(options.size().intValue() - 1);
         }
     }
 
-    private void updateOpponentModel(List<ActionWithBid> history) {
-        // this.getReporter().log(Level.INFO, this.getMe().toString() + ": Update OppModel!!!");
+    private void updateOpponentModel(List<ActionWithBid> history, AbstractState<?> state) {
         this.opponentModel = new BetterFreqOppModel(this.getUtilitySpace().getDomain(),
-                history.stream().map(a -> (Action) a).collect(Collectors.toList()), this.getMe(), this.getProgress());
+                history.stream().map(a -> (Action) a).collect(Collectors.toList()), this.getPartyId(), this.progress);
         this.oppBidsWithUtilities = new BidsWithUtility(this.opponentModel);
-    }
-
-    @Override
-    public void terminate() {
-        super.terminate();
     }
 
 }

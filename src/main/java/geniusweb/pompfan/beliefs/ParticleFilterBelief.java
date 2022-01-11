@@ -22,7 +22,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class ParticleFilterBelief extends AbstractBelief {
 
-    public static final int NUMBER_SAMPLES = 20; // Needs to be tuned
+    public static final int NUMBER_SAMPLES = 10; // Needs to be tuned
     protected Double EPSILON = 1.0; // Also needs tuning
     private AbstractPolicy mostProbablePolicy = null;
     protected Random r = new Random();
@@ -63,14 +63,15 @@ public class ParticleFilterBelief extends AbstractBelief {
                 // Monte Carlo Sampling
                 // This is in a loop in which we try multiple actions to get an
                 // understanding of whether the opponent could generate the real obs.
-                // System.out.println(state.getTime());
                 AbstractState<?> newState = state;
+                
                 // the noisy time makes nonreactive agents bid diffrently
-                Double noisyTime = state.getTime() + (r.nextGaussian() * 0.05);
-                newState = state.setTime(Math.min(1.0, Math.max(0.0, noisyTime)));
+                // Double noisyTime = state.getTime() + (r.nextGaussian() * 0.05);
+                // newState = state.setTime(Math.min(1.0, Math.max(0.0, noisyTime)));
+                
                 // no noise
-                // Double noisyTime = state.getTime();
-                // newState = state.setTime(noisyTime);
+                Double noNoisyTime = state.getTime();
+                newState = state.setTime(noNoisyTime);
                 
                 Bid sampledBid = this.sample(lastAgentAction, lastOppAction, newState, abstractPolicy);
                 candidateObservations.add(sampledBid);

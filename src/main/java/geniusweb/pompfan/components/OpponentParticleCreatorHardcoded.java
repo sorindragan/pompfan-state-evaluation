@@ -17,7 +17,7 @@ import geniusweb.pompfan.opponents.BoulwareOpponentPolicy;
 import geniusweb.pompfan.opponents.ConcederOpponentPolicy;
 import geniusweb.pompfan.opponents.HardLinerOpponentPolicy;
 import geniusweb.pompfan.opponents.LinearOpponentPolicy;
-import geniusweb.pompfan.opponents.NiceTFTOpponentPolicy;
+import geniusweb.pompfan.opponents.OppUtilityTFTOpponentPolicy;
 import geniusweb.pompfan.opponents.OwnUtilityTFTOpponentPolicy;
 import geniusweb.pompfan.opponents.RandomOpponentPolicy;
 import geniusweb.pompfan.opponents.SelfishOpponentPolicy;
@@ -25,40 +25,42 @@ import geniusweb.pompfan.opponents.TimeDependentOpponentPolicy;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.profileconnection.ProfileConnectionFactory;
 import geniusweb.profileconnection.ProfileInterface;
+import geniusweb.progress.Progress;
 import geniusweb.references.PartyWithProfile;
 import tudelft.utilities.logging.ReportToLogger;
 
 public abstract class OpponentParticleCreatorHardcoded {
 
-    public static List<AbstractPolicy> generateOpponentParticles(UtilitySpace uSpace, Long numParticlesPerOpponent) throws URISyntaxException, IOException, DeploymentException {
+    public static List<AbstractPolicy> generateOpponentParticles(UtilitySpace uSpace, Long numParticlesPerOpponent, Progress progress) throws URISyntaxException, IOException, DeploymentException {
         Domain domain = uSpace.getDomain();
         AllBidsList bidspace = new AllBidsList(domain);
         List<AbstractPolicy> listOfOpponents = new ArrayList<AbstractPolicy>();
 
         // hardcoded profile/utility
         ReportToLogger reporter = new ReportToLogger("HardcodedProfile");
-        // String profileString = "file:src/test/resources/party4.json";
-        String profileString = "file:src/test/resources/flightbooking2.json";
+        String profileString = "file:src/test/resources/party2.json";
+        // String profileString = "file:src/test/resources/flightbooking2.json";
         URI profile = new URI(profileString);
         ProfileInterface profileint = ProfileConnectionFactory.create(
                 profile, reporter);
         UtilitySpace utilitySpace = ((UtilitySpace) profileint.getProfile());
         
+        // AbstractPolicy correctOpponent = new HardLinerOpponentPolicy(utilitySpace, "ExactHardliner", 0.0);
         // AbstractPolicy correctOpponent = new BoulwareOpponentPolicy(utilitySpace, "ExactOpponentBoulware", 0.2);
-        // AbstractPolicy correctOpponent = new ConcederOpponentPolicy(utilitySpace, "ExactOpponentConceder", 2.0);
         // AbstractPolicy correctOpponent = new LinearOpponentPolicy(utilitySpace, "ExactOpponentLinear", 1.0);
-        // AbstractPolicy correctOpponent = new NiceTFTOpponentPolicy(utilitySpace, "ExactOpponentOppTFT");
-
-        // listOfOpponents.add(correctOpponent);
+        // AbstractPolicy correctOpponent = new ConcederOpponentPolicy(utilitySpace, "ExactOpponentConceder", 2.0);
+        // AbstractPolicy correctOpponent = new OppUtilityTFTOpponentPolicy(utilitySpace, "ExactOpponentOppTFT", progress);
+        AbstractPolicy correctOpponent = new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOpponentOwnTFT");
+        listOfOpponents.add(correctOpponent);
         // does knowing the opponent matter?
-        for (int cnt = 0; cnt < 5*numParticlesPerOpponent; cnt++) {
-            // listOfOpponents.add(new NiceTFTOpponentPolicy(utilitySpace, "OppTFT"));
+        for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
+            // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(utilitySpace, "OppTFT"));
             // listOfOpponents.add(new BoulwareOpponentPolicy(utilitySpace, "Boulware", 0.2));
             
-            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
-            listOfOpponents.add(new NiceTFTOpponentPolicy(domain));
+            // listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
+            // listOfOpponents.add(new NiceTFTOpponentPolicy(domain));
             listOfOpponents.add(new ConcederOpponentPolicy(domain));
-            // listOfOpponents.add(new LinearOpponentPolicy(domain));
+            listOfOpponents.add(new LinearOpponentPolicy(domain));
         }
 
 

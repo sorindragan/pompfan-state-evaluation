@@ -1,4 +1,4 @@
-package geniusweb.opponents;
+package geniusweb.opponents.fake;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -15,6 +15,7 @@ import geniusweb.inform.Agreements;
 import geniusweb.inform.Inform;
 import geniusweb.inform.Settings;
 import geniusweb.issuevalue.Bid;
+import geniusweb.opponents.AbstractOpponent;
 import tudelft.utilities.immutablelist.ImmutableList;
 
 public class SelfishAgent extends AbstractOpponent{

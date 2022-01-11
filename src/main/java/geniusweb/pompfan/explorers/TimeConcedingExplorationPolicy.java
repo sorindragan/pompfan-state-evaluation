@@ -30,7 +30,7 @@ public class TimeConcedingExplorationPolicy extends AbstractOwnExplorationPolicy
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
         Action action;
         Bid bid;
-        // progressively open the bounds of explored bids
+        // progressively open the bounds of explored bids; working fine
         double lowerBound = extremeBidUtil - state.getTime();
        
         ImmutableList<Bid> options = this.getBidutils()
@@ -47,10 +47,9 @@ public class TimeConcedingExplorationPolicy extends AbstractOwnExplorationPolicy
 
         BigDecimal utilToBeOffered = this.getUtilitySpace().getUtility(bid);
         BigDecimal utilFromOpp = this.getUtilitySpace().getUtility(lastReceivedBid);
-        if (utilToBeOffered.doubleValue() <= utilFromOpp.doubleValue()) {
+        if (utilToBeOffered.doubleValue() < utilFromOpp.doubleValue()) {
             action = new Accept(this.getPartyId(), lastReceivedBid);
         }
-
         return action;
     }
 
