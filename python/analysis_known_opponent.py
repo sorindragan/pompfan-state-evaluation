@@ -2,7 +2,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+import seaborn as sns
+sns.set_style("whitegrid")
+sns.set_context(None)
+sns.set_theme()
 # %%
 known_agent_name = "SimulatedExactConceder"
 file_name = f"real{known_agent_name.split('Exact')[1].lower()}"
@@ -29,7 +32,7 @@ new_d["opponent_type"] = new_d.index
 weight_dist = new_d[new_d["opponent_type"] == known_agent_name]
 weight_dist = dict(zip(list(weight_dist), list(weight_dist.values)[0][:-1]))
 # %%
-fig = plt.figure(figsize=(10, 5))
+fig = plt.figure(figsize=(12, 5))
 
 plt.bar([name.split("Bid")[0] for name in weight_dist.keys()], list(weight_dist.values()), color='darkblue',
         width=0.5)

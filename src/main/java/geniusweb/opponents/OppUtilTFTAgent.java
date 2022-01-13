@@ -59,7 +59,7 @@ public class OppUtilTFTAgent extends AbstractOpponent {
         List<ActionWithBid> oppHistory = this.getOpponentHistory();
         // List<ActionWithBid> ownHistory = this.getOwnHistory();
         
-        if (oppHistory.size() > 4) {
+        if (oppHistory.size() > 2) {
             this.updateOpponentModel(this.getHistory());
         }
         

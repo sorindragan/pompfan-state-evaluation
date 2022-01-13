@@ -21,6 +21,7 @@ import geniusweb.actions.PartyId;
 import geniusweb.bidspace.AllBidsList;
 import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
+import geniusweb.exampleparties.anac2021.tripleagent.BidHistory;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.opponentModels.AHPFreqWeightedOpponentModel;
@@ -36,16 +37,15 @@ import tudelft.utilities.immutablelist.ImmutableList;
 
 public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
 
-    // private static double utilGapForConcession = 0.02;
-    // private List<Bid> oppBadBids;
     @JsonIgnore
     BidsWithUtility bidsWithinUtil;
-    private AbstractOpponentModel opponentModel = null;
+    private AbstractOpponentModel opponentModelBelief = null;
+    private AbstractOpponentModel opponentModelParticle = null;
     private Bid myLastbid = null;
     private BidsWithUtility oppBidsWithUtilities;
     private final boolean DEBUG = false;
     private Progress progress;
-
+    private ArrayList<ActionWithBid> bidHistory = null;
     
     @JsonCreator
     public OppUtilityTFTOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace uSpace, @JsonProperty("name") String name, Progress progress) {
@@ -59,24 +59,31 @@ public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
 
     }
     
+    // used in the belief update
     @Override
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, Bid second2lastReceivedBid,
             AbstractState<?> state) {
         
         ActionWithBid action;
-        ArrayList<ActionWithBid> bidHistory = new ArrayList<ActionWithBid>(Arrays.asList(
-                new Offer(new PartyId("Opp"), second2lastReceivedBid),
-                new Offer(this.getPartyId(), lastOwnBid),
-                new Offer(new PartyId("Opp"), lastReceivedBid)
-                ));
+        if (bidHistory == null) {
+            bidHistory = new ArrayList<ActionWithBid>(Arrays.asList(
+                    new Offer(new PartyId("Opp"), second2lastReceivedBid),
+                    new Offer(this.getPartyId(), lastOwnBid),
+                    new Offer(new PartyId("Opp"), lastReceivedBid)
+                    ));
+        } else {
+            bidHistory.add(new Offer(this.getPartyId(), lastOwnBid));
+            bidHistory.add( new Offer(new PartyId("Opp"), lastReceivedBid));
+        }
         
         myLastbid = lastOwnBid;
         int historySize = bidHistory.size();
 
-        if (historySize > 3) {
-            this.updateOpponentModel(bidHistory, state);
+        if (historySize > 4) {
+            this.updateBeliefOpponentModel(bidHistory, state);
         }
-        if (this.opponentModel == null) {
+
+        if (this.opponentModelBelief == null) {
             Bid bid = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace()).getExtremeBid(true);
             action = new Offer(this.getPartyId(), bid);
             return action;
@@ -90,7 +97,7 @@ public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
                 .subtract(this.getUtilitySpace().getUtility(justLastOpponentBid));
         boolean isConcession = difference.doubleValue() > 0 ? true : false;
 
-        BigDecimal opponentUtilityOfmyLastOwnBid = this.opponentModel.getUtility(myLastbid);
+        BigDecimal opponentUtilityOfmyLastOwnBid = this.opponentModelBelief.getUtility(myLastbid);
 
         BigDecimal utilityGoal = isConcession
                 ? opponentUtilityOfmyLastOwnBid.add(difference.abs())
@@ -105,7 +112,7 @@ public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
             System.out.println("ppppppppppppppppppppppppppp");
             System.out.println(time);
             System.out.println(selectedBid);
-            System.out.println("TFT-Last-Utility-For-Opp: " + this.opponentModel.getUtility(myLastbid));
+            System.out.println("TFT-Last-Utility-For-Opp: " + this.opponentModelBelief.getUtility(myLastbid));
             System.out.println("TFT-Difference: " + difference);
             System.out.println("TFT-Utility-Goal-For-Opp: " + utilityGoal);
         }
@@ -117,9 +124,59 @@ public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
         
     }
 
+    // used in constructing the tree
     @Override
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
-        return this.chooseAction(lastReceivedBid, state);
+        ActionWithBid action;
+        ArrayList<ActionWithBid> simulatedHistory = new ArrayList<>(((HistoryState) state).getHistory().stream()
+                .map(b -> ((ActionWithBid) b)).collect(Collectors.toList()));
+
+        int historySize = simulatedHistory.size();
+
+        if (historySize > 4) {
+            this.updateParticleOpponentModel(simulatedHistory, state);
+        }
+        
+        if (this.opponentModelParticle == null) {
+            Bid bid = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace()).getExtremeBid(true);
+            action = new Offer(this.getPartyId(), bid);
+            myLastbid = bid;
+            return action;
+        }
+
+        BigDecimal difference = BigDecimal.ZERO;
+        Bid lastLastOpponentBid = simulatedHistory.get(historySize - 3).getBid();
+        Bid justLastOpponentBid = simulatedHistory.get(historySize - 1).getBid();
+
+        difference = this.getUtilitySpace().getUtility(lastLastOpponentBid)
+                .subtract(this.getUtilitySpace().getUtility(justLastOpponentBid));
+        boolean isConcession = difference.doubleValue() > 0 ? true : false;
+
+        BigDecimal opponentUtilityOfmyLastOwnBid = this.opponentModelParticle.getUtility(myLastbid);
+
+        BigDecimal utilityGoal = isConcession
+                ? opponentUtilityOfmyLastOwnBid.add(difference.abs())
+                        .min(BigDecimal.ONE)
+                : opponentUtilityOfmyLastOwnBid.subtract(difference.abs())
+                        .max(new BigDecimal("0.2"));
+
+        Bid selectedBid = computeNextBid(utilityGoal);
+        double time = state.getTime();
+
+        if (DEBUG) {
+            System.out.println("ppppppppppppppppppppppppppp");
+            System.out.println(time);
+            System.out.println(selectedBid);
+            System.out.println("TFT-Last-Utility-For-Opp: " + this.opponentModelParticle.getUtility(myLastbid));
+            System.out.println("TFT-Difference: " + difference);
+            System.out.println("TFT-Utility-Goal-For-Opp: " + utilityGoal);
+        }
+        myLastbid = selectedBid;
+
+        return this.getUtilitySpace().isPreferredOrEqual(justLastOpponentBid, selectedBid)
+                && time > 0.8
+                        ? new Accept(this.getPartyId(), justLastOpponentBid)
+                        : new Offer(this.getPartyId(), selectedBid);
     }
 
     @Override
@@ -145,7 +202,7 @@ public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
             // this is already crazy
             return options.get(options.size().intValue() - 1);
         } catch (Exception e) {
-            System.out.println("PARTICLE: OM Faild to properly capture the utility space. " + utilityGoal.doubleValue());
+            // System.out.println("PARTICLE: OM Faild to properly capture the utility space. " + utilityGoal.doubleValue());
             options = this.oppBidsWithUtilities.getBids(
                     new Interval(utilityGoal.subtract(new BigDecimal("0.5")).max(BigDecimal.ZERO),
                             utilityGoal.add(new BigDecimal("0.5")).min(BigDecimal.ONE)));
@@ -153,10 +210,16 @@ public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
         }
     }
 
-    private void updateOpponentModel(List<ActionWithBid> history, AbstractState<?> state) {
-        this.opponentModel = new BetterFreqOppModel(this.getUtilitySpace().getDomain(),
+    private void updateBeliefOpponentModel(List<ActionWithBid> history, AbstractState<?> state) {
+        this.opponentModelBelief = new BetterFreqOppModel(this.getUtilitySpace().getDomain(),
                 history.stream().map(a -> (Action) a).collect(Collectors.toList()), this.getPartyId(), this.progress);
-        this.oppBidsWithUtilities = new BidsWithUtility(this.opponentModel);
+        this.oppBidsWithUtilities = new BidsWithUtility(this.opponentModelBelief);
+    }
+
+    private void updateParticleOpponentModel(List<ActionWithBid> history, AbstractState<?> state) {
+        this.opponentModelParticle = new BetterFreqOppModel(this.getUtilitySpace().getDomain(),
+                history.stream().map(a -> (Action) a).collect(Collectors.toList()), this.getPartyId(), this.progress);
+        this.oppBidsWithUtilities = new BidsWithUtility(this.opponentModelParticle);
     }
 
 }

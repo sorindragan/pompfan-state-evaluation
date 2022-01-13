@@ -31,21 +31,16 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
     @Override
     public void widen(Progress simulatedProgress, Long shiftSimTime, Node currRoot) throws StateRepresentationException {
         AbstractPolicy currOpp = currRoot.getState().getOpponent();
-        while (currRoot.getChildren().size() == this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {
+        // apply widening only for nodes containing offers
+        while (currRoot.getChildren().stream().filter(node -> !node.getIsTerminal()).count()
+                == this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {
             // Going down the tree - Action Node Level
-            ArrayList<Node> ccc = currRoot.getChildren();
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
-            try {
-                currRoot.getState().setOpponent(currOpp);
-            } catch (Exception e) {
-                System.out.println("WTF");
-                System.out.println(ccc);
-                System.out.println(currRoot);
-                System.out.println(currRoot.getState());
-                System.out.println(currOpp);
-            }
+            currRoot.getState().setOpponent(currOpp);
             
-            if (currRoot.getChildren().size() < this.calcProgressiveMaxWidth(currRoot, this.k_b, this.a_b)) {
+            
+            if (currRoot.getChildren().stream().filter(node -> !node.getIsTerminal())
+                    .count() < this.calcProgressiveMaxWidth(currRoot, this.k_b, this.a_b)) {
                 // Widening the Belief level
                 Double simulatedTimeOfObsReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
 
@@ -96,7 +91,8 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
             if (currRoot == null) return;
             
         }
-        if (currRoot.getChildren().size() < this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {
+        if (currRoot.getChildren().stream().filter(node -> !node.getIsTerminal())
+                .count() < this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {
             // Widening the Action level
             Double simulatedTimeOfActReceival = simulatedProgress.get(System.currentTimeMillis() + shiftSimTime);
             BeliefNode currBeliefNode = (BeliefNode) currRoot;

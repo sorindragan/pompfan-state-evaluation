@@ -119,9 +119,9 @@ df.reset_index(inplace=True)
 df.rename(columns={'index': 'particle'}, inplace=True)
 
 print(df.loc[:, ["distance", "particle", "weight"]])
-append_file_name = "realowntft"
-df.loc[:, ["distance", "particle", "weight"]].to_csv(
-    f"../eval/{append_file_name}.csv", mode="a", index=False, header=False)
+# append_file_name = "realowntft"
+# df.loc[:, ["distance", "particle", "weight"]].to_csv(
+#     f"../eval/{append_file_name}.csv", mode="a", index=False, header=False)
 
 
 # %%

@@ -51,6 +51,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
     }
     
     // the ractive agents should have this method implemented
+    // used in the particle filter
     @Override
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, Bid second2lastReceivedBid,
             AbstractState<?> state) {
@@ -98,10 +99,51 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
                         : new Offer(this.getPartyId(), selectedBid);
     }
 
-
+    // used in constructing the tree
     @Override
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
-            return this.chooseAction(lastReceivedBid, state);
+            ActionWithBid action;
+        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
+        ArrayList<Action> simulatedHistory = ((HistoryState) state).getHistory();
+
+        if (simulatedHistory.size() < 3) {
+            // not enough information known
+            Bid bid = this.maxBid;
+            myLastbid = bid;
+            action = new Offer(this.getPartyId(), bid);
+            return action;
+        }
+
+        BigDecimal difference = BigDecimal.ZERO;
+        Bid lastLastOpponentBid = ((ActionWithBid) simulatedHistory.get(simulatedHistory.size()-3)).getBid();
+        Bid justLastOpponentBid = ((ActionWithBid) simulatedHistory.get(simulatedHistory.size()-1)).getBid();
+        difference = this.getUtilitySpace().getUtility(lastLastOpponentBid)
+                .subtract(this.getUtilitySpace().getUtility(justLastOpponentBid));
+        boolean isConcession = difference.doubleValue() > 0 ? true : false;
+
+        BigDecimal utilityGoal = isConcession
+                ? this.getUtilitySpace().getUtility(myLastbid).subtract(difference.abs())
+                        .max((this.extendedspace.getMax().add(this.extendedspace.getMin()))
+                                .divide(new BigDecimal("2.0")))
+                : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
+                        .min(this.extendedspace.getMax());
+
+        Bid selectedBid = computeNextBid(utilityGoal);
+        double time = state.getTime();
+
+        if (DEBUG) {
+            System.out.println("============================");
+            System.out.println(time);
+            System.out.println(selectedBid);
+            System.out.println("TFT-Last-Utility: " + this.getUtilitySpace().getUtility(myLastbid));
+            System.out.println("TFT-Difference: " + difference);
+            System.out.println("TFT-Utility-Goal: " + utilityGoal);
+        }
+        myLastbid = selectedBid;
+        return this.getUtilitySpace().isPreferredOrEqual(justLastOpponentBid, selectedBid)
+                && time > 0.8
+                        ? new Accept(this.getPartyId(), justLastOpponentBid)
+                        : new Offer(this.getPartyId(), selectedBid);
     }
 
     @Override

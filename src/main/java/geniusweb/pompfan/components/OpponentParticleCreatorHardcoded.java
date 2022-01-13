@@ -50,42 +50,43 @@ public abstract class OpponentParticleCreatorHardcoded {
         // AbstractPolicy correctOpponent = new LinearOpponentPolicy(utilitySpace, "ExactLinear", 1.0);
         // AbstractPolicy correctOpponent = new ConcederOpponentPolicy(utilitySpace, "ExactConceder", 2.0);
         // AbstractPolicy correctOpponent = new OppUtilityTFTOpponentPolicy(utilitySpace, "ExactOppTFT", progress);
-        AbstractPolicy correctOpponent = new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOwnTFT");
-        listOfOpponents.add(correctOpponent);
+        // AbstractPolicy correctOpponent = new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOwnTFT");
+        // listOfOpponents.add(correctOpponent);
         // can we find the opponent?
-        for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
-            listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
-            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
+        // for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
+        //     listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
+        //     listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
             
-            listOfOpponents.add(new HardLinerOpponentPolicy(domain));
-            listOfOpponents.add(new BoulwareOpponentPolicy(domain));
-            listOfOpponents.add(new LinearOpponentPolicy(domain));
-            listOfOpponents.add(new ConcederOpponentPolicy(domain));
-        }
+        //     listOfOpponents.add(new HardLinerOpponentPolicy(domain));
+        //     listOfOpponents.add(new BoulwareOpponentPolicy(domain));
+        //     listOfOpponents.add(new LinearOpponentPolicy(domain));
+        //     listOfOpponents.add(new ConcederOpponentPolicy(domain));
+        // }
 
 
         // same profile; get strategy?
         // for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
         //     listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(utilitySpace, "OwnTFT"));
-        //     listOfOpponents.add(new NiceTFTOpponentPolicy(utilitySpace, "OppTFT"));
+        //     listOfOpponents.add(new OppUtilityTFTOpponentPolicy(utilitySpace, "OppTFT", progress));
+            
+        //     listOfOpponents.add(new HardLinerOpponentPolicy(utilitySpace, "Hardliner", 0.0));
         //     listOfOpponents.add(new BoulwareOpponentPolicy(utilitySpace, "Boulware", 0.2));
         //     listOfOpponents.add(new LinearOpponentPolicy(utilitySpace, "Linear", 1));
         //     listOfOpponents.add(new ConcederOpponentPolicy(utilitySpace, "Conceder", 2.0));
         //     listOfOpponents.add(new RandomOpponentPolicy(utilitySpace, "Random"));
-
         // }
 
         // same strategy; get profile?
-        // AbstractPolicy correctOpponent = new OwnUtilityTFTOpponentPolicy(utilitySpace,
-        //                                         "ExactOpponentOwnTFT");
-        // listOfOpponents.add(correctOpponent);
-        // for (int cnt = 0; cnt < numParticlesPerOpponent*5; cnt++) {
+        // AbstractPolicy correctOpponent = new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOpponentOwnTFT");
+        AbstractPolicy correctOpponent = new LinearOpponentPolicy(utilitySpace, "ExactLinear", 1.0);
+        listOfOpponents.add(correctOpponent);
+        for (int cnt = 0; cnt < numParticlesPerOpponent*5; cnt++) {
         // listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
-        // listOfOpponents.add(new NiceTFTOpponentPolicy(domain));
+        // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
         // listOfOpponents.add(new BoulwareOpponentPolicy(domain));
-        // listOfOpponents.add(new LinearOpponentPolicy(domain));
+        listOfOpponents.add(new LinearOpponentPolicy(domain));
         // listOfOpponents.add(new ConcederOpponentPolicy(domain));
-        // }
+        }
 
         // for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
         //     listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
