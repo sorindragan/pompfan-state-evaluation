@@ -14,7 +14,7 @@
 									"simulationTime": "200",
 									"dataCollectionTime": "0.05",
 									"config": {
-										"confComparer": "BothUtilityBidDistance",
+										"confComparer": "IssueValueCountBidDistance",
 										"confBelief": "BayesianParticleFilterBelief",
 										"confEvaluator": "Last2BidsProductUtilityEvaluator",
 										"confState": "HistoryState",

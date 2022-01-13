@@ -116,7 +116,7 @@ public abstract class AbstractBelief {
     }
 
     public abstract AbstractBelief updateBeliefs(Offer newOppObservation, Offer lastRealAgentAction,
-            Offer lastRealOppAction, AbstractState<?> state);
+            Offer lastRealOppAction, Offer second2lastRealAgentAction, AbstractState<?> state);
 
     @Override
     public String toString() {

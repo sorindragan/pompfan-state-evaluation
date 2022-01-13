@@ -24,7 +24,7 @@ public class BayesianCountFilterBelief extends ParticleFilterWithAcceptBelief {
     }
 
     @Override
-    public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAgentAction, Offer lastOppAction,
+    public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAgentAction, Offer lastOppAction, Offer second2LastAgentAction,
             AbstractState<?> state) {
         Map<AbstractPolicy, Double> allJointProbabilities = this.getOpponents().parallelStream()
                 .collect(Collectors.toMap(oPolicy -> oPolicy, oPolicy -> this.jointProbability(realObservation,
@@ -51,7 +51,8 @@ public class BayesianCountFilterBelief extends ParticleFilterWithAcceptBelief {
             AbstractState<?> newState = state;
             Double noisyTime = state.getTime() + (r.nextGaussian() * 0.1);
             newState = state.setTime(Math.min(1.0, Math.max(0.0, noisyTime)));
-            Bid sampledBid = this.sample(lastAgentAction, lastOppAction, newState, oPolicy);
+            // here null must actually be the second2LastAgentAction
+            Bid sampledBid = this.sample(lastAgentAction, lastOppAction, null, newState, oPolicy);
             numHits = this.getDistance().computeDistance(sampledBid, realObservation.getBid()) < 0.01 ? ++numHits : numHits;
         }
         return numHits / BayesianCountFilterBelief.NUMBER_SAMPLES;

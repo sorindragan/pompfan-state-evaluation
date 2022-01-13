@@ -4,14 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # %%
-file_name = "realtft"
-known_agent_name = "SimulatedExactOpponentOppTFT"
+known_agent_name = "SimulatedExactConceder"
+file_name = f"real{known_agent_name.split('Exact')[1].lower()}"
+agent = known_agent_name.split("Exact")[1]
 df = pd.read_csv(f"../eval/{file_name}.csv")
 df['particle'] = df['particle'].str.split("_").str[:2].str.join("")
 df
 
 # %%
-
 distances = set(list(df["distance"]))
 new_d = pd.DataFrame()
 for i, d in enumerate(distances):
@@ -36,71 +36,71 @@ plt.bar([name.split("Bid")[0] for name in weight_dist.keys()], list(weight_dist.
 
 plt.xlabel("Used Distance")
 plt.ylabel("Aggregated Probability Mass of Real Opponent")
-plt.title("Mean probability mass received by the particle containing the real NTFT opponent")
+plt.title(f"Mean probability mass received by the particle containing the real {agent} opponent")
 plt.show()
 
 # %%
 # df.loc[df["distance"].isin(
 #     ["IssueValueCountBidDistance", "BothUtilityBidDistance"])]
 
-probabilities1 = [df[df["distance"] == "JaccardBidDistance"].iloc[i-11:i, :]
-     for i in range(11, 66, 11)]
-probabilities1w = [d["weight"] for d in probabilities1]
-aggregatedprobs1 = np.array([0.0]* 11)
-for d in probabilities1w:
-    d = np.array(d)
-    aggregatedprobs1 += d
+distances = ["JaccardBidDistance", "BothUtilityBidDistance"]
 
-aggregatedprobs1 = aggregatedprobs1 / aggregatedprobs1.sum()
-names1 = [name.split("lated")[1] for name in probabilities1[0]["particle"]]
-dict1 = dict(zip(names1, aggregatedprobs1))
-print(dict1)
+particles = [
+    'SimulatedBoulware',
+    'SimulatedConceder',
+    f'{known_agent_name}',
+    'SimulatedHardLiner',
+    'SimulatedLinear',
+    'SimulatedOppUtilTFT',
+    'SimulatedOwnUtilTFT']
 
-probabilities2 = [df[df["distance"] == "BothUtilityBidDistance"].iloc[i-11:i, :]
-                  for i in range(11, 66, 11)]
-probabilities2w = [d["weight"] for d in probabilities2]
-aggregatedprobs2 = np.array([0.0] * 11)
-for d in probabilities2w:
-    d = np.array(d)
-    aggregatedprobs2 += d
+probabilities1 = np.array([df.loc[(df["distance"] == distances[0]) & (
+    df["particle"] == particle)].sum()["weight"] for particle in particles])
 
-aggregatedprobs2 = aggregatedprobs2 / aggregatedprobs2.sum()
-names2 = [name.split("lated")[1] for name in probabilities2[0]["particle"]]
-dict2 = dict(zip(names2, aggregatedprobs2))
-print(dict2)
+aggregatedprobs1 = probabilities1 / probabilities1.sum()
+
+dict1 = dict(zip(particles, aggregatedprobs1))
+# dict1
+probabilities2 = np.array([df.loc[(df["distance"] == distances[1]) & (
+    df["particle"] == particle)].sum()["weight"] for particle in particles])
+
+aggregatedprobs2 = probabilities2 / probabilities2.sum()
+
+dict2 = dict(zip(particles, aggregatedprobs2))
 
 # %%
-fig = plt.figure(figsize=(20, 5))
+fig = plt.figure(figsize=(19, 5))
 width = 0.4
-ind = np.arange(11)
+ind = np.arange(7)
 ax = fig.add_subplot(111)
-tickers = names2
+tickers = particles
 b1 = ax.bar(ind, [dict1[k] for k in tickers], width,
-       color='blue', label='-Ymin', align='edge')
+       color='darkblue', label='-Ymin', align='edge')
 b2 = ax.bar(ind+width, [dict2[k] for k in tickers],
-       width, color='gray', label='Ymax', align='edge')
+       width, color='lightgray', label='Ymax', align='edge')
 
 ax.set_ylabel('Probability')
 ax.set_xlabel('Particle Type')
 ax.set_title('Probability mass assigned to each particle; A comparison')
 ax.set_xticks(ind + width)
-ax.set_xticklabels(tickers)
+ax.set_xticklabels([name.split("imulated")[1]+"Particle" for name in particles])
 
-ax.legend((b1[0], b2[0]), ('JaccardBidDistance', 'BothUtilityBidDistance'))
+ax.legend((b1[0], b2[0]), (distances[0], distances[1]))
 plt.show()
 
 
 # %%
-dfr = pd.read_csv(f"../eval/tmpevolution.csv", header=0)
-bu = list(dfr.iloc[0,:])
-ivc = list(dfr.iloc[1,:])
-plt.plot(list(range(len(bu))), bu, label="BothUtilityDistance", color="darkgreen")
-plt.plot(list(range(len(bu))), ivc, label="IssueValueCountDistance", color="orchid")
-plt.legend()
-# plt.title("Certanty the model has that the particle containing the real NTFT opponent is indeed the real one")
-plt.title("Evolution of the probability assigned to the particle \n containing the real Boulware opponent \n using two different distance metrics")
-plt.xlabel("Belief Update Step")
-plt.ylabel("Probability")
-plt.show()
+# particle evolution
+# dfr = pd.read_csv(f"../eval/tmpevolution.csv", header=0)
+# bu = list(dfr.iloc[0,:])
+# ivc = list(dfr.iloc[1,:])
+# plt.plot(list(range(len(bu))), bu, label="BothUtilityDistance", color="darkgreen")
+# plt.plot(list(range(len(bu))), ivc, label="IssueValueCountDistance", color="orchid")
+# plt.legend()
+# # plt.title("Certanty the model has that the particle containing the real NTFT opponent is indeed the real one")
+# plt.title("Evolution of the probability assigned to the particle \n containing the real Boulware opponent \n using two different distance metrics")
+# plt.xlabel("Belief Update Step")
+# plt.ylabel("Probability")
+# plt.show()
 
 # %%

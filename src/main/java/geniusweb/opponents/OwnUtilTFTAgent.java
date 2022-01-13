@@ -53,7 +53,7 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
         this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         this.bidutils = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         List<ActionWithBid> oppHistory = this.getOpponentHistory();
-        List<ActionWithBid> ownHistory = this.getOwnHistory();
+        // List<ActionWithBid> ownHistory = this.getOwnHistory();
         
         if (oppHistory.size() < 3) {
             // not enough information known
@@ -73,7 +73,7 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
 
         BigDecimal utilityGoal = isConcession
                 ? this.getUtilitySpace().getUtility(myLastbid).subtract(difference.abs())
-                        .max((this.extendedspace.getMax().subtract(this.extendedspace.getMin()))
+                        .max((this.extendedspace.getMax().add(this.extendedspace.getMin()))
                                 .divide(new BigDecimal("2.0")))
                 : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
                         .min(this.extendedspace.getMax());
@@ -102,12 +102,19 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
         ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
         if (options.size() == BigInteger.ZERO) {
             // System.out.println("WARNING: TOLERANCE TOO LOW");
-            // if we can't find good bid, iterate until you find a good bid
 
             options = this.bidutils.getBids(
 	                new Interval(utilityGoal.subtract(new BigDecimal("0.1")), utilityGoal));
         }
-        return options.get(options.size().intValue() - 1);
+        try {
+            // this should hardly happen
+            return options.get(options.size().intValue() - 1);
+        } catch (Exception e) {
+            System.out.println("OPP: No bid in that interval. " + utilityGoal.doubleValue());
+            options = this.bidutils.getBids(
+                    new Interval(utilityGoal.subtract(new BigDecimal("0.2")), utilityGoal.add(new BigDecimal("0.1"))));
+            return options.get(options.size().intValue() - 1);
+        }
     }
 
     @Override

@@ -21,6 +21,12 @@ public class RandomOpponentPolicy extends AbstractPolicy {
     }
 
     @Override
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, Bid second2lastReceivedBid,
+            AbstractState<?> state) {
+        return this.chooseAction(lastReceivedBid, lastOwnBid, state);
+    }
+
+    @Override
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
         Action action;
         Offer offer = (Offer) super.chooseAction();

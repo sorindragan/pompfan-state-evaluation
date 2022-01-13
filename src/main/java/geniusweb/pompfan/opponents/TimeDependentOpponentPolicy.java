@@ -59,6 +59,12 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
         return this.chooseAction(lastReceivedBid, state);
     }
 
+    @Override
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, Bid second2lastReceivedBid,
+            AbstractState<?> state) {
+        return this.chooseAction(lastReceivedBid, lastOwnBid, state);
+    }
+
     private Action myTurn(Bid lastReceivedBid, AbstractState<?> state) {
         Bid bid = makeBid(state.getTime());
         PartyId me = this.getPartyId();

@@ -1,5 +1,6 @@
 package geniusweb.pompfan.wideners;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import geniusweb.pompfan.components.ActionNode;
@@ -32,8 +33,17 @@ public class ProgressiveWideningStrategy extends AbstractWidener {
         AbstractPolicy currOpp = currRoot.getState().getOpponent();
         while (currRoot.getChildren().size() == this.calcProgressiveMaxWidth(currRoot, this.k_a, this.a_a)) {
             // Going down the tree - Action Node Level
+            ArrayList<Node> ccc = currRoot.getChildren();
             currRoot = Tree.selectFavoriteChild(currRoot.getChildren());
-            currRoot.getState().setOpponent(currOpp);
+            try {
+                currRoot.getState().setOpponent(currOpp);
+            } catch (Exception e) {
+                System.out.println("WTF");
+                System.out.println(ccc);
+                System.out.println(currRoot);
+                System.out.println(currRoot.getState());
+                System.out.println(currOpp);
+            }
             
             if (currRoot.getChildren().size() < this.calcProgressiveMaxWidth(currRoot, this.k_b, this.a_b)) {
                 // Widening the Belief level

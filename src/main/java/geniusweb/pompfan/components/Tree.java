@@ -142,17 +142,36 @@ public class Tree {
         Offer newRealObservation = (Offer) observationAction;
 
         // this should always happen when data collection is on
+        Offer lastRealAgentAction = this.realHistory.size() >= 2
+                ? (Offer) this.realHistory.get(this.realHistory.size() - 2)
+                : null;
         Offer lastRealOpponentAction = this.realHistory.size() >= 3
                 ? (Offer) this.realHistory.get(this.realHistory.size() - 3)
                 : null;
-        Offer lastRealAgentAction = this.realHistory.size() >= 3
-                ? (Offer) this.realHistory.get(this.realHistory.size() - 2)
+        Offer second2lastAgentAction = this.realHistory.size() >= 4
+                ? (Offer) this.realHistory.get(this.realHistory.size() - 4)
                 : null;
 
         // get the real negotiation time
-        AbstractState<?> stateUpdatedWithRealTime = this.lastBestActionNode.getState().copyState().setTime(this.getProgress().get(time));
+        // this might be wrong as the state has the simulated history, not the real one!
+        AbstractState<?> stateUpdatedWithRealTime = this.root.getState().copyState().setTime(this.getProgress().get(time));
+        
+        // sanity passed
+        // System.out.println("SANITY");
+        // System.out.println(this.getProgress().get(time));
+        // System.out.println(lastRealAgentAction);
+        // System.out.println(lastRealOpponentAction);
+        // HistoryState tmp = (HistoryState) stateUpdatedWithRealTime;
+        // System.out.println(tmp.getHistory().size());
+       
+        // OBS: the history in the state is now depricated!
+        // it will be updated on line :216 => don't use the history inside the state
         // update the belief based on real observation
-        this.belief = this.belief.updateBeliefs(newRealObservation, lastRealAgentAction, lastRealOpponentAction,
+        this.belief = this.belief.updateBeliefs(
+                newRealObservation, 
+                lastRealAgentAction, 
+                lastRealOpponentAction,
+                second2lastAgentAction,
                 stateUpdatedWithRealTime);
 
         if (PARTICLE_DEBUG) {
@@ -231,6 +250,10 @@ public class Tree {
             Action lastOpponentAction = this.realHistory.get(this.realHistory.size() - 1);
 
             Bid lastOpponentBid = ((Offer) lastOpponentAction).getBid();
+            // if this is done, there is no need to insert accepts in the tree
+            // it just complicates things
+            // having accepts in the tree should provide, under a good enough eval function, enough information
+            // for letting the MCTS take the decision between Accepting or Offering
             Bid futureAgentBid = action instanceof Accept ? ((Accept) action).getBid() : ((Offer) action).getBid();
             Double distanceValue = this.getUtilitySpace().getUtility(futureAgentBid)
                     .subtract(this.getUtilitySpace().getUtility(lastOpponentBid)).doubleValue();
@@ -238,7 +261,7 @@ public class Tree {
             // if we want to propose something worse than what we received
             if (distanceValue + ACCEPT_SLACK < 0) {
                 action = new Accept(action.getActor(), lastOpponentBid);
-                System.out.println("MCTS SENT ACCEPT");
+                System.out.println("MCTS SENT ACCEPT :)");
                 break;
             }
             if (action instanceof Accept) {

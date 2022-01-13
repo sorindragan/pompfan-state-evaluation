@@ -13,4 +13,6 @@ public interface CommonOpponentInterface {
     
     public abstract Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state);
 
+    public abstract Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, Bid second2lastReceivedBid, AbstractState<?> state);
+
 }

@@ -36,62 +36,51 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
     private BidsWithUtility bidutils;
     private final boolean DEBUG = false;
 
-    
     @JsonCreator
     public OwnUtilityTFTOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace uSpace, 
             @JsonProperty("name") String name) {
         super(uSpace, name);
-        this.bidutils = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
+        this.bidutils = new BidsWithUtility((LinearAdditive) uSpace);
         this.maxBid = this.bidutils.getExtremeBid(true);
     }
     
     public OwnUtilityTFTOpponentPolicy(Domain domain) {
         super(domain, "OwnUtilTFT");
-        this.maxBid = new BidsWithUtility((LinearAdditive) this.getUtilitySpace()).getExtremeBid(true);
+        this.bidutils = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
+        this.maxBid = this.bidutils.getExtremeBid(true);
     }
-
+    
+    // the ractive agents should have this method implemented
     @Override
-    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
-        return this.chooseAction(lastReceivedBid, state);
-    }
-
-    @Override
-    public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
-        return this.chooseAction(state);
-    }
-
-    @Override
-    public Action chooseAction(AbstractState<?> state) {
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, Bid second2lastReceivedBid,
+            AbstractState<?> state) {
+        
         ActionWithBid action;
         this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
-        ArrayList<ActionWithBid> bidHistory = new ArrayList<>(((HistoryState) state).getHistory().stream()
-                .map(b -> ((ActionWithBid) b)).collect(Collectors.toList()));
 
-        if (bidHistory.size() < 4) {
+        myLastbid  = lastOwnBid;
+        if (second2lastReceivedBid == null) {
             // not enough information known
             Bid bid = this.maxBid;
             action = new Offer(this.getPartyId(), bid);
-            myLastbid = bid;
             return action;
         }
 
-        int historySize = bidHistory.size();
         BigDecimal difference = BigDecimal.ZERO;
-        Bid lastLastOpponentBid = bidHistory.get(historySize - 3).getBid();
-        Bid justLastOpponentBid = bidHistory.get(historySize - 1).getBid();
+        Bid lastLastOpponentBid = second2lastReceivedBid;
+        Bid justLastOpponentBid = lastReceivedBid;
         difference = this.getUtilitySpace().getUtility(lastLastOpponentBid)
                 .subtract(this.getUtilitySpace().getUtility(justLastOpponentBid));
         boolean isConcession = difference.doubleValue() > 0 ? true : false;
 
         BigDecimal utilityGoal = isConcession
                 ? this.getUtilitySpace().getUtility(myLastbid).subtract(difference.abs())
-                        .max((this.extendedspace.getMax().subtract(this.extendedspace.getMin()))
+                        .max((this.extendedspace.getMax().add(this.extendedspace.getMin()))
                                 .divide(new BigDecimal("2.0")))
                 : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
                         .min(this.extendedspace.getMax());
-        
+
         Bid selectedBid = computeNextBid(utilityGoal);
-        myLastbid = selectedBid;
         double time = state.getTime();
 
         if (DEBUG) {
@@ -109,17 +98,40 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
                         : new Offer(this.getPartyId(), selectedBid);
     }
 
+
+    @Override
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
+            return this.chooseAction(lastReceivedBid, state);
+    }
+
+    @Override
+    public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
+        return this.chooseAction(state);
+    }
+
+    @Override
+    public Action chooseAction(AbstractState<?> state) {
+        // this should not happen
+        return super.chooseAction(state);
+    }
+
     private Bid computeNextBid(BigDecimal utilityGoal) {
         ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
         if (options.size() == BigInteger.ZERO) {
-            // tolerance = this.extendedspace
-            System.out.println("PARTICLE TOLERANCE TOO LOW");
-            // if we can't find good bid, iterate until you find a good bid
+            // System.out.println("WARNING: PARTICLE TOLERANCE TOO LOW");
 
             options = this.bidutils.getBids(
                     new Interval(utilityGoal.subtract(new BigDecimal("0.1")), utilityGoal));
-            System.out.println(options.size() + " " + utilityGoal.doubleValue());
+            // System.out.println(options.size() + " " + utilityGoal.doubleValue());
         }
-        return options.get(options.size().intValue() - 1);
+        try {
+            // this should hardly happen
+            return options.get(options.size().intValue() - 1);
+        } catch (Exception e) {
+            System.out.println("PARTICLE: No bid in that interval. " + utilityGoal.doubleValue());
+            options = this.bidutils.getBids(
+                    new Interval(utilityGoal.subtract(new BigDecimal("0.2")), utilityGoal.add(new BigDecimal("0.1"))));
+            return options.get(options.size().intValue() - 1);
+        }
     }
 }

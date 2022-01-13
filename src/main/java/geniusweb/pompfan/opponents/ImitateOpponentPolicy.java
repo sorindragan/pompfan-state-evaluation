@@ -121,6 +121,12 @@ public class ImitateOpponentPolicy extends AbstractPolicy {
         return this.chooseAction(lastReceivedBid, state);
     }
 
+    @Override
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, Bid second2lastReceivedBid,
+            AbstractState<?> state) {
+        return this.chooseAction(lastReceivedBid, lastOwnBid, state);
+    }
+
     private boolean isGood(Bid bid) {
         return (STUBBORNESS.compareTo(this.getUtilitySpace().getUtility(bid)) < 0);
     }

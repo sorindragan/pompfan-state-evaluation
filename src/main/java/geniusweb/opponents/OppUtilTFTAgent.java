@@ -109,7 +109,8 @@ public class OppUtilTFTAgent extends AbstractOpponent {
                 new Interval(utilityGoal.subtract(new BigDecimal("0.2")), utilityGoal));
         if (options.size().intValue() < 1) {
             options = this.oppBidsWithUtilities.getBids(
-                    new Interval(utilityGoal.subtract(new BigDecimal("0.4")), utilityGoal));
+                    new Interval(utilityGoal.subtract(new BigDecimal("0.2")),
+                            utilityGoal.add(new BigDecimal("0.2"))));
         }
         // System.out.println("TFTOpp");
         // System.out.println(utilityGoal.doubleValue());
@@ -117,6 +118,8 @@ public class OppUtilTFTAgent extends AbstractOpponent {
         try {
             return options.get(options.size().intValue() - 1);
         } catch (Exception e) {
+            System.out.println("OPP: OM Faild to properly capture the utility space. " + utilityGoal.doubleValue());
+
             options = this.oppBidsWithUtilities.getBids(
                     new Interval(utilityGoal.subtract(new BigDecimal("0.5")).max(BigDecimal.ZERO)
                     , utilityGoal.add(new BigDecimal("0.5")).min(BigDecimal.ONE)));

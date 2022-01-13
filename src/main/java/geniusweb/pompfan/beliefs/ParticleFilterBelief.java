@@ -46,7 +46,7 @@ public class ParticleFilterBelief extends AbstractBelief {
 
     @Override
     public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAgentAction, Offer lastOppAction,
-            AbstractState<?> state) {
+            Offer second2LastAgentAction, AbstractState<?> state) {
         Double minSum = 1000.0;
         UtilitySpace agentUtility = this.getDistance().getUtilitySpace();
         // This is not an update; this overwrites the probabilities
@@ -72,8 +72,8 @@ public class ParticleFilterBelief extends AbstractBelief {
                 // no noise
                 Double noNoisyTime = state.getTime();
                 newState = state.setTime(noNoisyTime);
-                
-                Bid sampledBid = this.sample(lastAgentAction, lastOppAction, newState, abstractPolicy);
+                // currentOppAction, lastAgentAction, lastOppAction
+                Bid sampledBid = this.sample(lastAgentAction, lastOppAction, second2LastAgentAction, newState, abstractPolicy);
                 candidateObservations.add(sampledBid);
             }
             Double weightOpponentLikelihood = candidateObservations.parallelStream().filter(Objects::nonNull)
@@ -103,15 +103,17 @@ public class ParticleFilterBelief extends AbstractBelief {
         return new ParticleFilterBelief(this.getOpponentProbabilities(), this.getDistance());
     }
 
-    protected Bid sample(Offer lastAgentAction, Offer lastOppAction, AbstractState<?> state,
-            AbstractPolicy abstractPolicy) {
+    protected Bid sample(Offer lastAgentAction, Offer lastOppAction, Offer second2LastAgentAction,
+            AbstractState<?> state, AbstractPolicy abstractPolicy) {
         // DONE: Keep track of real observations and also supply the previous real
         // observation
         Action chosenAction;
-        if (lastAgentAction != null) {
-            chosenAction = lastOppAction != null
-                    ? abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state)
-                    : abstractPolicy.chooseAction(lastAgentAction.getBid(), state);
+        if (second2LastAgentAction != null) {
+            chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), second2LastAgentAction.getBid(), state);
+        } else if (lastOppAction != null) {
+            chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state);
+        } else if (lastAgentAction != null) {
+            chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), state);
         } else {
             // Quickfix: Random action selection if no first own best action.
             chosenAction = abstractPolicy.chooseAction();

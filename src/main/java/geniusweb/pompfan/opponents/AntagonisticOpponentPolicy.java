@@ -84,6 +84,12 @@ public class AntagonisticOpponentPolicy extends AbstractPolicy {
     }
 
     @Override
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, Bid second2lastReceivedBid,
+            AbstractState<?> state) {
+        return this.chooseAction(lastReceivedBid, lastOwnBid, state);
+    }
+
+    @Override
     public Action chooseAction(Bid lastReceivedBid, AbstractState<?> state) {
         ActionWithBid antagonisticAction = (ActionWithBid) this.chooseAction();
         Bid antagonisticBid = antagonisticAction.getBid();

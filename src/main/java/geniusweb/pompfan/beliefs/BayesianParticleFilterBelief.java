@@ -23,10 +23,10 @@ public class BayesianParticleFilterBelief extends ParticleFilterWithAcceptBelief
     }
 
     @Override
-    public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAgentAction, Offer lastOppAction,
+    public AbstractBelief updateBeliefs(Offer realObservation, Offer lastAgentAction, Offer lastOppAction, Offer second2LastAgentAction,
             AbstractState<?> state) {
         Map<AbstractPolicy, Double> prior = this.getOpponentProbabilities();
-        AbstractBelief oldBelief = super.updateBeliefs(realObservation, lastAgentAction, lastOppAction, state);
+        AbstractBelief oldBelief = super.updateBeliefs(realObservation, lastAgentAction, lastOppAction, second2LastAgentAction, state);
         Double sums = oldBelief.getProbabilities().parallelStream().collect(Collectors.summingDouble(x -> x));
         Map<AbstractPolicy, Double> newBelief = oldBelief.getOpponentProbabilities().entrySet().parallelStream()
                 .collect(Collectors.toMap(e -> e.getKey(), e -> updateFormula(prior, sums, e)));

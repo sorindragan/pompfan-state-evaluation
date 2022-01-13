@@ -198,6 +198,11 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
         return this.chooseAction(lastReceivedBid, state);
     }
 
+    @Override
+    public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, Bid second2lastReceivedBid, AbstractState<?> state) {
+        return this.chooseAction(lastReceivedBid, lastOwnBid, state);
+    }
+
     public void setRandom(Random random) {
         this.random = random;
     }

@@ -33,19 +33,22 @@ public class ParticleFilterWithAcceptBelief extends ParticleFilterBelief {
     }
 
     @Override
-    protected Bid sample(Offer lastAgentAction, Offer lastOppAction, AbstractState<?> state,
-            AbstractPolicy abstractPolicy) {
-        // TODO: maybe actions that are the same should count in calculating the distance
+    protected Bid sample(Offer lastAgentAction, Offer lastOppAction, Offer second2LastAgentAction, 
+            AbstractState<?> state, AbstractPolicy abstractPolicy) {
+        // ? maybe actions that are the same should count in calculating the distance
+        // example: (offer, offer), (accept, accept), (offer, accept)
         Action chosenAction;
-        if (lastAgentAction != null) {
-            chosenAction = lastOppAction != null
-                    ? abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state)
-                    : abstractPolicy.chooseAction(lastAgentAction.getBid(), state);
+        if (second2LastAgentAction != null) {
+            chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(),
+                    second2LastAgentAction.getBid(), state);
+        } else if (lastOppAction != null) {
+            chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state);
+        } else if (lastAgentAction != null) {
+            chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), state);
         } else {
             // Quickfix: Random action selection if no first own best action.
             chosenAction = abstractPolicy.chooseAction();
         }
-
         return chosenAction instanceof Offer ? ((Offer) chosenAction).getBid() : ((Accept) chosenAction).getBid();
     }
 

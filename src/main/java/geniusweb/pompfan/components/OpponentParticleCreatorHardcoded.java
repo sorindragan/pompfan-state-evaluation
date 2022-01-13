@@ -46,21 +46,21 @@ public abstract class OpponentParticleCreatorHardcoded {
         UtilitySpace utilitySpace = ((UtilitySpace) profileint.getProfile());
         
         // AbstractPolicy correctOpponent = new HardLinerOpponentPolicy(utilitySpace, "ExactHardliner", 0.0);
-        // AbstractPolicy correctOpponent = new BoulwareOpponentPolicy(utilitySpace, "ExactOpponentBoulware", 0.2);
-        // AbstractPolicy correctOpponent = new LinearOpponentPolicy(utilitySpace, "ExactOpponentLinear", 1.0);
-        // AbstractPolicy correctOpponent = new ConcederOpponentPolicy(utilitySpace, "ExactOpponentConceder", 2.0);
-        // AbstractPolicy correctOpponent = new OppUtilityTFTOpponentPolicy(utilitySpace, "ExactOpponentOppTFT", progress);
-        AbstractPolicy correctOpponent = new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOpponentOwnTFT");
+        // AbstractPolicy correctOpponent = new BoulwareOpponentPolicy(utilitySpace, "ExactBoulware", 0.2);
+        // AbstractPolicy correctOpponent = new LinearOpponentPolicy(utilitySpace, "ExactLinear", 1.0);
+        // AbstractPolicy correctOpponent = new ConcederOpponentPolicy(utilitySpace, "ExactConceder", 2.0);
+        // AbstractPolicy correctOpponent = new OppUtilityTFTOpponentPolicy(utilitySpace, "ExactOppTFT", progress);
+        AbstractPolicy correctOpponent = new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOwnTFT");
         listOfOpponents.add(correctOpponent);
-        // does knowing the opponent matter?
+        // can we find the opponent?
         for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
-            // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(utilitySpace, "OppTFT"));
-            // listOfOpponents.add(new BoulwareOpponentPolicy(utilitySpace, "Boulware", 0.2));
+            listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
+            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
             
-            // listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
-            // listOfOpponents.add(new NiceTFTOpponentPolicy(domain));
-            listOfOpponents.add(new ConcederOpponentPolicy(domain));
+            listOfOpponents.add(new HardLinerOpponentPolicy(domain));
+            listOfOpponents.add(new BoulwareOpponentPolicy(domain));
             listOfOpponents.add(new LinearOpponentPolicy(domain));
+            listOfOpponents.add(new ConcederOpponentPolicy(domain));
         }
 
 

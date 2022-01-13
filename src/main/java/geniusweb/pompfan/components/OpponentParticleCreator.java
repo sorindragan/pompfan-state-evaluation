@@ -28,7 +28,7 @@ public abstract class OpponentParticleCreator {
         // TODO: fix arguments
         for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
             listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
-            listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain));
+            listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
             listOfOpponents.add(new AntagonisticOpponentPolicy(uSpace));
             // listOfOpponents.add(new SelfishOpponentPolicy(domain));
             // listOfOpponents.add(new HardLinerOpponentPolicy(domain));

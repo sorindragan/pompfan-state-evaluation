@@ -14,7 +14,7 @@ public class UniformBelief extends AbstractBelief {
     }
 
     @Override
-    public AbstractBelief updateBeliefs(Offer newOppObservation, Offer lastRealAgentAction, Offer lastRealOppAction,
+    public AbstractBelief updateBeliefs(Offer newOppObservation, Offer lastRealAgentAction, Offer lastRealOppAction, Offer second2LastAgentAction,
             AbstractState<?> state) {
         return this;
     }
