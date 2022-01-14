@@ -59,7 +59,7 @@ public class BetterFreqOppModel extends AbstractOpponentModel {
             Action oppAction = oppActions.get(i);
             Bid secondBid = ((ActionWithBid) oppAction).getBid();
             for (String nextIssue : this.getDomain().getIssues()) {
-                // my action is not used
+                // my action is not used; skipped
                 DiscreteValue firstVal = (DiscreteValue) firstBid.getValue(nextIssue);
                 DiscreteValue secondVal = (DiscreteValue) secondBid.getValue(nextIssue);
                 DiscreteValue lastOpponentValue = (DiscreteValue) lastBid.getValue(nextIssue);

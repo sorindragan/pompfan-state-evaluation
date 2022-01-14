@@ -76,7 +76,6 @@ public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
             bidHistory.add( new Offer(new PartyId("Opp"), lastReceivedBid));
         }
         
-        myLastbid = lastOwnBid;
         int historySize = bidHistory.size();
 
         if (historySize > 4) {
@@ -97,7 +96,7 @@ public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
                 .subtract(this.getUtilitySpace().getUtility(justLastOpponentBid));
         boolean isConcession = difference.doubleValue() > 0 ? true : false;
 
-        BigDecimal opponentUtilityOfmyLastOwnBid = this.opponentModelBelief.getUtility(myLastbid);
+        BigDecimal opponentUtilityOfmyLastOwnBid = this.opponentModelBelief.getUtility(lastOwnBid);
 
         BigDecimal utilityGoal = isConcession
                 ? opponentUtilityOfmyLastOwnBid.add(difference.abs())
@@ -112,7 +111,7 @@ public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
             System.out.println("ppppppppppppppppppppppppppp");
             System.out.println(time);
             System.out.println(selectedBid);
-            System.out.println("TFT-Last-Utility-For-Opp: " + this.opponentModelBelief.getUtility(myLastbid));
+            System.out.println("TFT-Last-Utility-For-Opp: " + this.opponentModelBelief.getUtility(lastOwnBid));
             System.out.println("TFT-Difference: " + difference);
             System.out.println("TFT-Utility-Goal-For-Opp: " + utilityGoal);
         }
@@ -202,10 +201,12 @@ public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
             // this is already crazy
             return options.get(options.size().intValue() - 1);
         } catch (Exception e) {
-            // System.out.println("PARTICLE: OM Faild to properly capture the utility space. " + utilityGoal.doubleValue());
+            System.out.println("PARTICLE: OM Faild to properly capture the utility space. " + utilityGoal.doubleValue());
             options = this.oppBidsWithUtilities.getBids(
                     new Interval(utilityGoal.subtract(new BigDecimal("0.5")).max(BigDecimal.ZERO),
                             utilityGoal.add(new BigDecimal("0.5")).min(BigDecimal.ONE)));
+            // ! when same bids are made by the opponent in the history of the state
+            // ! this fails miserably
             return options.get(options.size().intValue() - 1);
         }
     }

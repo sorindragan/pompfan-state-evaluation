@@ -245,8 +245,9 @@ public class POMPFANAgent extends DefaultParty {
                 }
                 getConnection().send(action);
             } catch (Exception e) {
-                this.getReporter().log(Level.WARNING, "Problem in YourTurn!!!");
                 e.printStackTrace();
+                System.out.println(e.getClass());
+                this.getReporter().log(Level.WARNING, "Problem in YourTurn!!!");
                 if (DEBUG_OFFER == true) {
                     System.out.println("Current Time: " + progress.get(System.currentTimeMillis()));
                     System.out.println("Agent: Util= " + "Some ERR");
@@ -553,7 +554,6 @@ public class POMPFANAgent extends DefaultParty {
         Bid bid;
         long negotiationEnd = this.progress.getTerminationTime().getTime();
         long simTime = this.simulationTime;
-        
         if (this.progress.get(System.currentTimeMillis()) < this.dataCollectionTime) {
             // ?? For some reason this part fills the RAM quickly
             // High throughput bidding used for data collection
@@ -577,16 +577,14 @@ public class POMPFANAgent extends DefaultParty {
 
             // When we start the tree construction we use the last real observation to guide the initial exploration
             // We do this just once at the very beginning after the data collection phase
-            
             this.MCTS.getRoot().setObservation(this.MCTS.getRealHistory().get(this.MCTS.getRealHistory().size()-1));
-
             
             this.MCTS.construct(simTime, this.progress);
             
         } else {
             getReporter().log(Level.WARNING, "Not enough time! Start consuming the tree");
         }
-        
+
         if (DEBUG_OFFER) {
             getReporter().log(Level.INFO, this.MCTS.getRoot().toString());
             // System.out.println(this.MCTS.toString());
@@ -595,6 +593,7 @@ public class POMPFANAgent extends DefaultParty {
         }
 
         action = this.MCTS.chooseBestAction();
+      
 
         // Consuming the whole tree will result in an error
         // So accept
@@ -612,7 +611,6 @@ public class POMPFANAgent extends DefaultParty {
             action = new Offer(this.me, bid);
             return action;
         }
-
         // Logging agent decisions
         if (action instanceof Offer) {
             Bid myBid = ((Offer) action).getBid();
@@ -621,7 +619,6 @@ public class POMPFANAgent extends DefaultParty {
                         "Agent: Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- " + myBid.toString());
             return action;
         }
-
         if (action instanceof Accept) {
             Bid acceptedBid = ((Accept) action).getBid();
             if (DEBUG_OFFER == true)

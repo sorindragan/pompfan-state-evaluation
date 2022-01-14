@@ -93,17 +93,22 @@ plt.show()
 
 
 # %%
+
+
+# %%
 # particle evolution
-# dfr = pd.read_csv(f"../eval/tmpevolution.csv", header=0)
-# bu = list(dfr.iloc[0,:])
-# ivc = list(dfr.iloc[1,:])
-# plt.plot(list(range(len(bu))), bu, label="BothUtilityDistance", color="darkgreen")
-# plt.plot(list(range(len(bu))), ivc, label="IssueValueCountDistance", color="orchid")
-# plt.legend()
-# # plt.title("Certanty the model has that the particle containing the real NTFT opponent is indeed the real one")
-# plt.title("Evolution of the probability assigned to the particle \n containing the real Boulware opponent \n using two different distance metrics")
-# plt.xlabel("Belief Update Step")
-# plt.ylabel("Probability")
-# plt.show()
+particle_name = "OwnTFT"
+dfr = pd.read_csv(f"../eval/tmpevolution.csv", header=0)
+jd = list(filter(lambda x: str(x) != 'nan', list(dfr.iloc[0, :])))
+bud = list(filter(lambda x: str(x) != 'nan', list(dfr.iloc[1, :])))
+l = min(len(jd), len(bud))
+plt.plot(list(range(l)), jd[:l], label="JaccardDistance", color="darkgreen")
+plt.plot(list(range(l)), bud[:l], label="BothUtilityDistance", color="orchid")
+plt.legend()
+# plt.title("Certanty the model has that the particle containing the real NTFT opponent is indeed the real one")
+plt.title(f"Evolution of the probability assigned to the particle \n containing the real {particle_name} opponent \n using two different distance metrics")
+plt.xlabel("Belief Update Step")
+plt.ylabel("Probability")
+plt.show()
 
 # %%
