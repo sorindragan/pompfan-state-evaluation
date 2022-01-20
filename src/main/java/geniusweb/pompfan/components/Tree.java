@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -167,13 +168,15 @@ public class Tree {
         // OBS: the history in the state is now depricated!
         // it will be updated on line :222 => don't use the history inside the state
         // update the belief based on real observation
+        // long t = System.nanoTime();
         this.belief = this.belief.updateBeliefs(
                 newRealObservation, 
                 lastRealAgentAction, 
                 lastRealOpponentAction,
                 second2lastAgentAction,
                 stateUpdatedWithRealTime);
-
+        // System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t));
+        
         if (PARTICLE_DEBUG) {
             System.out.println("New Belief-Probabilities");
             System.out.println(this.belief);

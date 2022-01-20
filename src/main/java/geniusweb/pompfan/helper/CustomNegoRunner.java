@@ -34,7 +34,6 @@ import tudelft.utilities.logging.Reporter;
 public class CustomNegoRunner extends NegoRunner {
     private final static ObjectMapper jacksonReader = new ObjectMapper();
     private final static ObjectWriter jacksonWriter = jacksonReader.writerWithDefaultPrettyPrinter();
-    private final static ObjectWriter jacksonWriterCompact = jacksonReader.writer();
     private String timestampString;
     private SimpleDateFormat tFormatter = new SimpleDateFormat("HH:mm:ss:SSS dd-MM-yyyy");
     private ResultsWriter intermediateWriter;
@@ -71,14 +70,6 @@ public class CustomNegoRunner extends NegoRunner {
             resultsJsonFileWriter = new FileWriter("logs/" + logFileName + ".json");
             resultsJsonFileWriter.write(jacksonWriter.writeValueAsString(finalResults));
             resultsJsonFileWriter.close();
-
-            // String content = this.negSettings.toString().split("confEvaluator=")[1].split(",")[0] + "," +
-            //     this.negSettings.toString().split("confComparer=")[1].split(",")[0] + "," +
-            //     state.toString();
-            
-            // this.collectFile.write(content);
-            // this.collectFile.close();
-            
             // System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
@@ -128,7 +119,7 @@ public class CustomNegoRunner extends NegoRunner {
             String name = Paths.get(settingRef).getParent().getFileName().toString();
             cnt++;
             Reporter logger = new StdOutReporter();
-            logger.log(Level.INFO, "Starting Tournament " + cnt);
+            logger.log(Level.INFO, "Starting Session " + cnt);
             NegoRunner runner = new CustomNegoRunner(negoSettings, new ClassPathConnectionFactory(), logger, 0,
                     settingRef, name);
             runner.run();

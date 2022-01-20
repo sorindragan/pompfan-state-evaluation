@@ -95,12 +95,12 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
         BigDecimal sumOfInts = allInts.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
         Map<String, BigDecimal> issueWeights = IntStream.range(0, issues.size()).boxed().collect(
                 Collectors.toMap(issues::get, index -> allInts.get(index).divide(sumOfInts, 5, RoundingMode.HALF_UP)));
-
         // To make everything add to 1
         BigDecimal remainder = BigDecimal.ONE
                 .subtract(issueWeights.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add));
         String firstKey = (String) issueWeights.keySet().toArray()[0];
         issueWeights.computeIfPresent(firstKey, (key, value) -> value.add(remainder));
+        // System.out.println(issueWeights);
 
         HashMap<String, ValueSetUtilities> issueValueWeights = new HashMap<String, ValueSetUtilities>();
         for (String issueString : issues) {
@@ -108,19 +108,25 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
             DiscreteValueSet values = (DiscreteValueSet) domain.getValues(issueString);
             List<BigDecimal> randLongs = random.longs(values.size().longValue(), 1, 100).boxed().map(String::valueOf)
                     .map(BigDecimal::new).collect(Collectors.toList());
-            BigDecimal sumOfValueLongs = randLongs.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+            // BigDecimal sumOfValueLongs = randLongs.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
             Map<DiscreteValue, BigDecimal> valueWeights = LongStream.range(0, values.size().longValue()).boxed()
                     .collect(Collectors.toMap(values::get,
-                            index -> randLongs.get(index.intValue()).divide(sumOfValueLongs, 5, RoundingMode.HALF_UP)));
-            // To make everything add to 1
-            BigDecimal valueRemainder = BigDecimal.ONE
-                    .subtract(valueWeights.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add));
-            DiscreteValue firstValueKey = (DiscreteValue) valueWeights.keySet().toArray()[valueWeights.keySet().size()
-                    - 1];
-            valueWeights.computeIfPresent(firstValueKey, (key, value) -> value.add(valueRemainder));
+                            index -> randLongs.get(index.intValue()).divide(new BigDecimal("100.0"), 5, RoundingMode.HALF_UP)));
+            
+            // !! values don't need to add up to 1; if they do -> bidWithUtils returns intervals like [0.01, 0.2]
+            // Map<DiscreteValue, BigDecimal> valueWeights = LongStream.range(0, values.size().longValue()).boxed()
+            //         .collect(Collectors.toMap(values::get,
+            //                 index -> randLongs.get(index.intValue()).divide(sumOfValueLongs, 5, RoundingMode.HALF_UP)));
+            // // To make everything add to 1
+            // BigDecimal valueRemainder = BigDecimal.ONE
+            //         .subtract(valueWeights.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add));
+            // DiscreteValue firstValueKey = (DiscreteValue) valueWeights.keySet().toArray()[valueWeights.keySet().size()
+            //         - 1];
+            // valueWeights.computeIfPresent(firstValueKey, (key, value) -> value.add(valueRemainder));
             
             issueValueWeights.put(issueString, new DiscreteValueSetUtilities(valueWeights));
         }
+        // System.out.println(issueValueWeights);
 
         return new AbstractMap.SimpleEntry<HashMap<String, ValueSetUtilities>, Map<String, BigDecimal>>(
                 issueValueWeights, issueWeights);

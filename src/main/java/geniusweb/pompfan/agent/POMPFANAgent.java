@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import javax.websocket.DeploymentException;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.ActionWithBid;
@@ -45,6 +47,7 @@ import geniusweb.pompfan.components.OpponentParticleCreator;
 import geniusweb.pompfan.components.OpponentParticleCreatorHardcoded;
 import geniusweb.pompfan.components.Tree;
 import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.state.HistoryState;
 import geniusweb.pompfan.state.StateRepresentationException;
 import geniusweb.profile.Profile;
 import geniusweb.profile.utilityspace.LinearAdditive;
@@ -68,7 +71,7 @@ public class POMPFANAgent extends DefaultParty {
     private static final boolean DEBUG_PERSIST = false;
     private static final boolean DEBUG_SAVE_TREE = false;
     // turn on for state estimation experiments
-    private static final boolean DEBUG_BELIEF = false;
+    private static final boolean DEBUG_BELIEF = true;
     private static final boolean DEBUG_TIME = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -152,8 +155,18 @@ public class POMPFANAgent extends DefaultParty {
     private void cleanupIfGameOver() throws IOException{
         if (this.progress.isPastDeadline(System.currentTimeMillis())) {
             getReporter().log(Level.INFO, "Game's over!");
-            FileWriter finalLogWriter = new FileWriter("eval/result_" + "last_experiment" + ".jsonl", true);
-            String content = this.me.getName() + "," + this.opponentName + "," + 0.0 + "," + "Bid{}" + "," + "Bid{}" +"\n";
+            // FileWriter finalLogWriter = new FileWriter("eval/result_" + "last_experiment" + ".jsonl", true);
+            // String content = this.me.getName() + ","
+            //         + this.opponentName + "," + "0.0" + "\n";
+            // finalLogWriter.write(content);
+            // finalLogWriter.close();
+
+            FileWriter finalLogWriter = new FileWriter("eval/tournament_results_ExperimentStateEval.jsonl", true);
+            String content = ((HistoryState) this.MCTS.getRoot().getState()).getEvaluator().getClass().toString()
+                    + "," + this.MCTS.getBelief().getDistance().getClass().toString()
+                    + "," + this.me.getName() + "," + this.opponentName
+                    + "," + "0.0"
+                    + "\n";
             finalLogWriter.write(content);
             finalLogWriter.close();
             terminate();
@@ -182,6 +195,7 @@ public class POMPFANAgent extends DefaultParty {
         } else {
             if (DEBUG_LEARN)
                 System.out.println("DEBUG_LEARN_PERSISTENCE: Enter tree init");
+            System.out.println("Initialiing the tree");
             this.initializeTree(settings);
             this.goodBids = this.bidsWithUtility.getBids(new Interval(new BigDecimal(0.8), BigDecimal.ONE));
         }
@@ -253,6 +267,10 @@ public class POMPFANAgent extends DefaultParty {
                     System.out.println("Agent: Util=" + this.uSpace.getUtility(action.getBid()) + " -- "
                             + action.getBid().toString());
                 }
+                // double time = this.progress.get(System.currentTimeMillis());
+                // System.out.println("++++++++++++++++++++++++++++");
+                // System.out.println("A: " + time);
+
                 getConnection().send(action);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -304,13 +322,25 @@ public class POMPFANAgent extends DefaultParty {
             // getReporter().log(Level.INFO, "Final outcome: " + this.me.getName() + ": "
             //         + this.uSpace.getUtility(agreements.getMap().get(this.me)) + " " + info);
             
-            // TODO: get the utility of the opponent somehow
-            // TODO: see if can get other metrics
             // The only thing that should not be complicated to just get metrics in the end...
-            FileWriter finalLogWriter = new FileWriter("eval/result_" + "last_experiment" + ".jsonl", true);
-            String content = this.me.getName() + ","
-                    + this.opponentName + "," + this.uSpace.getUtility(agreements.getMap().get(this.me)) + ","
-                    + agreements.getMap().get(this.me) + "," + agreements.getMap().get(this.opp) + "\n";
+            // Regular Negotiations
+            // FileWriter finalLogWriter = new FileWriter("eval/result_" + "last_experiment" + ".jsonl", true);
+            // String content = this.me.getName() + ","
+            //         + this.opponentName 
+            //         + "," + this.uSpace.getUtility(agreements.getMap().get(this.me))
+            //         // + "," + agreements.getMap().get(this.me) + "," + agreements.getMap().get(this.opp) 
+            //         + "\n";
+            // finalLogWriter.write(content);
+            // finalLogWriter.close();
+
+            // StateEval Experminet
+            FileWriter finalLogWriter = new FileWriter("eval/tournament_results_ExperimentStateEval.jsonl", true);
+            String content = 
+            ((HistoryState) this.MCTS.getRoot().getState()).getEvaluator().getClass().toString()
+            + "," + this.MCTS.getBelief().getDistance().getClass().toString()
+            + "," + this.me.getName() + "," + this.opponentName
+            + "," + this.uSpace.getUtility(agreements.getMap().get(this.me))
+            + "\n";
             finalLogWriter.write(content);
             finalLogWriter.close();
 
@@ -594,8 +624,9 @@ public class POMPFANAgent extends DefaultParty {
             // When we start the tree construction we use the last real observation to guide the initial exploration
             // We do this just once at the very beginning after the data collection phase
             this.MCTS.getRoot().setObservation(this.MCTS.getRealHistory().get(this.MCTS.getRealHistory().size()-1));
-            
+            // long t = System.nanoTime();
             this.MCTS.construct(simTime, this.progress);
+            // System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime()-t));
             
         } else {
             getReporter().log(Level.WARNING, "Not enough time! Start consuming the tree");

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -40,15 +41,14 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
     public OwnUtilityTFTOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace uSpace, 
             @JsonProperty("name") String name) {
         super(uSpace, name);
-        this.bidutils = new BidsWithUtility((LinearAdditive) uSpace);
+        this.bidutils = new BidsWithUtility((LinearAdditiveUtilitySpace) uSpace);
         this.maxBid = this.bidutils.getExtremeBid(true);
         this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
-
     }
     
     public OwnUtilityTFTOpponentPolicy(Domain domain) {
         super(domain, "OwnUtilTFT");
-        this.bidutils = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
+        this.bidutils = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         this.maxBid = this.bidutils.getExtremeBid(true);
         this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
     }
@@ -82,7 +82,16 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
                 : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
                         .min(this.extendedspace.getMax());
 
+        // long t = System.nanoTime();
         Bid selectedBid = computeNextBid(utilityGoal);
+        // if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t) > 2000) {
+        //     System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        //     System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t));
+        //     System.out.println(utilityGoal.doubleValue());
+        //     System.out.println(this.bidutils.getRange());
+        //     System.out.println("WTF");
+        // }
+
         double time = state.getTime();
 
         if (DEBUG) {
@@ -129,6 +138,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
                         .min(this.extendedspace.getMax());
 
         Bid selectedBid = computeNextBid(utilityGoal);
+        
         double time = state.getTime();
 
         if (DEBUG) {
@@ -159,6 +169,15 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
     }
 
     private Bid computeNextBid(BigDecimal utilityGoal) {
+        if (utilityGoal.doubleValue() < this.bidutils.getRange().getMin().doubleValue()) {
+            utilityGoal = this.bidutils.getRange().getMin();
+        }
+
+        if (utilityGoal.doubleValue() > this.bidutils.getRange().getMax().doubleValue()) {
+            utilityGoal = this.bidutils.getRange().getMax();
+        }
+
+
         ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
         if (options.size() == BigInteger.ZERO) {
             // System.out.println("WARNING: PARTICLE TOLERANCE TOO LOW");

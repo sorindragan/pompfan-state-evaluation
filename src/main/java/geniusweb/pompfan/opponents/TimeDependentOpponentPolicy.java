@@ -2,8 +2,10 @@ package geniusweb.pompfan.opponents;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -67,7 +69,9 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
     }
 
     private Action myTurn(Bid lastReceivedBid, AbstractState<?> state) {
+
         Bid bid = makeBid(state.getTime());
+        
         PartyId me = this.getPartyId();
         UtilitySpace utilspace = this.getUtilitySpace();
         Action myAction;
@@ -87,9 +91,19 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
      *         bid.
      */
     private Bid makeBid(Double currTime) {
-
-        BigDecimal utilityGoal = getUtilityGoal(currTime, this.e, this.extendedspace.getMin(), this.extendedspace.getMax());
+        BigDecimal utilityGoal = getUtilityGoal(currTime, this.getE(), this.extendedspace.getMin(), this.extendedspace.getMax());
+        
+        // ! this takes too much (sometimes 3 seconds for a poor bid)
+        // long t = System.nanoTime();
         ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
+        // if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t) > 1000) {
+        //     System.out.println(this.getClass().getName());
+        //     System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t));
+        //     System.out.println(this.extendedspace.getMin().doubleValue());
+        //     System.out.println(this.extendedspace.getMax().doubleValue());
+        //     System.out.println(utilityGoal.doubleValue());
+        // }
+
         if (options.size() == BigInteger.ZERO) {
             // this should not happen!
             options = extendedspace.getBids(this.extendedspace.getMax());
@@ -122,8 +136,9 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
         double ft = 0.0;
         if (e != 0) ft = Math.pow(t, 1 / e);
         // we subtract epsilon to correct possibly small round-up errors
+        
         return new BigDecimal(minUtil.doubleValue()
-                        + (maxUtil.doubleValue() - minUtil.doubleValue()) * (1 - ft))
+                        + (maxUtil.doubleValue() - minUtil.doubleValue()) * (1 - ft), new MathContext(6))
                                         .min(maxUtil).max(minUtil);
     }
 

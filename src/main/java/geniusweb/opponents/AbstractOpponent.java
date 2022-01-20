@@ -29,6 +29,7 @@ import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
 import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
+import geniusweb.boa.biddingstrategy.ExtendedUtilSpace;
 import geniusweb.inform.ActionDone;
 import geniusweb.inform.Agreements;
 import geniusweb.inform.Finished;
@@ -40,6 +41,7 @@ import geniusweb.party.Capabilities;
 import geniusweb.party.DefaultParty;
 import geniusweb.profile.Profile;
 import geniusweb.profile.utilityspace.LinearAdditive;
+import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.profileconnection.ProfileConnectionFactory;
 import geniusweb.profileconnection.ProfileInterface;
@@ -51,6 +53,7 @@ import tudelft.utilities.logging.Reporter;
 
 public abstract class AbstractOpponent extends DefaultParty {
     private boolean isLearn;
+    private ExtendedUtilSpace extendedspace;
     private BidsWithUtility bidsWithUtility;
     private ImmutableList<Bid> goodBids;
     private List<ActionWithBid> history = new ArrayList<ActionWithBid>();
@@ -72,7 +75,10 @@ public abstract class AbstractOpponent extends DefaultParty {
     private String protocol;
     protected boolean DEBUG_TIME;
 
-    public AbstractOpponent() {
+    public AbstractOpponent() {}
+
+    public AbstractOpponent(Reporter reporter) {
+        super(reporter); // for debugging
     }
 
     public Random getRandom() {
@@ -89,10 +95,6 @@ public abstract class AbstractOpponent extends DefaultParty {
 
     public void setUtilitySpace(UtilitySpace uSpace) {
         this.utilitySpace = uSpace;
-    }
-
-    public AbstractOpponent(Reporter reporter) {
-        super(reporter); // for debugging
     }
 
     /**
@@ -271,7 +273,8 @@ public abstract class AbstractOpponent extends DefaultParty {
     protected void initializeVariables(Settings settings) throws DeploymentException, IOException {
         this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(), getReporter());
         this.setUtilitySpace((UtilitySpace) this.profileint.getProfile());
-        this.bidsWithUtility = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
+        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
+        this.bidsWithUtility = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         this.protocol = settings.getProtocol().getURI().getPath();
         this.me = settings.getID();
         this.progress = settings.getProgress();
@@ -338,6 +341,14 @@ public abstract class AbstractOpponent extends DefaultParty {
 
     public void setLearn(boolean isLearn) {
         this.isLearn = isLearn;
+    }
+
+    public ExtendedUtilSpace getExtendedspace() {
+        return extendedspace;
+    }
+
+    public void setExtendedspace(ExtendedUtilSpace extendedspace) {
+        this.extendedspace = extendedspace;
     }
 
     public BidsWithUtility getBidsWithUtility() {

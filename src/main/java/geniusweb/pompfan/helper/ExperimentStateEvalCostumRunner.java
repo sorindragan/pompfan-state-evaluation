@@ -49,8 +49,7 @@ public class ExperimentStateEvalCostumRunner extends CustomNegoRunner {
         "Last2BidsMixtOneMinusDifferenceUtilEvaluator", "RandomEvaluator");
         
         private final static List<String> setComparer = Arrays.asList("JaccardBidDistance",
-        "SDiceBidDistance",
-        "IssueValueCountBidDistance");
+        "SDiceBidDistance", "BothUtilityBidDistance");
         
         private final static List<String> setOpponents = Arrays.asList(
                         "classpath:geniusweb.exampleparties.anac2021.tripleagent.TripleAgent",
@@ -62,6 +61,8 @@ public class ExperimentStateEvalCostumRunner extends CustomNegoRunner {
                         "classpath:geniusweb.opponents.ConcederParty",
                         "classpath:geniusweb.opponents.OwnUtilTFTAgent"
                         );
+        
+        private final static List<String> setProfiles = Arrays.asList("party1.json", "party2.json");
 
         public ExperimentStateEvalCostumRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory,
                         Reporter logger, long maxruntime, String settingRef, String name) throws IOException {
@@ -76,80 +77,101 @@ public class ExperimentStateEvalCostumRunner extends CustomNegoRunner {
                 for (String distanceMeasure : setComparer) {
                         for (String stateEval : setEvaluator) {
                                 for (String currOpponent : setOpponents) {
-                                       cnt++;
-                                        ObjectNode target = (ObjectNode) settingsJson.get("SAOPSettings")
-                                                        .get("participants").get(0)
-                                                        .get("TeamInfo").get("parties").get(0).get("party");
+                                        for (int i=0; i<2; i++) {
+                                                cnt++;
+                                                ObjectNode target = (ObjectNode) settingsJson.get("SAOPSettings")
+                                                                .get("participants").get(0)
+                                                                .get("TeamInfo").get("parties").get(0).get("party");
 
-                                        Map<String, Object> parameters = new HashMap<String, Object>();
-                                        Map<String, Object> config = new HashMap<String, Object>();
-                                        Map<String, Object> confExtra = new HashMap<String, Object>();
-                                        Map<String, Object> widener = new HashMap<String, Object>();
+                                                ObjectNode profileTarget = (ObjectNode) settingsJson.get("SAOPSettings")
+                                                                .get("participants").get(0)
+                                                                .get("TeamInfo").get("parties").get(0);
+                                                
+                                                profileTarget.put("profile",
+                                                                "file:src/test/resources/" + setProfiles.get(i%2));
 
-                                        parameters.put("numParticlesPerOpponent", setNumParticlesPerOpponent.get(0));
-                                        parameters.put("simulationTime", setSimulationTime.get(0));
-                                        parameters.put("dataCollectionTime", setDataCollectionTime.get(0));
-                                        parameters.put("persistentstate", "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7");
-                                        parameters.put("config", config);
+                                                Map<String, Object> parameters = new HashMap<String, Object>();
+                                                Map<String, Object> config = new HashMap<String, Object>();
+                                                Map<String, Object> confExtra = new HashMap<String, Object>();
+                                                Map<String, Object> widener = new HashMap<String, Object>();
 
-                                        config.put("confState", "HistoryState");
-                                        config.put("confBelief", setBelief.get(0));
-                                        config.put("confExplorer", setExplorer.get(0));
-                                        config.put("confWidener", setWidener.get(0));
-                                        config.put("confComparer", distanceMeasure);
-                                        config.put("confEvaluator", stateEval);
-                                        config.put("confExtra", confExtra);
+                                                parameters.put("numParticlesPerOpponent",
+                                                                setNumParticlesPerOpponent.get(0));
+                                                parameters.put("simulationTime", setSimulationTime.get(0));
+                                                parameters.put("dataCollectionTime", setDataCollectionTime.get(0));
+                                                parameters.put("persistentstate",
+                                                                "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7");
+                                                parameters.put("config", config);
 
-                                        confExtra.put("widener", widener);
+                                                config.put("confState", "HistoryState");
+                                                config.put("confBelief", setBelief.get(0));
+                                                config.put("confExplorer", setExplorer.get(0));
+                                                config.put("confWidener", setWidener.get(0));
+                                                config.put("confComparer", distanceMeasure);
+                                                config.put("confEvaluator", stateEval);
+                                                config.put("confExtra", confExtra);
 
-                                        widener.put("maxWidth", setMaxWidth.get(0));
-                                        widener.put("k_a", setK.get(0));
-                                        widener.put("k_b", setK.get(0));
-                                        widener.put("a_a", setA.get(0));
-                                        widener.put("a_b", setA.get(0));
+                                                confExtra.put("widener", widener);
 
-                                        target.set("parameters",
-                                                        jacksonReader.convertValue(parameters, JsonNode.class));
+                                                widener.put("maxWidth", setMaxWidth.get(0));
+                                                widener.put("k_a", setK.get(0));
+                                                widener.put("k_b", setK.get(0));
+                                                widener.put("a_a", setA.get(0));
+                                                widener.put("a_b", setA.get(0));
 
-                                        ObjectNode opponent = (ObjectNode) settingsJson.get("SAOPSettings")
-                                                        .get("participants").get(1)
-                                                        .get("TeamInfo").get("parties").get(0).get("party");
+                                                target.set("parameters",
+                                                                jacksonReader.convertValue(parameters, JsonNode.class));
 
-                                        Map<String, Object> oppParameters = new HashMap<String, Object>();
-                                        String ref = currOpponent;
-                                        oppParameters.put("persistentstate", "59853b79-f3f8-4179-8b57-7b5b2e9eb11" + cnt % 9);
-                                        opponent.put("partyref", ref);
-                                        opponent.set("parameters", jacksonReader.convertValue(oppParameters, JsonNode.class));
+                                                ObjectNode opponent = (ObjectNode) settingsJson.get("SAOPSettings")
+                                                                .get("participants").get(1)
+                                                                .get("TeamInfo").get("parties").get(0).get("party");
+                                                
+                                                ObjectNode profileOpponent = (ObjectNode) settingsJson.get("SAOPSettings")
+                                                                .get("participants").get(1)
+                                                                .get("TeamInfo").get("parties").get(0);
 
-                                        String settingRef = args[0];
+                                                profileOpponent.put("profile",
+                                                                "file:src/test/resources/" + setProfiles.get((1-i % 2)));
 
-                                        Reporter logger = new StdOutReporter();
-                                        NegoSettings settings = jacksonReader.readValue(settingsJson.toString(),
-                                                        NegoSettings.class);
+                                                Map<String, Object> oppParameters = new HashMap<String, Object>();
+                                                String ref = currOpponent;
+                                                oppParameters.put("persistentstate",
+                                                                "59853b79-f3f8-4179-8b57-7b5b2e9eb11" + cnt % 9);
+                                                opponent.put("partyref", ref);
+                                                opponent.set("parameters", jacksonReader.convertValue(oppParameters,
+                                                                JsonNode.class));
 
-                                        logger.log(Level.INFO, "Starting Session " + cnt);
-                                        logger.log(Level.INFO, settingsJson.toString());
+                                                String settingRef = args[0];
 
-                                        FileWriter finalLogWriter = new FileWriter(
-                                                        "eval/tournament_results_ExperimentStateEval.jsonl", true);
-                                        String content = settings.toString().split("confEvaluator=")[1].split(",")[0]
-                                                        .split("}")[0] + "," +
-                                                        settings.toString().split("confComparer=")[1].split(",")[0]
-                                                                        .split("}")[0]
-                                                        + "," + "POMPFANAgent" + "," + 
-                                                        currOpponent.split(".")[currOpponent.split(".").length-1] + "\n";
+                                                Reporter logger = new StdOutReporter();
+                                                NegoSettings settings = jacksonReader.readValue(settingsJson.toString(),
+                                                                NegoSettings.class);
 
-                                        finalLogWriter.write(content);
-                                        finalLogWriter.close();
+                                                logger.log(Level.INFO, "Starting Session " + cnt);
+                                                logger.log(Level.INFO, settingsJson.toString());
 
-                                        NegoRunner runner = new ExperimentStateEvalCostumRunner(settings,
-                                                        new ClassPathConnectionFactory(),
-                                                        logger, 0, settingRef, "ExperimentStateEval");
-                                        runner.run();
-                                        // if (runner.isProperlyStopped()) {
+                                                // FileWriter finalLogWriter = new FileWriter(
+                                                // "eval/tournament_results_ExperimentStateEval.jsonl", true);
+                                                // String content =
+                                                // settings.toString().split("confEvaluator=")[1].split(",")[0]
+                                                // .split("}")[0] + "," +
+                                                // settings.toString().split("confComparer=")[1].split(",")[0]
+                                                // .split("}")[0]
+                                                // + "," + "POMPFANAgent" + "," +
+                                                // currOpponent.split("\\.")[currOpponent.split("\\.").length-1] + "\n";
+                                                // finalLogWriter.write(content);
+                                                // finalLogWriter.close();
+                                                System.out.println("Session " + cnt + " out of 336");
+
+                                                NegoRunner runner = new ExperimentStateEvalCostumRunner(settings,
+                                                                new ClassPathConnectionFactory(),
+                                                                logger, 0, settingRef, "ExperimentStateEval");
+                                                runner.run();
+                                                // if (runner.isProperlyStopped()) {
                                                 // do something
-                                        // }
+                                                // }
 
+                                        }
                                 }
                         }
 

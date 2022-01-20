@@ -64,6 +64,7 @@ public class ActionNode extends Node {
             cnt++;
             chosenOpponentObservation = observation;
             newUnseenState = newState;
+            // System.out.println("STRUGGLE BECAUSE OF OPPONENT");
             // try 100 times to generate a new observation
         } while(child != null && cnt < 100);
 

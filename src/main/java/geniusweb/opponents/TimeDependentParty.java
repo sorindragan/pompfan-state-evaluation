@@ -21,6 +21,7 @@ public class TimeDependentParty extends AbstractOpponent {
 
     private ExtendedUtilSpace extendedspace;
     private double e = 1.2;
+    private final boolean DEBUG = false; 
 
     public TimeDependentParty() {
         super();
@@ -66,6 +67,10 @@ public class TimeDependentParty extends AbstractOpponent {
     private Bid makeBid() {
         double time = this.getProgress().get(System.currentTimeMillis());
         BigDecimal utilityGoal = utilityGoal(time, getE());
+        if (DEBUG) {
+            System.out.println("O: " + time);
+            System.out.println("TD-Utility-Goal: " + utilityGoal.doubleValue());
+        }
         ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
         if (options.size() == BigInteger.ZERO) {
             // if we can't find good bid, get max util bid....
@@ -85,7 +90,6 @@ public class TimeDependentParty extends AbstractOpponent {
     private BigDecimal utilityGoal(double t, double e) {
         BigDecimal minUtil = this.extendedspace.getMin();
         BigDecimal maxUtil = this.extendedspace.getMax();
-
         double ft = 0;
         if (e != 0)
             ft = Math.pow(t, 1 / e);

@@ -2,6 +2,7 @@ package geniusweb.pompfan.beliefs;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,8 +40,13 @@ public class ParticleFilterWithAcceptBelief extends ParticleFilterBelief {
         // example: (offer, offer), (accept, accept), (offer, accept)
         Action chosenAction;
         if (second2LastAgentAction != null) {
+            // long t = System.nanoTime();
             chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(),
                     second2LastAgentAction.getBid(), state);
+            // if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t) > 1000) {
+                // System.out.println(abstractPolicy.getClass().getName());
+                // System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t));
+            // }
         } else if (lastOppAction != null) {
             chosenAction = abstractPolicy.chooseAction(lastAgentAction.getBid(), lastOppAction.getBid(), state);
         } else if (lastAgentAction != null) {

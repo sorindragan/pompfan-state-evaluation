@@ -76,6 +76,7 @@ public class BeliefNode extends Node {
             cnt++;
             chosenAgentAction = agentAction;
             newUnseenState = newState;
+            // System.out.println("STRUGGLE BECAUSE OF AGENT");
             // try 100 times to generate new action
         } while(child != null && cnt < 100);
 

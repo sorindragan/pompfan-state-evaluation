@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -58,7 +59,7 @@ public class ParticleFilterBelief extends AbstractBelief {
                 this.getDistance().setUtilitySpace(abstractPolicy.getUtilitySpace());
                 // System.out.println(this.getDistance().getUtilitySpace().toString());
             }
-            
+            // long t = System.nanoTime();
             for (int i = 0; i < ParticleFilterBelief.NUMBER_SAMPLES; i++) {
                 // Monte Carlo Sampling
                 // This is in a loop in which we try multiple actions to get an
@@ -76,6 +77,7 @@ public class ParticleFilterBelief extends AbstractBelief {
                 Bid sampledBid = this.sample(lastAgentAction, lastOppAction, second2LastAgentAction, newState, abstractPolicy);
                 candidateObservations.add(sampledBid);
             }
+            // System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t));
             Double weightOpponentLikelihood = candidateObservations.parallelStream().filter(Objects::nonNull)
                     .mapToDouble(obs -> this.getDistance().computeDistance(obs, realObservation.getBid()))
                     .map(val -> Math.abs(val)).sum();

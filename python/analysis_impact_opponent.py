@@ -7,8 +7,8 @@ import seaborn as sns
 sns.set_theme(style="whitegrid")
 
 # %%
-file_name = "known_opponent_boulware.csv"
-# file_name = "result_last_experiment.jsonl"
+# file_name = "known_opponent_boulware.csv"
+file_name = "result_last_experiment.jsonl"
 
 
 # file_name = "known_opponent_ntft.csv"
@@ -20,7 +20,7 @@ domain_name = "Abstract"
 opptype = "Boulware"
 
 
-n = 20
+n = 10
 df = pd.read_csv(f"../eval/{file_name}")
 
 # %%

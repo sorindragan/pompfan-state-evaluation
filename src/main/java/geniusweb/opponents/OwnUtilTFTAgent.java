@@ -16,13 +16,16 @@ import geniusweb.inform.Agreements;
 import geniusweb.issuevalue.Bid;
 import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import tudelft.utilities.immutablelist.ImmutableList;
+import tudelft.utilities.logging.Reporter;
 
 public class OwnUtilTFTAgent extends AbstractOpponent {
    
-    private ExtendedUtilSpace extendedspace;
     private Bid myLastbid = null;
-    private BidsWithUtility bidutils;
     private boolean DEBUG_TFT = false;
+
+    public OwnUtilTFTAgent(Reporter reporter) {
+        super(reporter);
+    }
 
     public OwnUtilTFTAgent() {
         super();
@@ -49,8 +52,8 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
     @Override
     protected ActionWithBid myTurn(Object param) {
         ActionWithBid action;
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
-        this.bidutils = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace());
+        ExtendedUtilSpace extendedspace = this.getExtendedspace();
+        BidsWithUtility bidutils = this.getBidsWithUtility();
         List<ActionWithBid> oppHistory = this.getOpponentHistory();
         // List<ActionWithBid> ownHistory = this.getOwnHistory();
         
@@ -72,22 +75,22 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
 
         BigDecimal utilityGoal = isConcession
                 ? this.getUtilitySpace().getUtility(myLastbid).subtract(difference.abs())
-                        .max(this.extendedspace.getMax().divide(new BigDecimal("2.0")))
+                        .max(extendedspace.getMax().divide(new BigDecimal("2.0")))
                 : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
-                        .min(this.extendedspace.getMax());
+                        .min(extendedspace.getMax());
         
-        Bid selectedBid = computeNextBid(utilityGoal);
+        Bid selectedBid = computeNextBid(utilityGoal, extendedspace, bidutils);
         double time = this.getProgress().get(System.currentTimeMillis());
 
         if (DEBUG_TFT) {
             System.out.println("============================");
-            System.out.println(time);
+            System.out.println("O: " + time);
             System.out.println(selectedBid);
             System.out.println("TFT-Last-Utility: " + this.getUtilitySpace().getUtility(myLastbid));
             System.out.println("TFT-Difference: " + difference);
             System.out.println("TFT-Utility-Goal: " + utilityGoal);
             System.out.println("TFT-Lower-Bound: " + 
-                this.extendedspace.getMax().divide(new BigDecimal("2.0")).doubleValue());
+                extendedspace.getMax().divide(new BigDecimal("2.0")).doubleValue());
         }
 
         myLastbid = selectedBid;
@@ -98,12 +101,12 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
                 : new Offer(this.getMe(), selectedBid);
     }
 
-    private Bid computeNextBid(BigDecimal utilityGoal) {
-        ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
+    private Bid computeNextBid(BigDecimal utilityGoal, ExtendedUtilSpace extendedspace, BidsWithUtility bidutils) {
+        ImmutableList<Bid> options = extendedspace.getBids(utilityGoal);
         if (options.size() == BigInteger.ZERO) {
             // System.out.println("WARNING: TOLERANCE TOO LOW");
 
-            options = this.bidutils.getBids(
+            options = bidutils.getBids(
 	                new Interval(utilityGoal.subtract(new BigDecimal("0.1")), utilityGoal));
         }
         try {
@@ -111,7 +114,7 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
             return options.get(options.size().intValue() - 1);
         } catch (Exception e) {
             System.out.println("OPP: No bid in that interval. " + utilityGoal.doubleValue());
-            options = this.bidutils.getBids(
+            options = bidutils.getBids(
                     new Interval(utilityGoal.subtract(new BigDecimal("0.2")), utilityGoal.add(new BigDecimal("0.1"))));
             return options.get(options.size().intValue() - 1);
         }
