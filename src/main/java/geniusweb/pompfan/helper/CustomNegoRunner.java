@@ -40,6 +40,7 @@ public class CustomNegoRunner extends NegoRunner {
     private ResultsWriter intermediateWriter;
     private Integer sessNum = 0;
     private Date startTimeStamp;
+    // private final int LOOPTIME = 200;// ms
 
     public CustomNegoRunner(NegoSettings settings, ProtocolToPartyConnFactory connectionfactory, Reporter logger,
             long maxruntime, String settingRef, String name) throws IOException {
@@ -81,7 +82,7 @@ public class CustomNegoRunner extends NegoRunner {
             // System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(0);
+            // System.exit(0);
         }
     }
 
@@ -101,7 +102,7 @@ public class CustomNegoRunner extends NegoRunner {
                 Date sessionTimestamp = new Date();
                 String sessionTime = this.tFormatter.format(sessionTimestamp);
                 try {
-                    this.intermediateWriter.writeSession(this.sessNum, sessionState, sessionTime);
+                    // this.intermediateWriter.writeSession(this.sessNum, sessionState, sessionTime);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

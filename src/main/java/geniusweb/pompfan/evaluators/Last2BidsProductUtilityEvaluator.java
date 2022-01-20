@@ -32,7 +32,6 @@ public class Last2BidsProductUtilityEvaluator extends Last2BidsMeanUtilityEvalua
             BigDecimal lastUtility = state.getUtilitySpace().getUtility(lastBid);
             // might be boosting accepts in this way; don't know for sure
             return lastUtility.doubleValue();
-            // return lastUtility.multiply(lastUtility).doubleValue();
         }
         BigDecimal utility1 = lastAction != null ? this.getUtilitySpace().getUtility(lastBid) : BigDecimal.ONE;
         BigDecimal utility2 = secondToLastAction != null ? this.getUtilitySpace().getUtility(secondToLastBid) : BigDecimal.ONE;

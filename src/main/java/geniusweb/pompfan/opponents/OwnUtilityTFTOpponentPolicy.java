@@ -42,12 +42,15 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
         super(uSpace, name);
         this.bidutils = new BidsWithUtility((LinearAdditive) uSpace);
         this.maxBid = this.bidutils.getExtremeBid(true);
+        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
+
     }
     
     public OwnUtilityTFTOpponentPolicy(Domain domain) {
         super(domain, "OwnUtilTFT");
         this.bidutils = new BidsWithUtility((LinearAdditive) this.getUtilitySpace());
         this.maxBid = this.bidutils.getExtremeBid(true);
+        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
     }
     
     // the ractive agents should have this method implemented
@@ -57,7 +60,6 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
             AbstractState<?> state) {
         
         ActionWithBid action;
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
 
         myLastbid  = lastOwnBid;
         if (second2lastReceivedBid == null) {
@@ -76,8 +78,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
 
         BigDecimal utilityGoal = isConcession
                 ? this.getUtilitySpace().getUtility(myLastbid).subtract(difference.abs())
-                        .max((this.extendedspace.getMax().add(this.extendedspace.getMin()))
-                                .divide(new BigDecimal("2.0")))
+                        .max(this.extendedspace.getMax().divide(new BigDecimal("2.0")))
                 : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
                         .min(this.extendedspace.getMax());
 
@@ -86,6 +87,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
 
         if (DEBUG) {
             System.out.println("============================");
+            System.out.println("Used for Belief Update");
             System.out.println(time);
             System.out.println(selectedBid);
             System.out.println("TFT-Last-Utility: " + this.getUtilitySpace().getUtility(myLastbid));
@@ -103,7 +105,6 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
     @Override
     public Action chooseAction(Bid lastReceivedBid, Bid lastOwnBid, AbstractState<?> state) {
             ActionWithBid action;
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         ArrayList<Action> simulatedHistory = ((HistoryState) state).getHistory();
 
         if (simulatedHistory.size() < 3) {
@@ -123,8 +124,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
 
         BigDecimal utilityGoal = isConcession
                 ? this.getUtilitySpace().getUtility(myLastbid).subtract(difference.abs())
-                        .max((this.extendedspace.getMax().add(this.extendedspace.getMin()))
-                                .divide(new BigDecimal("2.0")))
+                        .max(this.extendedspace.getMax().divide(new BigDecimal("2.0")))
                 : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
                         .min(this.extendedspace.getMax());
 
@@ -133,6 +133,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
 
         if (DEBUG) {
             System.out.println("============================");
+            System.out.println("Used in particles");
             System.out.println(time);
             System.out.println(selectedBid);
             System.out.println("TFT-Last-Utility: " + this.getUtilitySpace().getUtility(myLastbid));
@@ -173,6 +174,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
             System.out.println("PARTICLE: No bid in that interval. " + utilityGoal.doubleValue());
             options = this.bidutils.getBids(
                     new Interval(utilityGoal.subtract(new BigDecimal("0.2")), utilityGoal.add(new BigDecimal("0.1"))));
+            System.out.println(this.bidutils.getRange());
             return options.get(options.size().intValue() - 1);
         }
     }

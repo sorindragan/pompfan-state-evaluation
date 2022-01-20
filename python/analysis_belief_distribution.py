@@ -84,8 +84,9 @@ df[list(df.columns)[:-3]].sum(axis=1)
 # %%
 # KNOWN STRATEGY
 fig = plt.figure(figsize=(20, 5))
-for i, cls in enumerate(df['cls']):
-    vals = list(df.loc[df["cls"] == cls].iloc[0, 0:-3])
+# colors = ["magenta","orange", "black", "green", "red", "violet", "maroon", "blue"]
+for i, (cls, pid) in enumerate(zip(df['cls'], df['profile_id'])):
+    vals = list(df.loc[df["profile_id"] == pid].iloc[0, 0:-3])
     updates = df.shape[1]-3
     cls = str(cls).split("_")[1]
     xnew = np.linspace(0, updates-1, 200)
@@ -96,6 +97,7 @@ for i, cls in enumerate(df['cls']):
                  label=f"Correct {cls.split('act')[1]} Profile",
                  linestyle='-',
                  linewidth=2,
+                #  color=colors[-1])
                  color=np.random.rand(3,))
         continue
 
@@ -103,6 +105,7 @@ for i, cls in enumerate(df['cls']):
              label=f"{cls} Profile_{i}",
              linestyle='-',
              linewidth=2,
+            #  color=colors[i])
              color=np.random.rand(3,))
 
 plt.legend()
@@ -114,17 +117,17 @@ plt.show()
 # %%
 # KNOWN STRATEGY pie chart
 # fig = plt.figure(figsize=(10, 10))
-labels = [str(cls_).split("_")[1] for cls_ in df['cls']]
+labels = [str(cls_).split("_")[1] for cls_, _ in zip(df['cls'], df["profile_id"])]
 sizes = list(df[list(df.columns)[:-3]].sum(axis=1))
 
 compressed_labels = []
 compressed_sizes = []
 rest_sum = 0
 sizes_sum = sum(sizes)
-idx = 0
+idx = -1
 for l, s in zip(labels, sizes):
     idx += 1
-    if (s / sizes_sum) < 0.075:
+    if (s / sizes_sum) < 0.007:
         rest_sum += s
         continue
     compressed_labels.append("Correct " + l.split("act")[1] + " Profile" if "Exact" in l else l + f"Profile_{idx}")
@@ -138,7 +141,7 @@ explode = tuple([0.05 if s == maxs else 0 for s in compressed_sizes])
 
 fig1, ax1 = plt.subplots(figsize=(7, 7))
 ax1.pie(compressed_sizes, explode=explode, labels=compressed_labels, autopct='%1.1f%%',
-        shadow=True, startangle=90,  wedgeprops=dict(width=0.5, edgecolor='w'))
+        shadow=True, startangle=0,  wedgeprops=dict(width=0.5, edgecolor='w'))
 ax1.axis('equal')
 
 plt.title('Particle Aggregated Probability Distribution', fontweight='bold')
@@ -234,10 +237,10 @@ anim = animation.FuncAnimation(fig, animate, frames=num_frames, interval=1000, r
 HTML(anim.to_jshtml())
 
 # %%
-last_col = list(df.columns[df.columns.str.startswith(STEP_PREFIX)])[-1]
-most_likely = df[df[last_col] == df[last_col].max()]
-id_, profl = most_likely.index[0], most_likely['profile'][0]
-print(f"Most likely profile:\n{id_} => {profl}")
+most_likely = df[df[list(df.columns)[:-3]].sum(axis=1)
+                 == df[list(df.columns)[:-3]].sum(axis=1).max()]
+stype, profl = most_likely["cls"][0], most_likely['profile'][0]
+print(f"Most likely profile:\n{stype} => {profl}")
 # %%
 df['weight'] = df[list(df.columns)[:-3]].sum(axis=1)
 # df['distance'] = pd.Series([all_results[0]['Distance']

@@ -38,7 +38,8 @@ public abstract class OpponentParticleCreatorHardcoded {
 
         // hardcoded profile/utility
         ReportToLogger reporter = new ReportToLogger("HardcodedProfile");
-        String profileString = "file:src/test/resources/party2.json";
+        // String profileString = "file:src/test/resources/party2.json";
+        String profileString = "file:src/test/resources/abstract2.json";
         // String profileString = "file:src/test/resources/flightbooking2.json";
         URI profile = new URI(profileString);
         ProfileInterface profileint = ProfileConnectionFactory.create(
@@ -77,29 +78,41 @@ public abstract class OpponentParticleCreatorHardcoded {
         // }
 
         // same strategy; get profile?
-        // AbstractPolicy correctOpponent = new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOpponentOwnTFT");
-        AbstractPolicy correctOpponent = new LinearOpponentPolicy(utilitySpace, "ExactLinear", 1.0);
-        listOfOpponents.add(correctOpponent);
-        for (int cnt = 0; cnt < numParticlesPerOpponent*5; cnt++) {
+        // AbstractPolicy correctOpponent = new OppUtilityTFTOpponentPolicy(utilitySpace, "ExactOppTFT", progress);
+        // AbstractPolicy correctOpponent = new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOwnTFT");
+        // AbstractPolicy correctOpponent = new BoulwareOpponentPolicy(utilitySpace, "ExactBoulware", 0.2);
+        // AbstractPolicy correctOpponent = new LinearOpponentPolicy(utilitySpace, "ExactLinear", 1.0);
+        // AbstractPolicy correctOpponent = new ConcederOpponentPolicy(utilitySpace, "ExactConceder", 2.0);
+
+        // listOfOpponents.add(correctOpponent);
+        // for (int cnt = 0; cnt < numParticlesPerOpponent*5; cnt++) {
         // listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
         // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
         // listOfOpponents.add(new BoulwareOpponentPolicy(domain));
-        listOfOpponents.add(new LinearOpponentPolicy(domain));
+        // listOfOpponents.add(new LinearOpponentPolicy(domain));
         // listOfOpponents.add(new ConcederOpponentPolicy(domain));
-        }
-
-        // for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
-        //     listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
-        //     listOfOpponents.add(new NiceTFTOpponentPolicy(domain));
-        //     // listOfOpponents.add(new AntagonisticOpponentPolicy(uSpace));
-        //     // listOfOpponents.add(new SelfishOpponentPolicy(domain));
-        //     // listOfOpponents.add(new HardLinerOpponentPolicy(domain));
-        //     listOfOpponents.add(new BoulwareOpponentPolicy(domain));
-        //     listOfOpponents.add(new LinearOpponentPolicy(domain));
-        //     // listOfOpponents.add(new TimeDependentOpponentPolicy(domain));
-        //     listOfOpponents.add(new ConcederOpponentPolicy(domain));
         // }
 
+        // listOfOpponents.add(correctOpponent);
+        // does the opponent matter?
+        for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
+            // listOfOpponents.add(new HardLinerOpponentPolicy(utilitySpace, "ExactHardliner", 0.0));
+            // listOfOpponents.add(new BoulwareOpponentPolicy(utilitySpace, "ExactBoulware", 0.2));
+            // listOfOpponents.add(new LinearOpponentPolicy(utilitySpace, "ExactLinear", 1.0));
+            // listOfOpponents.add(new ConcederOpponentPolicy(utilitySpace, "ExactConceder", 2.0));
+            // listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOwnTFT"));
+            // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(utilitySpace, "ExactOppTFT", progress));
+
+            // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
+            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
+            
+            listOfOpponents.add(new HardLinerOpponentPolicy(domain));
+            listOfOpponents.add(new BoulwareOpponentPolicy(domain));
+            listOfOpponents.add(new LinearOpponentPolicy(domain));
+            listOfOpponents.add(new ConcederOpponentPolicy(domain));
+        }
+
+        
         
         listOfOpponents = listOfOpponents.stream().map(opponent -> opponent.setBidspace(bidspace))
                 .collect(Collectors.toList());

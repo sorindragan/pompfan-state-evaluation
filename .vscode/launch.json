@@ -6,14 +6,14 @@
 	"configurations": [
 		{
 			"type": "java",
-			"name": "Experiment1CustomNegoRunner",
+			"name": "ExperimentStateEval",
 			"request": "launch",
-			"mainClass": "geniusweb.pompfan.helper.Experiment1CostumRunner",
+			"mainClass": "geniusweb.pompfan.helper.ExperimentStateEvalCostumRunner",
 			"classPaths": [
 				"$Auto"
 			],
 			"args": [
-				"src/test/resources/settingsExperiment1A.json",
+				"src/test/resources/settingsExperimentStateEval.json",
 			],
 			"console": "internalConsole",
 		},

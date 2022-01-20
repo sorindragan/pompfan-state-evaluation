@@ -165,7 +165,7 @@ public class Tree {
         // System.out.println(tmp.getHistory().size());
        
         // OBS: the history in the state is now depricated!
-        // it will be updated on line :216 => don't use the history inside the state
+        // it will be updated on line :222 => don't use the history inside the state
         // update the belief based on real observation
         this.belief = this.belief.updateBeliefs(
                 newRealObservation, 

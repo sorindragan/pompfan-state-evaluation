@@ -157,20 +157,20 @@ public class ResultsLogger {
             try {
                 
                 this.profile = this.getPwp().getProfile();
+                // sometimes the connection cannot be innitiated; still a problem: IOException
                 ProfileInterface profileint = ProfileConnectionFactory.create(this.profile.getURI(), this.reporter);
-                // System.out.println(profileint);
                 UtilitySpace utilitySpace = ((UtilitySpace) profileint.getProfile());
                 this.utility = this.getAggreeBid() != null ? utilitySpace.getUtility(this.getAggreeBid()).doubleValue()
                         : 0.0;
-                // System.out.println(this.utility);
+                profileint.close();
             } catch (IOException e) {
                 this.utility = -1.0;
-                this.reporter.log(Level.WARNING, "IOException");
+                this.reporter.log(Level.WARNING, "Logger IOException");
                 // e.printStackTrace();
                 return this;
             } catch (DeploymentException e) {
                 this.utility = -1.0;
-                this.reporter.log(Level.WARNING, "ServerException");
+                this.reporter.log(Level.WARNING, "Logger ServerException");
                 // e.printStackTrace();
                 return this;
             } catch (IllegalArgumentException e) {

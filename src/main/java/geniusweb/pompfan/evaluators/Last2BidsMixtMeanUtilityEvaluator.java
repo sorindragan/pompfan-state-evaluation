@@ -16,7 +16,7 @@ import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
 /**
- * MeanUtilityEvaluator
+ * Mean Utility as Evaluator
  */
 public class Last2BidsMixtMeanUtilityEvaluator implements IEvalFunction<HistoryState> {
     @JsonBackReference

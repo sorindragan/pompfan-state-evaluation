@@ -447,11 +447,17 @@ public abstract class AbstractOpponent extends DefaultParty {
             this.profileint.close();
             this.profileint = null;
         }
-        this.dataPaths = null;
-        this.goodBids = null;
-        this.history = null;
-        this.utilitySpace = null;
-        this.mapper = null;
+        System.out.println("Opponent closed");
+        // super.terminate();
+        // if (this.profileint != null) {
+        //     this.profileint.close();
+        //     this.profileint = null;
+        // }
+        // this.dataPaths = null;
+        // this.goodBids = null;
+        // this.history = null;
+        // this.utilitySpace = null;
+        // this.mapper = null;
     }
 
     /**

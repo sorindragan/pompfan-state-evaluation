@@ -15,6 +15,7 @@ import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
+import geniusweb.bidspace.Interval;
 import geniusweb.exampleparties.timedependentparty.ExtendedUtilSpace;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
@@ -89,11 +90,17 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
 
         BigDecimal utilityGoal = getUtilityGoal(currTime, this.e, this.extendedspace.getMin(), this.extendedspace.getMax());
         ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
-        if (options.size().compareTo(BigInteger.ONE) == -1) {
+        if (options.size() == BigInteger.ZERO) {
             // this should not happen!
             options = extendedspace.getBids(this.extendedspace.getMax());
+
         }
-        return options.get(options.size().intValue()-1);
+        try {
+            return options.get(options.size().intValue()-1);
+        } catch (Exception e) {
+            System.out.println("WARNING: A profile was genereated weirdly and resulted in option size:" + options.size().intValue());
+            return null;
+        }
 
 
     }

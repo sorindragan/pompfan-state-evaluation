@@ -14,7 +14,7 @@ import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
 /**
- * MeanUtilityEvaluator
+ * Measures Concession as an evaluation function
  */
 public class Last2BidsOneMinusDifferenceUtilityEvaluator implements IEvalFunction<HistoryState> {
     @JsonBackReference
@@ -56,7 +56,7 @@ public class Last2BidsOneMinusDifferenceUtilityEvaluator implements IEvalFunctio
         BigDecimal utility1 = lastAction != null ? this.getUtilitySpace().getUtility(lastBid) : BigDecimal.ZERO;
         BigDecimal utility2 = secondToLastAction != null ? this.getUtilitySpace().getUtility(secondToLastBid)
                 : BigDecimal.ZERO;
-        BigDecimal difference = utility2.subtract(utility1);
+        BigDecimal difference = utility2.subtract(utility1).abs();
         return BigDecimal.ONE.subtract(difference).doubleValue();
     }
 

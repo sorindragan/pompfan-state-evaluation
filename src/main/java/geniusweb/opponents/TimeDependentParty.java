@@ -40,9 +40,11 @@ public class TimeDependentParty extends AbstractOpponent {
         PartyId me = this.getMe();
         UtilitySpace utilspace = this.getUtilitySpace();
         List<ActionWithBid> oppHistory = this.getOpponentHistory();
-        Bid lastReceivedBid = oppHistory.get(oppHistory.size()-1).getBid();
+        Bid lastReceivedBid;
         if (oppHistory.size() < 1) {
             lastReceivedBid = null;
+        } else {
+            lastReceivedBid = oppHistory.get(oppHistory.size()-1).getBid();
         }
         Action myAction;
         if (bid == null || (lastReceivedBid != null

@@ -1,4 +1,4 @@
-package geniusweb.pompfan.evaluators;
+package geniusweb.pompfan.evaluators.others;
 
 import java.util.ArrayList;
 

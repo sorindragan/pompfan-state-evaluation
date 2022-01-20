@@ -22,11 +22,10 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
     private ExtendedUtilSpace extendedspace;
     private Bid myLastbid = null;
     private BidsWithUtility bidutils;
-    private boolean DEBUG_TFT = true;
+    private boolean DEBUG_TFT = false;
 
     public OwnUtilTFTAgent() {
         super();
-
     }
 
     @Override
@@ -73,8 +72,7 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
 
         BigDecimal utilityGoal = isConcession
                 ? this.getUtilitySpace().getUtility(myLastbid).subtract(difference.abs())
-                        .max((this.extendedspace.getMax().add(this.extendedspace.getMin()))
-                                .divide(new BigDecimal("2.0")))
+                        .max(this.extendedspace.getMax().divide(new BigDecimal("2.0")))
                 : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
                         .min(this.extendedspace.getMax());
         
@@ -88,6 +86,8 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
             System.out.println("TFT-Last-Utility: " + this.getUtilitySpace().getUtility(myLastbid));
             System.out.println("TFT-Difference: " + difference);
             System.out.println("TFT-Utility-Goal: " + utilityGoal);
+            System.out.println("TFT-Lower-Bound: " + 
+                this.extendedspace.getMax().divide(new BigDecimal("2.0")).doubleValue());
         }
 
         myLastbid = selectedBid;

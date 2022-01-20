@@ -180,6 +180,8 @@ public class LearningAgent extends DefaultParty {
 
                 // Log the final outcome and terminate
                 getReporter().log(Level.INFO, "Final outcome:" + info);
+                getReporter().log(Level.INFO, "AGENT NOT USED");
+
                 terminate();
             }
         } catch (Exception e) {

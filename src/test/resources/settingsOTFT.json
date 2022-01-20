@@ -16,7 +16,7 @@
 									"config": {
 										"confComparer": "JaccardBidDistance",
 										"confBelief": "BayesianParticleFilterBelief",
-										"confEvaluator": "Last2BidsProductUtilityEvaluator",
+										"confEvaluator": "Last2BidsMixtProdUtilEvaluator",
 										"confState": "HistoryState",
 										"confExplorer": "TimeConcedingExplorationPolicy",
 										"confWidener": "ProgressiveWideningStrategy",
@@ -32,7 +32,7 @@
 									}
 								}
 							},
-							"profile": "file:src/test/resources/party1.json"
+							"profile": "file:src/test/resources/abstract1.json"
 						}
 					]
 				}
@@ -50,7 +50,7 @@
 									]
 								}
 							},
-							"profile": "file:src/test/resources/party2.json"
+							"profile": "file:src/test/resources/abstract2.json"
 						}
 					]
 				}

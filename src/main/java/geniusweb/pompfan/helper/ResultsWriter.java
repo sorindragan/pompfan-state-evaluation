@@ -153,10 +153,20 @@ public class ResultsWriter {
             try {
                 // PartyWithParameters party = pwp.getParty();
                 this.profile = this.getPwp().getProfile();
+                System.out.println("COMPUTE UTIL");
+                System.out.println(this.profile);
+                System.out.println(this.profile.getURI());
+                System.out.println(this.reporter);
+
+                // ?? for some reason this fails miserably in case of agreement
                 ProfileInterface profileint = ProfileConnectionFactory.create(this.profile.getURI(), this.reporter);
+                System.out.println(profileint);
+                System.out.println(profileint.getProfile());
                 UtilitySpace utilitySpace = ((UtilitySpace) profileint.getProfile());
+                System.out.println(utilitySpace);
                 this.utility = this.getAggreeBid() != null ? utilitySpace.getUtility(this.getAggreeBid()).doubleValue()
                         : 0.0;
+                profileint.close();
             } catch (IOException e) {
                 this.utility = -1.0;
                 e.printStackTrace();

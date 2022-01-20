@@ -12,15 +12,18 @@ import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
-public class Last2BidsMixtInverseDifferenceUtilEvaluator extends Last2BidsProductUtilityEvaluator {
+/**
+ * Difference Minimization as an Evaluation Function
+ */
+
+public class Last2BidsMixtOneMinusDifferenceUtilEvaluator extends Last2BidsProductUtilityEvaluator {
     private PartyId holder;
-    public static final double EPSILON = 0.25;
     
-    public Last2BidsMixtInverseDifferenceUtilEvaluator(UtilitySpace utilitySpace) {
+    public Last2BidsMixtOneMinusDifferenceUtilEvaluator(UtilitySpace utilitySpace) {
         super(utilitySpace);
     }
 
-    public Last2BidsMixtInverseDifferenceUtilEvaluator() {
+    public Last2BidsMixtOneMinusDifferenceUtilEvaluator() {
     }
 
     @Override
@@ -48,8 +51,10 @@ public class Last2BidsMixtInverseDifferenceUtilEvaluator extends Last2BidsProduc
                     ? this.getUtilitySpace().getUtility(secondToLastBid)
                     : currOpp.getUtilitySpace().getUtility(secondToLastBid);
         }
-        Double diff = Math.abs(utility1.subtract(utility2).doubleValue());
-        return 1 / (diff + EPSILON);
+
+        BigDecimal difference = utility2.subtract(utility1).abs();
+        return BigDecimal.ONE.subtract(difference).doubleValue();
+        
     }
 
     public PartyId getHolder() {

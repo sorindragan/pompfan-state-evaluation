@@ -1,4 +1,4 @@
-package geniusweb.pompfan.evaluators;
+package geniusweb.pompfan.evaluators.others;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -9,6 +9,7 @@ import geniusweb.actions.Action;
 import geniusweb.actions.ActionWithBid;
 import geniusweb.actions.PartyId;
 import geniusweb.issuevalue.Domain;
+import geniusweb.pompfan.evaluators.Last2BidsMeanUtilityEvaluator;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.UtilitySpace;
 

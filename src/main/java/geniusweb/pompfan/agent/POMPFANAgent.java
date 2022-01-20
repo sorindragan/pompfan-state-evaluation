@@ -67,10 +67,12 @@ public class POMPFANAgent extends DefaultParty {
     private static final boolean DEBUG_OFFER = false;
     private static final boolean DEBUG_PERSIST = false;
     private static final boolean DEBUG_SAVE_TREE = false;
-    private static final boolean DEBUG_BELIEF = true;
+    // turn on for state estimation experiments
+    private static final boolean DEBUG_BELIEF = false;
     private static final boolean DEBUG_TIME = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
+    private PartyId opp;
     protected ProfileInterface profileint = null;
     private Progress progress;
     private String protocol;
@@ -110,7 +112,6 @@ public class POMPFANAgent extends DefaultParty {
      */
     @Override
     public void notifyChange(Inform info) {
-        // System.out.println("===========INFO========== " + info.getClass().getName());
         try {
             if (info instanceof Settings) {
                 if (DEBUG_TIME)
@@ -121,16 +122,19 @@ public class POMPFANAgent extends DefaultParty {
                     System.out.println(this.me.getName() + ": Setup");
                 runSetupPhase(info);
             } else if (info instanceof ActionDone) {
+                // System.out.println("INFO= " + info);
                 if (DEBUG_TIME)
                     System.out.println(this.me.getName() + " - " + this.progress.get(System.currentTimeMillis())
                             + ": ActionDone - " + ((ActionDone) info).getAction().getActor());
                 runOpponentPhase(info);
+
             } else if (info instanceof YourTurn) {
                 if (DEBUG_TIME)
                     System.out.println(
                             this.me.getName() + " - " + this.progress.get(System.currentTimeMillis()) + ": YourTurn");
                 runAgentPhase(info);
             } else if (info instanceof Finished) {
+                System.out.println("INFO= " + info);
                 if (DEBUG_TIME)
                     System.out.println(
                             this.me.getName() + " - " + this.progress.get(System.currentTimeMillis()) + ": Finished");
@@ -145,9 +149,13 @@ public class POMPFANAgent extends DefaultParty {
         }
     }
 
-    private void cleanupIfGameOver() {
+    private void cleanupIfGameOver() throws IOException{
         if (this.progress.isPastDeadline(System.currentTimeMillis())) {
             getReporter().log(Level.INFO, "Game's over!");
+            FileWriter finalLogWriter = new FileWriter("eval/result_" + "last_experiment" + ".jsonl", true);
+            String content = this.me.getName() + "," + this.opponentName + "," + 0.0 + "," + "Bid{}" + "," + "Bid{}" +"\n";
+            finalLogWriter.write(content);
+            finalLogWriter.close();
             terminate();
         }
     }
@@ -192,11 +200,13 @@ public class POMPFANAgent extends DefaultParty {
         // The info object is an action that is performed by an agent.
         Action action = ((ActionDone) info).getAction();
 
+        // ActionDone could also be our action, which is stupid
         // Check if this is not our own action
         if (!this.me.equals(action.getActor())) {
             // Check if we already know who we are playing against.
             if (this.opponentName == null) {
                 // The part behind the last _ is always changing, so we must cut it off.
+                this.opp = action.getActor();
                 String fullOpponentName = action.getActor().getName();
                 int lastIndexOf = fullOpponentName.lastIndexOf("_");
                 int index = lastIndexOf;
@@ -290,18 +300,19 @@ public class POMPFANAgent extends DefaultParty {
 
         // Log the final outcome and terminate
         if (agreements.getMap().size() > 0) {
-            System.out.println(agreements.getMap());
-            getReporter().log(Level.INFO, "Final outcome: " + this.me.getName() + ": "
-                    + this.uSpace.getUtility(agreements.getMap().get(this.me)) + " " + info);
+
+            // getReporter().log(Level.INFO, "Final outcome: " + this.me.getName() + ": "
+            //         + this.uSpace.getUtility(agreements.getMap().get(this.me)) + " " + info);
             
-            // FileWriter finalLogWriter = new FileWriter("eval/result_" + "last_experiment" + ".jsonl", true);
-            // // FileWriter finalLogWriter = new FileWriter("eval/tournament_results_Experiment1A.jsonl", true);
-            // String content = this.me.getName() + ","
-            //         + this.opponentName + "," + this.uSpace.getUtility(agreements.getMap().get(this.me)) + "\n";
-            // // TODO: get the utility of the opponent somehow
-            // // TODO: see if can get other metrics
-            // finalLogWriter.write(content);
-            // finalLogWriter.close();
+            // TODO: get the utility of the opponent somehow
+            // TODO: see if can get other metrics
+            // The only thing that should not be complicated to just get metrics in the end...
+            FileWriter finalLogWriter = new FileWriter("eval/result_" + "last_experiment" + ".jsonl", true);
+            String content = this.me.getName() + ","
+                    + this.opponentName + "," + this.uSpace.getUtility(agreements.getMap().get(this.me)) + ","
+                    + agreements.getMap().get(this.me) + "," + agreements.getMap().get(this.opp) + "\n";
+            finalLogWriter.write(content);
+            finalLogWriter.close();
 
         }
         terminate();
@@ -462,15 +473,21 @@ public class POMPFANAgent extends DefaultParty {
             this.profileint.close();
             this.profileint = null;
         }
-        this.oppActions = null;
-        this.MCTS = null;
-        this.uSpace = null;
-        this.config = null;
-        this.bidsWithUtility = null;
-        this.negotiationData = null;
-        this.persistentState = null;
-        this.parameters = null;
-        this.mapper = null;
+        System.out.println("POMPFAN closed");
+        // super.terminate();
+        // if (this.profileint != null) {
+        //     this.profileint.close();
+        //     this.profileint = null;
+        // }
+        // this.oppActions = null;
+        // this.MCTS = null;
+        // this.uSpace = null;
+        // this.config = null;
+        // this.bidsWithUtility = null;
+        // this.negotiationData = null;
+        // this.persistentState = null;
+        // this.parameters = null;
+        // this.mapper = null;
     }
 
     /*
@@ -574,7 +591,6 @@ public class POMPFANAgent extends DefaultParty {
         if (1.5 * simTime < remainingTime) {
             // this.MCTS.scrapeSubTree();
             // System.gc();
-
             // When we start the tree construction we use the last real observation to guide the initial exploration
             // We do this just once at the very beginning after the data collection phase
             this.MCTS.getRoot().setObservation(this.MCTS.getRealHistory().get(this.MCTS.getRealHistory().size()-1));
@@ -583,6 +599,7 @@ public class POMPFANAgent extends DefaultParty {
             
         } else {
             getReporter().log(Level.WARNING, "Not enough time! Start consuming the tree");
+            // System.out.println(MCTS);
         }
 
         if (DEBUG_OFFER) {
@@ -603,6 +620,7 @@ public class POMPFANAgent extends DefaultParty {
             ActionNode lastBestActionNode = this.MCTS.getLastBestActionNode();
             if (lastBestActionNode != null) {
                 action = (ActionWithBid) lastBestActionNode.getAction();
+                System.out.println(action);
                 return action;
             }
 
@@ -612,18 +630,19 @@ public class POMPFANAgent extends DefaultParty {
             return action;
         }
         // Logging agent decisions
-        if (action instanceof Offer) {
-            Bid myBid = ((Offer) action).getBid();
-            if (DEBUG_OFFER == true)
-                System.out.println(
-                        "Agent: Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- " + myBid.toString());
-            return action;
-        }
         if (action instanceof Accept) {
             Bid acceptedBid = ((Accept) action).getBid();
             if (DEBUG_OFFER == true)
                 System.out.println("We ACCEPT: Util=" + String.valueOf(this.uSpace.getUtility(acceptedBid)) + " -- "
                         + acceptedBid.toString());
+            return action;
+        }
+
+        if (action instanceof Offer) {
+            Bid myBid = ((Offer) action).getBid();
+            if (DEBUG_OFFER == true)
+                System.out.println(
+                        "Agent: Util=" + String.valueOf(this.uSpace.getUtility(myBid)) + " -- " + myBid.toString());
             return action;
         }
         this.getReporter().log(Level.SEVERE, "Something unexpected HAPPENED! " + action.toString());
