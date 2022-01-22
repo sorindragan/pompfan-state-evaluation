@@ -213,7 +213,6 @@ public class POMPFANAgent extends DefaultParty {
     private void runOpponentPhase(Inform info) throws IOException {
         // The info object is an action that is performed by an agent.
         Action action = ((ActionDone) info).getAction();
-
         // ActionDone could also be our action, which is stupid
         // Check if this is not our own action
         if (!this.me.equals(action.getActor())) {
@@ -270,7 +269,6 @@ public class POMPFANAgent extends DefaultParty {
                 // double time = this.progress.get(System.currentTimeMillis());
                 // System.out.println("++++++++++++++++++++++++++++");
                 // System.out.println("A: " + time);
-
                 getConnection().send(action);
             } catch (Exception e) {
                 e.printStackTrace();

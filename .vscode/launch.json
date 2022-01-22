@@ -19,6 +19,19 @@
 		},
 		{
 			"type": "java",
+			"name": "ExperimentSelfPlay",
+			"request": "launch",
+			"mainClass": "geniusweb.pompfan.helper.ExperimentStateEvalSelfPlayRunner",
+			"classPaths": [
+				"$Auto"
+			],
+			"args": [
+				"src/test/resources/settingsExperimentSelfPlay.json",
+			],
+			"console": "internalConsole",
+		},
+		{
+			"type": "java",
 			"name": "Launch RandomCustomNegoRunner",
 			"request": "launch",
 			"mainClass": "geniusweb.pompfan.helper.RandomCustomNegoRunner",
