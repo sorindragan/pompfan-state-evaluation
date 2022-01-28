@@ -38,8 +38,8 @@ public abstract class OpponentParticleCreatorHardcoded {
 
         // hardcoded profile/utility
         ReportToLogger reporter = new ReportToLogger("HardcodedProfile");
-        // String profileString = "file:src/test/resources/party2.json";
-        String profileString = "file:src/test/resources/abstract2.json";
+        String profileString = "file:src/test/resources/party2.json";
+        // String profileString = "file:src/test/resources/abstract2.json";
         // String profileString = "file:src/test/resources/flightbooking2.json";
         URI profile = new URI(profileString);
         ProfileInterface profileint = ProfileConnectionFactory.create(
@@ -104,7 +104,7 @@ public abstract class OpponentParticleCreatorHardcoded {
             // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(utilitySpace, "ExactOppTFT", progress));
 
             // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
-            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
+            // listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
             
             listOfOpponents.add(new HardLinerOpponentPolicy(domain));
             listOfOpponents.add(new BoulwareOpponentPolicy(domain));

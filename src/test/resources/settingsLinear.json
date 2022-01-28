@@ -57,7 +57,7 @@
 			}
 		],
 		"deadline": {
-			"deadlinetime": { "durationms": 25000}
+			"deadlinetime": { "durationms": 30000}
 		}
 	}
 }

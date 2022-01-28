@@ -9,9 +9,10 @@ from scipy import stats
 sns.set_theme(style="whitegrid")
 
 # %%
-# df = pd.read_csv("../eval/tournament_results_ExperimentStateEval_Party.jsonl")
+df = pd.read_csv("../eval/tournament_results_ExperimentStateEval_Party.jsonl")
 
-df = pd.read_csv("../eval/tournament_results_ExperimentStateEval.jsonl")
+# last expermient was self-play Abstract
+# df = pd.read_csv("../eval/tournament_results_ExperimentStateEval.jsonl")
 # df = df.iloc[::2]
 original_df = df.copy(deep=True)
 df_zeros = df[df["utility"] == 0.0]
@@ -73,7 +74,7 @@ ax.set_ylabel(
 ax.set_xticks([i+1 for i in range(len(agreement_rate.keys()))])
 ax.set_xticklabels(list(agreement_rate.keys()), rotation=60, fontdict={
                    'horizontalalignment': 'right', 'size': 12})
-ax.set_ylim(0, 0.5)
+ax.set_ylim(0, 1)
 
 # Annotate
 for i, k in enumerate(agreement_rate.keys()):

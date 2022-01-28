@@ -7,20 +7,20 @@ import seaborn as sns
 sns.set_theme(style="whitegrid")
 
 # %%
-# file_name = "known_opponent_boulware.csv"
-file_name = "result_last_experiment.jsonl"
+# file_name = "known_opponent_boulware_party.csv"
+# file_name = "result_last_experiment.jsonl"
 
 
-# file_name = "known_opponent_ntft.csv"
+file_name = "known_opponent_ntft.csv"
 
-# domain_name = "Party"
-domain_name = "Abstract"
+domain_name = "Party"
+# domain_name = "Abstract"
 
-# opptype = "OwnTFT"
-opptype = "Boulware"
+opptype = "OwnTFT"
+# opptype = "Boulware"
 
 
-n = 10
+n = 20
 df = pd.read_csv(f"../eval/{file_name}")
 
 # %%
@@ -36,11 +36,14 @@ wrong_utils_party = list(filter(lambda num: num != 0, wrong_utils_partyz))
 
 data = [known_utils_party, unknown_utils_party, wrong_utils_party]
 
-fig = plt.figure(figsize=(14, 6))
+fig = plt.figure(figsize=(15, 6))
 ax = sns.boxplot(data=data,  palette="Set2", width=0.5, linewidth=2.5)
 # plt.boxplot(data)
 ax.set_xticklabels([f"Known Opponent {domain_name} Domain", f"Multiple Unknown Opponents {domain_name} Domain",
                    f"Single Unknown Opponent {domain_name} Domain"])
+
+# ax.set_xticklabels([f"Known Opponent {domain_name} Domain", f"Same Strategy Unknown Profile {domain_name} Domain",
+#                    f"Multiple Unknown Opponents {domain_name} Domain"])
 
 plt.title(f"Utility earned across multiple negotiations when the {opptype} opponent is known vs. unknown")
 plt.xlabel("Setting")

@@ -49,7 +49,7 @@ df.index = df["cls"] + "_" + df["profile_id"]
 df.head(5)
 # %%
 # data for graph showing the evolution of the probability for the particle containing the real opponent
-print(df[df['cls'].str.contains("Exact")].iloc[:, 1:-3])
+# print(df[df['cls'].str.contains("Exact")].iloc[:, 1:-3])
 
 # df[df['cls'].str.contains("Exact")].iloc[:, 0:-5].to_csv(
 #     "../eval/tmpevolution.csv", mode = "a", index = False, header = False)
@@ -237,10 +237,20 @@ anim = animation.FuncAnimation(fig, animate, frames=num_frames, interval=1000, r
 HTML(anim.to_jshtml())
 
 # %%
+# analysis general
 most_likely = df[df[list(df.columns)[:-3]].sum(axis=1)
                  == df[list(df.columns)[:-3]].sum(axis=1).max()]
 stype, profl = most_likely["cls"][0], most_likely['profile'][0]
 print(f"Most likely profile:\n{stype} => {profl}")
+
+least_likely = df[df[list(df.columns)[:-3]].sum(axis=1)
+                 == df[list(df.columns)[:-3]].sum(axis=1).min()]
+stype, profl = least_likely["cls"][0], least_likely['profile'][0]
+print(f"Least likely profile:\n{stype} => {profl}")
+
+# most likely class
+df.groupby("cls").sum().sum(axis=1) / df.groupby("cls").sum().sum(axis=1).sum()
+
 # %%
 df['weight'] = df[list(df.columns)[:-3]].sum(axis=1)
 # df['distance'] = pd.Series([all_results[0]['Distance']
