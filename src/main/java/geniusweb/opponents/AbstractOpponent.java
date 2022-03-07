@@ -6,12 +6,15 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.websocket.DeploymentException;
 
@@ -19,7 +22,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import geniusweb.actions.AbstractAction;
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.ActionWithBid;
@@ -29,7 +31,6 @@ import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
 import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
-import geniusweb.boa.biddingstrategy.ExtendedUtilSpace;
 import geniusweb.inform.ActionDone;
 import geniusweb.inform.Agreements;
 import geniusweb.inform.Finished;
@@ -40,7 +41,6 @@ import geniusweb.issuevalue.Bid;
 import geniusweb.party.Capabilities;
 import geniusweb.party.DefaultParty;
 import geniusweb.profile.Profile;
-import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.profileconnection.ProfileConnectionFactory;
@@ -48,13 +48,15 @@ import geniusweb.profileconnection.ProfileInterface;
 import geniusweb.progress.Progress;
 import geniusweb.progress.ProgressRounds;
 import geniusweb.references.Parameters;
+import javafx.util.Pair;
 import tudelft.utilities.immutablelist.ImmutableList;
 import tudelft.utilities.logging.Reporter;
 
 public abstract class AbstractOpponent extends DefaultParty {
     private boolean isLearn;
-    private ExtendedUtilSpace extendedspace;
     private BidsWithUtility bidsWithUtility;
+    private HashMap<BigDecimal, ArrayList<Bid>> bidsHash = new HashMap<BigDecimal, ArrayList<Bid>>();
+    private ArrayList<BigDecimal> sortedUtilKeys = new ArrayList<BigDecimal>();
     private ImmutableList<Bid> goodBids;
     private List<ActionWithBid> history = new ArrayList<ActionWithBid>();
     private PartyId me;
@@ -68,6 +70,8 @@ public abstract class AbstractOpponent extends DefaultParty {
     private Progress progress;
     protected ProfileInterface profileint = null;
     private Bid lastReceivedBid;
+    public Pair<Bid, BigDecimal> minBidWithUtil;
+    public Pair<Bid, BigDecimal> maxBidWithUtil;
     private List<File> dataPaths = new ArrayList<>();
     protected boolean DEBUG_OFFER = false;
     // private T param;
@@ -273,8 +277,39 @@ public abstract class AbstractOpponent extends DefaultParty {
     protected void initializeVariables(Settings settings) throws DeploymentException, IOException {
         this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(), getReporter());
         this.setUtilitySpace((UtilitySpace) this.profileint.getProfile());
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         this.bidsWithUtility = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace());
+        // create utils to bids hashmap
+        BigDecimal currUtility = BigDecimal.ZERO;
+        ArrayList<Bid> currBidsWithUtil = new ArrayList<>();
+        for (Bid bid: this.bidsWithUtility.getBids(new Interval(BigDecimal.ZERO, BigDecimal.ONE))) {
+            currUtility = this.getUtilitySpace().getUtility(bid);
+            if (this.bidsHash.containsKey(currUtility)) {
+                currBidsWithUtil = this.bidsHash.get(currUtility);
+                currBidsWithUtil.add(bid);
+                this.bidsHash.put(currUtility, currBidsWithUtil);
+                continue;
+            }
+            this.sortedUtilKeys.add(currUtility);
+            currBidsWithUtil = (ArrayList<Bid>) Stream.of(bid).collect(Collectors.toList());
+            this.bidsHash.put(currUtility, currBidsWithUtil);
+        }
+        this.sortedUtilKeys.sort(new Comparator<BigDecimal>() {
+            @Override
+            public int compare(BigDecimal o1, BigDecimal o2) {
+                return o1.compareTo(o2);
+            }
+            });
+        
+        this.minBidWithUtil = new Pair<Bid, BigDecimal>(this.bidsHash.get(this.sortedUtilKeys.get(0)).get(0), this.sortedUtilKeys.get(0));
+        this.maxBidWithUtil = new Pair<Bid, BigDecimal>(this.bidsHash.get(this.sortedUtilKeys.get(this.sortedUtilKeys.size()-1)).get(0),
+                this.sortedUtilKeys.get(this.sortedUtilKeys.size() - 1));
+
+        // SearchFunction test; also tested for 0.0 and 1.0
+        // System.out.println(this.sortedUtilKeys);
+        // Bid someBid = this.getBidWithUtility(new BigDecimal("0.5732"));
+        // System.out.println("----------");
+        // System.out.println(someBid);
+
         this.protocol = settings.getProtocol().getURI().getPath();
         this.me = settings.getID();
         this.progress = settings.getProgress();
@@ -327,6 +362,44 @@ public abstract class AbstractOpponent extends DefaultParty {
 
     }
 
+    // logN complexity; where N is the number of bids in the Domain
+    public BigDecimal bidBinarySearch(BigDecimal value, ArrayList<BigDecimal> bidSearchSpace, int lowerBound, int upperBound, Pair<BigDecimal, BigDecimal> closestValue) {
+        if (upperBound <= lowerBound) {
+            return bidSearchSpace.get(lowerBound).subtract(value).abs().compareTo(closestValue.getValue()) == -1 ? bidSearchSpace.get(lowerBound): closestValue.getKey();
+        }
+
+        int midPoint = (lowerBound + upperBound) / 2;
+        BigDecimal middleUtil = bidSearchSpace.get(midPoint);
+        closestValue = middleUtil.subtract(value).abs().compareTo(closestValue.getValue()) == -1
+                        ? new Pair<BigDecimal,BigDecimal>(middleUtil, middleUtil.subtract(value).abs())
+                        : closestValue;
+        
+        if (value.compareTo(middleUtil) == 0) {
+            return value;
+        } 
+
+        if (value.compareTo(middleUtil) < 0) {
+            return bidBinarySearch(value, bidSearchSpace, lowerBound, midPoint-1, closestValue);
+        }
+        
+        if (value.compareTo(middleUtil) > 0) {
+            return bidBinarySearch(value, bidSearchSpace, midPoint+1, upperBound, closestValue);
+        }
+
+        // should not be reached
+        return BigDecimal.ZERO.subtract(BigDecimal.ONE);
+        
+    }
+
+    public Bid getBidWithUtility(BigDecimal util) {
+        Pair<BigDecimal, BigDecimal> closestValue = new Pair<BigDecimal,BigDecimal>(BigDecimal.ONE, BigDecimal.TEN);
+        BigDecimal closestUtil = this.bidBinarySearch(util, 
+                this.sortedUtilKeys, 0, this.sortedUtilKeys.size()-1, closestValue);
+        // System.out.println("CLOSEST UTILITY");
+        // System.out.println(closestUtil);
+        return this.bidsHash.get(closestUtil).get(0);
+    }
+
     public ImmutableList<Bid> getGoodBids() {
         return goodBids;
     }
@@ -341,14 +414,6 @@ public abstract class AbstractOpponent extends DefaultParty {
 
     public void setLearn(boolean isLearn) {
         this.isLearn = isLearn;
-    }
-
-    public ExtendedUtilSpace getExtendedspace() {
-        return extendedspace;
-    }
-
-    public void setExtendedspace(ExtendedUtilSpace extendedspace) {
-        this.extendedspace = extendedspace;
     }
 
     public BidsWithUtility getBidsWithUtility() {

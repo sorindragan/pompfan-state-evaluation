@@ -231,10 +231,10 @@ def generate_animate(df: pd.DataFrame, skip=5):
 
 fig = plt.figure(figsize=(15, 15))
 # Don't skip frames/lines; 1 is actually not skipping shit
-animate, num_frames = generate_animate(df, skip=1)
+animate, num_frames = generate_animate(df, skip=2)
 anim = animation.FuncAnimation(fig, animate, frames=num_frames, interval=1000, repeat=True, blit=False)
-# anim.save('../visuals/particleUpdates.gif', writer='imagemagick', fps=2)
-HTML(anim.to_jshtml())
+anim.save('../visuals/particleUpdatesOTFT.gif', writer='imagemagick', fps=2)
+# HTML(anim.to_jshtml())
 
 # %%
 # analysis general

@@ -1,7 +1,6 @@
 package geniusweb.opponents;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 
 import geniusweb.actions.Accept;
@@ -9,17 +8,12 @@ import geniusweb.actions.Action;
 import geniusweb.actions.ActionWithBid;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
-import geniusweb.boa.biddingstrategy.ExtendedUtilSpace;
 import geniusweb.inform.Agreements;
 import geniusweb.issuevalue.Bid;
-import geniusweb.profile.utilityspace.LinearAdditive;
-import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import geniusweb.profile.utilityspace.UtilitySpace;
-import tudelft.utilities.immutablelist.ImmutableList;
 
 public class TimeDependentParty extends AbstractOpponent {
 
-    private ExtendedUtilSpace extendedspace;
     private double e = 1.2;
     private final boolean DEBUG = false; 
 
@@ -36,7 +30,6 @@ public class TimeDependentParty extends AbstractOpponent {
     }
 
     protected ActionWithBid myTurn(Object param) {
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         Bid bid = makeBid();
         PartyId me = this.getMe();
         UtilitySpace utilspace = this.getUtilitySpace();
@@ -47,6 +40,7 @@ public class TimeDependentParty extends AbstractOpponent {
         } else {
             lastReceivedBid = oppHistory.get(oppHistory.size()-1).getBid();
         }
+
         Action myAction;
         if (bid == null || (lastReceivedBid != null
                 && utilspace.getUtility(lastReceivedBid)
@@ -66,17 +60,12 @@ public class TimeDependentParty extends AbstractOpponent {
      */
     private Bid makeBid() {
         double time = this.getProgress().get(System.currentTimeMillis());
-        BigDecimal utilityGoal = utilityGoal(time, getE());
+        BigDecimal utilityGoal = this.utilityGoal(time, getE());
         if (DEBUG) {
             System.out.println("O: " + time);
             System.out.println("TD-Utility-Goal: " + utilityGoal.doubleValue());
         }
-        ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
-        if (options.size() == BigInteger.ZERO) {
-            // if we can't find good bid, get max util bid....
-            options = this.extendedspace.getBids(this.extendedspace.getMax());
-        }
-        return options.get(options.size().intValue()-1);
+        return this.getBidWithUtility(utilityGoal);
 
     }
 
@@ -88,8 +77,8 @@ public class TimeDependentParty extends AbstractOpponent {
      * @return the utility goal for this time and e value
      */
     private BigDecimal utilityGoal(double t, double e) {
-        BigDecimal minUtil = this.extendedspace.getMin();
-        BigDecimal maxUtil = this.extendedspace.getMax();
+        BigDecimal minUtil = this.minBidWithUtil.getValue();
+        BigDecimal maxUtil = this.maxBidWithUtil.getValue();
         double ft = 0;
         if (e != 0)
             ft = Math.pow(t, 1 / e);

@@ -100,17 +100,29 @@ public abstract class OpponentParticleCreatorHardcoded {
             // listOfOpponents.add(new BoulwareOpponentPolicy(utilitySpace, "ExactBoulware", 0.2));
             // listOfOpponents.add(new LinearOpponentPolicy(utilitySpace, "ExactLinear", 1.0));
             // listOfOpponents.add(new ConcederOpponentPolicy(utilitySpace, "ExactConceder", 2.0));
-            // listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOwnTFT"));
+            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOwnTFT"));
             // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(utilitySpace, "ExactOppTFT", progress));
 
             // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
-            // listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
+            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
             
             listOfOpponents.add(new HardLinerOpponentPolicy(domain));
             listOfOpponents.add(new BoulwareOpponentPolicy(domain));
             listOfOpponents.add(new LinearOpponentPolicy(domain));
             listOfOpponents.add(new ConcederOpponentPolicy(domain));
         }
+
+
+        // general experiment
+        // for (int cnt = 0; cnt < numParticlesPerOpponent; cnt++) {
+        //     // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
+        //     listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
+
+        //     listOfOpponents.add(new HardLinerOpponentPolicy(domain));
+        //     listOfOpponents.add(new BoulwareOpponentPolicy(domain));
+        //     listOfOpponents.add(new LinearOpponentPolicy(domain));
+        //     listOfOpponents.add(new ConcederOpponentPolicy(domain));
+        // }
 
         
         

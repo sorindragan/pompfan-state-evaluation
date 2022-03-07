@@ -1,21 +1,13 @@
 package geniusweb.opponents;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.List;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.ActionWithBid;
 import geniusweb.actions.Offer;
-import geniusweb.bidspace.AllBidsList;
-import geniusweb.bidspace.BidsWithUtility;
-import geniusweb.bidspace.Interval;
-import geniusweb.boa.biddingstrategy.ExtendedUtilSpace;
 import geniusweb.inform.Agreements;
 import geniusweb.issuevalue.Bid;
-import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
-import tudelft.utilities.immutablelist.ImmutableList;
 import tudelft.utilities.logging.Reporter;
 
 public class OwnUtilTFTAgent extends AbstractOpponent {
@@ -52,8 +44,6 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
     @Override
     protected ActionWithBid myTurn(Object param) {
         ActionWithBid action;
-        ExtendedUtilSpace extendedspace = this.getExtendedspace();
-        BidsWithUtility bidutils = this.getBidsWithUtility();
         List<ActionWithBid> oppHistory = this.getOpponentHistory();
         // List<ActionWithBid> ownHistory = this.getOwnHistory();
         
@@ -75,11 +65,11 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
 
         BigDecimal utilityGoal = isConcession
                 ? this.getUtilitySpace().getUtility(myLastbid).subtract(difference.abs())
-                        .max(extendedspace.getMax().divide(new BigDecimal("2.0")))
+                        .max(this.maxBidWithUtil.getValue().divide(new BigDecimal("2.0")))
                 : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
-                        .min(extendedspace.getMax());
+                        .min(this.maxBidWithUtil.getValue());
         
-        Bid selectedBid = computeNextBid(utilityGoal, extendedspace, bidutils);
+        Bid selectedBid = computeNextBid(utilityGoal);
         double time = this.getProgress().get(System.currentTimeMillis());
 
         if (DEBUG_TFT) {
@@ -90,7 +80,7 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
             System.out.println("TFT-Difference: " + difference);
             System.out.println("TFT-Utility-Goal: " + utilityGoal);
             System.out.println("TFT-Lower-Bound: " + 
-                extendedspace.getMax().divide(new BigDecimal("2.0")).doubleValue());
+                this.maxBidWithUtil.getValue().divide(new BigDecimal("2.0")).doubleValue());
         }
 
         myLastbid = selectedBid;
@@ -101,23 +91,8 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
                 : new Offer(this.getMe(), selectedBid);
     }
 
-    private Bid computeNextBid(BigDecimal utilityGoal, ExtendedUtilSpace extendedspace, BidsWithUtility bidutils) {
-        ImmutableList<Bid> options = extendedspace.getBids(utilityGoal);
-        if (options.size() == BigInteger.ZERO) {
-            // System.out.println("WARNING: TOLERANCE TOO LOW");
-
-            options = bidutils.getBids(
-	                new Interval(utilityGoal.subtract(new BigDecimal("0.1")), utilityGoal));
-        }
-        try {
-            // this should hardly happen
-            return options.get(options.size().intValue() - 1);
-        } catch (Exception e) {
-            System.out.println("OPP: No bid in that interval. " + utilityGoal.doubleValue());
-            options = bidutils.getBids(
-                    new Interval(utilityGoal.subtract(new BigDecimal("0.2")), utilityGoal.add(new BigDecimal("0.1"))));
-            return options.get(options.size().intValue() - 1);
-        }
+    private Bid computeNextBid(BigDecimal utilityGoal) {
+       return this.getBidWithUtility(utilityGoal);
     }
 
     @Override
