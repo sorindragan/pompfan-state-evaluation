@@ -1,11 +1,7 @@
 package geniusweb.pompfan.opponents;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,42 +11,26 @@ import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.ActionWithBid;
 import geniusweb.actions.Offer;
-import geniusweb.bidspace.AllBidsList;
-import geniusweb.bidspace.BidsWithUtility;
-import geniusweb.bidspace.Interval;
-import geniusweb.boa.biddingstrategy.ExtendedUtilSpace;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.HistoryState;
-import geniusweb.profile.utilityspace.LinearAdditive;
-import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import geniusweb.profile.utilityspace.UtilitySpace;
-import tudelft.utilities.immutablelist.ImmutableList;
 
 public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
 
     @JsonIgnore
-    private ExtendedUtilSpace extendedspace;
     private Bid myLastbid = null;
-    private Bid maxBid;
-    private BidsWithUtility bidutils;
     private final boolean DEBUG = false;
 
     @JsonCreator
     public OwnUtilityTFTOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace uSpace, 
             @JsonProperty("name") String name) {
         super(uSpace, name);
-        this.bidutils = new BidsWithUtility((LinearAdditiveUtilitySpace) uSpace);
-        this.maxBid = this.bidutils.getExtremeBid(true);
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
     }
     
     public OwnUtilityTFTOpponentPolicy(Domain domain) {
         super(domain, "OwnUtilTFT");
-        this.bidutils = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace());
-        this.maxBid = this.bidutils.getExtremeBid(true);
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
     }
     
     // the ractive agents should have this method implemented
@@ -64,7 +44,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
         myLastbid  = lastOwnBid;
         if (second2lastReceivedBid == null) {
             // not enough information known
-            Bid bid = this.maxBid;
+            Bid bid = this.maxBidWithUtil.getKey();
             action = new Offer(this.getPartyId(), bid);
             return action;
         }
@@ -78,9 +58,9 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
 
         BigDecimal utilityGoal = isConcession
                 ? this.getUtilitySpace().getUtility(myLastbid).subtract(difference.abs())
-                        .max(this.extendedspace.getMax().divide(new BigDecimal("2.0")))
+                        .max(this.maxBidWithUtil.getValue().divide(new BigDecimal("2.0")))
                 : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
-                        .min(this.extendedspace.getMax());
+                        .min(this.maxBidWithUtil.getValue());
 
         // long t = System.nanoTime();
         Bid selectedBid = computeNextBid(utilityGoal);
@@ -118,7 +98,7 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
 
         if (simulatedHistory.size() < 3) {
             // not enough information known
-            Bid bid = this.maxBid;
+            Bid bid = this.maxBidWithUtil.getKey();
             myLastbid = bid;
             action = new Offer(this.getPartyId(), bid);
             return action;
@@ -133,9 +113,9 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
 
         BigDecimal utilityGoal = isConcession
                 ? this.getUtilitySpace().getUtility(myLastbid).subtract(difference.abs())
-                        .max(this.extendedspace.getMax().divide(new BigDecimal("2.0")))
+                        .max(this.maxBidWithUtil.getValue().divide(new BigDecimal("2.0")))
                 : this.getUtilitySpace().getUtility(myLastbid).add(difference.abs())
-                        .min(this.extendedspace.getMax());
+                        .min(this.maxBidWithUtil.getValue());
 
         Bid selectedBid = computeNextBid(utilityGoal);
         
@@ -169,32 +149,6 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
     }
 
     private Bid computeNextBid(BigDecimal utilityGoal) {
-        if (utilityGoal.doubleValue() < this.bidutils.getRange().getMin().doubleValue()) {
-            utilityGoal = this.bidutils.getRange().getMin();
-        }
-
-        if (utilityGoal.doubleValue() > this.bidutils.getRange().getMax().doubleValue()) {
-            utilityGoal = this.bidutils.getRange().getMax();
-        }
-
-
-        ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
-        if (options.size() == BigInteger.ZERO) {
-            // System.out.println("WARNING: PARTICLE TOLERANCE TOO LOW");
-
-            options = this.bidutils.getBids(
-                    new Interval(utilityGoal.subtract(new BigDecimal("0.1")), utilityGoal));
-            // System.out.println(options.size() + " " + utilityGoal.doubleValue());
-        }
-        try {
-            // this should hardly happen
-            return options.get(options.size().intValue() - 1);
-        } catch (Exception e) {
-            System.out.println("PARTICLE: No bid in that interval. " + utilityGoal.doubleValue());
-            options = this.bidutils.getBids(
-                    new Interval(utilityGoal.subtract(new BigDecimal("0.2")), utilityGoal.add(new BigDecimal("0.1"))));
-            System.out.println(this.bidutils.getRange());
-            return options.get(options.size().intValue() - 1);
-        }
+        return this.getBidWithUtility(utilityGoal);
     }
 }

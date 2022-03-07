@@ -100,7 +100,7 @@ public abstract class OpponentParticleCreatorHardcoded {
             // listOfOpponents.add(new BoulwareOpponentPolicy(utilitySpace, "ExactBoulware", 0.2));
             // listOfOpponents.add(new LinearOpponentPolicy(utilitySpace, "ExactLinear", 1.0));
             // listOfOpponents.add(new ConcederOpponentPolicy(utilitySpace, "ExactConceder", 2.0));
-            listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOwnTFT"));
+            // listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOwnTFT"));
             // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(utilitySpace, "ExactOppTFT", progress));
 
             // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));

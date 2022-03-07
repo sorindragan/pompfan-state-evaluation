@@ -35,8 +35,10 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.progress.Progress;
 import tudelft.utilities.immutablelist.ImmutableList;
 
-public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
+// TODO: Fix Opponent Model
+// TODO: Use getBidWithUtility(util) method instead of this mess
 
+public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
     @JsonIgnore
     BidsWithUtility bidsWithinUtil;
     private AbstractOpponentModel opponentModelBelief = null;
@@ -56,7 +58,6 @@ public class OppUtilityTFTOpponentPolicy extends AbstractPolicy {
     public OppUtilityTFTOpponentPolicy(Domain domain, Progress progress) {
         super(domain, "OppUtilTFT");
         this.progress = progress;
-
     }
     
     // used in the belief update

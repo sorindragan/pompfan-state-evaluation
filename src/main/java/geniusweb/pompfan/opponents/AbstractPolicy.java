@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,6 +38,7 @@ import geniusweb.profile.utilityspace.DiscreteValueSetUtilities;
 import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.profile.utilityspace.ValueSetUtilities;
+import javafx.util.Pair;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @Type(value = AntagonisticOpponentPolicy.class), @Type(value = RandomOpponentPolicy.class),
@@ -52,6 +55,12 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
     private String name = "DEFAULT-ABSTRACT-POLICY";
     private PartyId partyId;
 
+    // necessary for the fast bid search
+    private HashMap<BigDecimal, ArrayList<Bid>> bidsHash = new HashMap<BigDecimal, ArrayList<Bid>>();
+    private ArrayList<BigDecimal> sortedUtilKeys = new ArrayList<BigDecimal>();
+    public Pair<Bid, BigDecimal> minBidWithUtil;
+    public Pair<Bid, BigDecimal> maxBidWithUtil;
+
     @JsonIgnore
     private Random random = null;
 
@@ -66,6 +75,33 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
                 .initRandomUtilityProfile(domain, name);
         this.setUtilitySpace(new LinearAdditiveUtilitySpace(domain, name, preferencePairs.getKey(),
                 preferencePairs.getValue(), null));
+        
+        BigDecimal currUtility = BigDecimal.ZERO;
+        ArrayList<Bid> currBidsWithUtil = new ArrayList<>();
+        for (Bid bid: this.getBidspace()) {
+            currUtility = this.getUtilitySpace().getUtility(bid);
+            if (this.bidsHash.containsKey(currUtility)) {
+                currBidsWithUtil = this.bidsHash.get(currUtility);
+                currBidsWithUtil.add(bid);
+                this.bidsHash.put(currUtility, currBidsWithUtil);
+                continue;
+            }
+            this.sortedUtilKeys.add(currUtility);
+            currBidsWithUtil = (ArrayList<Bid>) Stream.of(bid).collect(Collectors.toList());
+            this.bidsHash.put(currUtility, currBidsWithUtil);
+        }
+        this.sortedUtilKeys.sort(new Comparator<BigDecimal>() {
+            @Override
+            public int compare(BigDecimal o1, BigDecimal o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+        this.minBidWithUtil = new Pair<Bid, BigDecimal>(this.bidsHash.get(this.sortedUtilKeys.get(0)).get(0),
+                this.sortedUtilKeys.get(0));
+        this.maxBidWithUtil = new Pair<Bid, BigDecimal>(
+                this.bidsHash.get(this.sortedUtilKeys.get(this.sortedUtilKeys.size() - 1)).get(0),
+                this.sortedUtilKeys.get(this.sortedUtilKeys.size() - 1));
 
     }
 
@@ -77,6 +113,75 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
         this.setUtilitySpace(uSpace);
         this.setBidspace(new AllBidsList(this.getDomain()));
         this.setRandom(new Random());
+
+        BigDecimal currUtility = BigDecimal.ZERO;
+        ArrayList<Bid> currBidsWithUtil = new ArrayList<>();
+        for (Bid bid : this.getBidspace()) {
+            currUtility = this.getUtilitySpace().getUtility(bid);
+            if (this.bidsHash.containsKey(currUtility)) {
+                currBidsWithUtil = this.bidsHash.get(currUtility);
+                currBidsWithUtil.add(bid);
+                this.bidsHash.put(currUtility, currBidsWithUtil);
+                continue;
+            }
+            this.sortedUtilKeys.add(currUtility);
+            currBidsWithUtil = (ArrayList<Bid>) Stream.of(bid).collect(Collectors.toList());
+            this.bidsHash.put(currUtility, currBidsWithUtil);
+        }
+        this.sortedUtilKeys.sort(new Comparator<BigDecimal>() {
+            @Override
+            public int compare(BigDecimal o1, BigDecimal o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+        this.minBidWithUtil = new Pair<Bid, BigDecimal>(this.bidsHash.get(this.sortedUtilKeys.get(0)).get(0),
+                this.sortedUtilKeys.get(0));
+        this.maxBidWithUtil = new Pair<Bid, BigDecimal>(
+                this.bidsHash.get(this.sortedUtilKeys.get(this.sortedUtilKeys.size() - 1)).get(0),
+                this.sortedUtilKeys.get(this.sortedUtilKeys.size() - 1));
+
+    }
+
+    public BigDecimal bidBinarySearch(BigDecimal value, ArrayList<BigDecimal> bidSearchSpace, int lowerBound,
+            int upperBound, Pair<BigDecimal, BigDecimal> closestValue) {
+        if (upperBound <= lowerBound) {
+            return bidSearchSpace.get(lowerBound).subtract(value).abs().compareTo(closestValue.getValue()) == -1
+                    ? bidSearchSpace.get(lowerBound)
+                    : closestValue.getKey();
+        }
+
+        int midPoint = (lowerBound + upperBound) / 2;
+        BigDecimal middleUtil = bidSearchSpace.get(midPoint);
+        closestValue = middleUtil.subtract(value).abs().compareTo(closestValue.getValue()) == -1
+                ? new Pair<BigDecimal, BigDecimal>(middleUtil, middleUtil.subtract(value).abs())
+                : closestValue;
+
+        if (value.compareTo(middleUtil) == 0) {
+            return middleUtil;
+        }
+
+        if (value.compareTo(middleUtil) < 0) {
+            return bidBinarySearch(value, bidSearchSpace, lowerBound, midPoint - 1, closestValue);
+        }
+
+        if (value.compareTo(middleUtil) > 0) {
+            return bidBinarySearch(value, bidSearchSpace, midPoint + 1, upperBound, closestValue);
+        }
+
+        // should not be reached
+        return BigDecimal.ZERO.subtract(BigDecimal.ONE);
+
+    }
+
+    public Bid getBidWithUtility(BigDecimal util) {
+        Pair<BigDecimal, BigDecimal> closestValue = new Pair<BigDecimal, BigDecimal>(BigDecimal.ONE, BigDecimal.TEN);
+        BigDecimal closestUtil = this.bidBinarySearch(util,
+                this.sortedUtilKeys, 0, this.sortedUtilKeys.size() - 1, closestValue);
+        // System.out.println("CLOSEST UTILITY");
+        // System.out.println(closestUtil);
+        return this.bidsHash.get(closestUtil).get(0);
+        
     }
 
     public String getId() {

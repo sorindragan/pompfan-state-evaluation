@@ -375,7 +375,7 @@ public abstract class AbstractOpponent extends DefaultParty {
                         : closestValue;
         
         if (value.compareTo(middleUtil) == 0) {
-            return value;
+            return middleUtil;
         } 
 
         if (value.compareTo(middleUtil) < 0) {

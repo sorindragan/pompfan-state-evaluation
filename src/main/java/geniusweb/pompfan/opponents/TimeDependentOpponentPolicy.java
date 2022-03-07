@@ -1,11 +1,7 @@
 package geniusweb.pompfan.opponents;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.MathContext;
-import java.math.RoundingMode;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,39 +13,30 @@ import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
 import geniusweb.actions.Offer;
 import geniusweb.actions.PartyId;
-import geniusweb.bidspace.Interval;
-import geniusweb.exampleparties.timedependentparty.ExtendedUtilSpace;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.state.AbstractState;
-import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.UtilitySpace;
-import tudelft.utilities.immutablelist.ImmutableList;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @Type(value = BoulwareOpponentPolicy.class), @Type(value = ConcederOpponentPolicy.class),
         @Type(value = HardLinerOpponentPolicy.class), @Type(value = LinearOpponentPolicy.class) })
 public class TimeDependentOpponentPolicy extends AbstractPolicy {
-
-    private ExtendedUtilSpace extendedspace;
     private double e = 1.2;
 
     public TimeDependentOpponentPolicy(Domain domain) {
         super(domain, "TimeDependent");
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditive) this.getUtilitySpace());
     }
     
     @JsonCreator
     public TimeDependentOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace utilitySpace, @JsonProperty("name") String name, @JsonProperty("e") double e) {
         super(utilitySpace, name);
         this.e = e;
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditive) this.getUtilitySpace());
     }
 
 
     public TimeDependentOpponentPolicy(Domain domain, String name) {
         super(domain, name);
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditive) this.getUtilitySpace());
     }
 
     @Override
@@ -71,6 +58,9 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
     private Action myTurn(Bid lastReceivedBid, AbstractState<?> state) {
 
         Bid bid = makeBid(state.getTime());
+        // System.out.println("TD Particle");
+        // System.out.println(state.getTime());
+        
         
         PartyId me = this.getPartyId();
         UtilitySpace utilspace = this.getUtilitySpace();
@@ -91,32 +81,9 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
      *         bid.
      */
     private Bid makeBid(Double currTime) {
-        BigDecimal utilityGoal = getUtilityGoal(currTime, this.getE(), this.extendedspace.getMin(), this.extendedspace.getMax());
-        
-        // ! this takes too much (sometimes 3 seconds for a poor bid)
-        // long t = System.nanoTime();
-        ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
-        // if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t) > 1000) {
-        //     System.out.println(this.getClass().getName());
-        //     System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t));
-        //     System.out.println(this.extendedspace.getMin().doubleValue());
-        //     System.out.println(this.extendedspace.getMax().doubleValue());
-        //     System.out.println(utilityGoal.doubleValue());
-        // }
-
-        if (options.size() == BigInteger.ZERO) {
-            // this should not happen!
-            options = extendedspace.getBids(this.extendedspace.getMax());
-
-        }
-        try {
-            return options.get(options.size().intValue()-1);
-        } catch (Exception e) {
-            System.out.println("WARNING: A profile was genereated weirdly and resulted in option size:" + options.size().intValue());
-            return null;
-        }
-
-
+        BigDecimal utilityGoal = getUtilityGoal(currTime, this.getE());
+        // System.out.println(utilityGoal);
+        return this.getBidWithUtility(utilityGoal);
     }
 
     /**
@@ -131,7 +98,10 @@ public class TimeDependentOpponentPolicy extends AbstractPolicy {
      * @param maxUtil the maximum utility possible in our profile
      * @return the utility goal for this time and e value
      */
-    protected BigDecimal getUtilityGoal(double t, double e, BigDecimal minUtil, BigDecimal maxUtil) {
+    protected BigDecimal getUtilityGoal(double t, double e) {
+
+        BigDecimal minUtil = this.minBidWithUtil.getValue();
+        BigDecimal maxUtil = this.maxBidWithUtil.getValue();
 
         double ft = 0.0;
         if (e != 0) ft = Math.pow(t, 1 / e);
