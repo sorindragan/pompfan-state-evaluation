@@ -67,11 +67,11 @@ public class POMPFANAgent extends DefaultParty {
      */
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = false;
-    private static final boolean DEBUG_OFFER = false;
+    private static final boolean DEBUG_OFFER = true;
     private static final boolean DEBUG_PERSIST = false;
     private static final boolean DEBUG_SAVE_TREE = false;
     // turn on for state estimation experiments
-    private static final boolean DEBUG_BELIEF = true;
+    private static final boolean DEBUG_BELIEF = false;
     private static final boolean DEBUG_TIME = false;
     private Bid lastReceivedBid = null;
     private PartyId me;
@@ -84,6 +84,7 @@ public class POMPFANAgent extends DefaultParty {
     private PersistentState persistentState;
     private NegotiationData negotiationData;
     private List<Action> oppActions = new ArrayList<Action>();
+    private List<Action> actingAgentActions = new ArrayList<Action>();
     private List<File> dataPaths = new ArrayList<>();
     private File persistentPath;
     private String opponentName;
@@ -92,10 +93,8 @@ public class POMPFANAgent extends DefaultParty {
     private Long numParticlesPerOpponent = 10l;
     private Boolean isLearn = false;
     private HashMap<String, Object> config;
-    private BidsWithUtility bidsWithUtility;
-    private ImmutableList<Bid> goodBids;
-    private Random random = new Random();
-    private Double dataCollectionTime = 0.25;
+    private Double dataCollectionTime = 0.05;
+    private Random innerRandom = new Random();
 
     public POMPFANAgent() {
     }
@@ -117,12 +116,11 @@ public class POMPFANAgent extends DefaultParty {
     public void notifyChange(Inform info) {
         try {
             if (info instanceof Settings) {
-                if (DEBUG_TIME)
+                if (DEBUG_TIME) {
                     this.me = ((Settings) info).getID();
-                if (DEBUG_TIME)
                     this.progress = ((Settings) info).getProgress();
-                if (DEBUG_TIME)
                     System.out.println(this.me.getName() + ": Setup");
+                }
                 runSetupPhase(info);
             } else if (info instanceof ActionDone) {
                 // System.out.println("INFO= " + info);
@@ -195,9 +193,8 @@ public class POMPFANAgent extends DefaultParty {
         } else {
             if (DEBUG_LEARN)
                 System.out.println("DEBUG_LEARN_PERSISTENCE: Enter tree init");
-            System.out.println("Initialiing the tree");
+            System.out.println("Initializing the tree");
             this.initializeTree(settings);
-            this.goodBids = this.bidsWithUtility.getBids(new Interval(new BigDecimal(0.8), BigDecimal.ONE));
         }
 
         if (DEBUG_BELIEF) {
@@ -370,7 +367,6 @@ public class POMPFANAgent extends DefaultParty {
             // Our stuff
             this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(), getReporter());
             this.uSpace = ((UtilitySpace) profileint.getProfile());
-            this.bidsWithUtility = new BidsWithUtility((LinearAdditive) this.uSpace);
 
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -383,7 +379,7 @@ public class POMPFANAgent extends DefaultParty {
         // Experiment1
         List<AbstractPolicy> listOfOpponents = OpponentParticleCreatorHardcoded.generateOpponentParticles(this.uSpace,
                 this.numParticlesPerOpponent, this.progress);
-
+        System.out.println("opponents set");
         Configurator configurator = this.config != null ? this.mapper.convertValue(config, Configurator.class)
                 : new Configurator();
         configurator = configurator.setUtilitySpace(this.uSpace).setListOfOpponents(listOfOpponents).setMe(this.me)
@@ -600,16 +596,15 @@ public class POMPFANAgent extends DefaultParty {
         long negotiationEnd = this.progress.getTerminationTime().getTime();
         long simTime = this.simulationTime;
         if (this.progress.get(System.currentTimeMillis()) < this.dataCollectionTime) {
-            // ?? For some reason this part fills the RAM quickly
             // High throughput bidding used for data collection
-            bid = this.goodBids.get(this.random.nextInt(this.goodBids.size().intValue()));
+            bid = this.MCTS.getExpandingPolicyFromWidener().getAllBids().getExtremeBid(true);
             action = new Offer(this.me, bid);
             return action;
         }
 
         if (this.opponentName == null) {
             // The first one to make the offer
-            bid = this.bidsWithUtility.getExtremeBid(true);
+            bid = this.MCTS.getExpandingPolicyFromWidener().getAllBids().getExtremeBid(true);
             action = new Offer(this.me, bid);
             return action;
         }
@@ -640,24 +635,24 @@ public class POMPFANAgent extends DefaultParty {
 
         action = this.MCTS.chooseBestAction();
       
-
-        // Consuming the whole tree will result in an error
-        // So accept
-        // ? proposing old bids also possible
+ 
+        // if the tree is consumed: propose old bids
         if (action == null) {
-            this.getReporter().log(Level.WARNING, "Could not produce new action!!!");
-            ActionNode lastBestActionNode = this.MCTS.getLastBestActionNode();
-            if (lastBestActionNode != null) {
-                action = (ActionWithBid) lastBestActionNode.getAction();
-                System.out.println(action);
-                return action;
+            this.getReporter().log(Level.WARNING, "Could not produce new action using the tree!!!");
+            if (this.actingAgentActions.size()-1 > 0) {
+                int formerBidIndex = this.innerRandom.nextInt(this.actingAgentActions.size()-1);
+                action = this.actingAgentActions.get(formerBidIndex);
+            } else {
+                // propose max bid
+                bid = this.MCTS.getExpandingPolicyFromWidener().getAllBids().getExtremeBid(true);
+                action = new Offer(this.me, bid);
             }
-
-            this.getReporter().log(Level.WARNING, "Could not get last best action node!!!");
-            bid = this.bidsWithUtility.getExtremeBid(true);
-            action = new Offer(this.me, bid);
             return action;
+        } else {
+            // add only if actions is not null
+            this.actingAgentActions.add(action);
         }
+
         // Logging agent decisions
         if (action instanceof Accept) {
             Bid acceptedBid = ((Accept) action).getBid();

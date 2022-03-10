@@ -8,6 +8,8 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -56,8 +58,8 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
     private PartyId partyId;
 
     // necessary for the fast bid search
-    private HashMap<BigDecimal, ArrayList<Bid>> bidsHash = new HashMap<BigDecimal, ArrayList<Bid>>();
-    private ArrayList<BigDecimal> sortedUtilKeys = new ArrayList<BigDecimal>();
+    private HashMap<BigDecimal, LinkedList<Bid>> bidsHash;
+    private ArrayList<BigDecimal> sortedUtilKeys;
     public Pair<Bid, BigDecimal> minBidWithUtil;
     public Pair<Bid, BigDecimal> maxBidWithUtil;
 
@@ -75,27 +77,61 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
                 .initRandomUtilityProfile(domain, name);
         this.setUtilitySpace(new LinearAdditiveUtilitySpace(domain, name, preferencePairs.getKey(),
                 preferencePairs.getValue(), null));
+        int bidsNumber = this.bidspace.size().intValue();
+        System.out.println("Creting a new particle");
+        this.bidsHash = new HashMap<BigDecimal, LinkedList<Bid>>(bidsNumber);
+        this.sortedUtilKeys = new ArrayList<BigDecimal>(bidsNumber);
+        AllBidsList currentBidSpace = this.getBidspace();
+        BigDecimal currUtil;
+        System.out.println(bidsNumber);
+        double secondsInNano = 1000000000.0;
+        long start = System.nanoTime();
+
+        // init an array for each key as there might be multiple bids with same utility
+        // for (long i=0; i < currentBidSpace.size().longValue(); i++) {
+        //     currUtil = this.getUtilitySpace().getUtility(currentBidSpace.get(i));
+        //     this.bidsHash.put(currUtil, new ArrayList<Bid>());
+        //     this.sortedUtilKeys.add(currUtil);
+        // }
         
-        BigDecimal currUtility = BigDecimal.ZERO;
-        ArrayList<Bid> currBidsWithUtil = new ArrayList<>();
-        for (Bid bid: this.getBidspace()) {
-            currUtility = this.getUtilitySpace().getUtility(bid);
-            if (this.bidsHash.containsKey(currUtility)) {
-                currBidsWithUtil = this.bidsHash.get(currUtility);
-                currBidsWithUtil.add(bid);
-                this.bidsHash.put(currUtility, currBidsWithUtil);
-                continue;
-            }
-            this.sortedUtilKeys.add(currUtility);
-            currBidsWithUtil = (ArrayList<Bid>) Stream.of(bid).collect(Collectors.toList());
-            this.bidsHash.put(currUtility, currBidsWithUtil);
+        // this can be sped up by losing bids; aka use a value instead of an arraylist of values
+        // the used precision is 10
+        long listSize = currentBidSpace.size().longValue()-1;
+        for (long i=0; i < currentBidSpace.size().longValue() / 2; i++) {
+            currUtil = this.getUtilitySpace().getUtility(currentBidSpace.get(i));
+            this.bidsHash.put(currUtil, new LinkedList<Bid>());
+            currUtil = this.getUtilitySpace().getUtility(currentBidSpace.get(listSize-i));
+            this.bidsHash.put(currUtil, new LinkedList<Bid>());
         }
+        currUtil = this.getUtilitySpace().getUtility(currentBidSpace.get(listSize / 2));
+        this.bidsHash.put(currUtil, new LinkedList<Bid>());
+
+        long finish = System.nanoTime();
+        long timeElapsed = finish - start;
+        System.out.println("Initializing the hash took: " + timeElapsed / secondsInNano);
+
+        start = System.nanoTime();
+        Bid currentBid;
+        for (long i = 0; i < currentBidSpace.size().longValue(); i++) {
+            currentBid = currentBidSpace.get(i);
+            currUtil = this.getUtilitySpace().getUtility(currentBid);
+            this.bidsHash.get(currUtil).add(currentBid);
+            this.sortedUtilKeys.add(currUtil);
+        }
+        finish = System.nanoTime();
+        timeElapsed = finish - start;
+        System.out.println("Populating the hash took: " + timeElapsed / secondsInNano);
+        
+        start = System.nanoTime();
         this.sortedUtilKeys.sort(new Comparator<BigDecimal>() {
             @Override
             public int compare(BigDecimal o1, BigDecimal o2) {
                 return o1.compareTo(o2);
             }
         });
+        finish = System.nanoTime();
+        timeElapsed = finish - start;
+        System.out.println("Sorting took: " + timeElapsed / secondsInNano);
 
         this.minBidWithUtil = new Pair<Bid, BigDecimal>(this.bidsHash.get(this.sortedUtilKeys.get(0)).get(0),
                 this.sortedUtilKeys.get(0));
@@ -115,7 +151,7 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
         this.setRandom(new Random());
 
         BigDecimal currUtility = BigDecimal.ZERO;
-        ArrayList<Bid> currBidsWithUtil = new ArrayList<>();
+        LinkedList<Bid> currBidsWithUtil = new LinkedList<>();
         for (Bid bid : this.getBidspace()) {
             currUtility = this.getUtilitySpace().getUtility(bid);
             if (this.bidsHash.containsKey(currUtility)) {
@@ -125,7 +161,7 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
                 continue;
             }
             this.sortedUtilKeys.add(currUtility);
-            currBidsWithUtil = (ArrayList<Bid>) Stream.of(bid).collect(Collectors.toList());
+            currBidsWithUtil = (LinkedList<Bid>) Stream.of(bid).collect(Collectors.toList());
             this.bidsHash.put(currUtility, currBidsWithUtil);
         }
         this.sortedUtilKeys.sort(new Comparator<BigDecimal>() {

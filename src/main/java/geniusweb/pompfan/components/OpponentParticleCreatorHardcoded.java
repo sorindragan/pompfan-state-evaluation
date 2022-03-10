@@ -102,7 +102,6 @@ public abstract class OpponentParticleCreatorHardcoded {
             // listOfOpponents.add(new ConcederOpponentPolicy(utilitySpace, "ExactConceder", 2.0));
             // listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(utilitySpace, "ExactOwnTFT"));
             // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(utilitySpace, "ExactOppTFT", progress));
-
             // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
             listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
             
@@ -110,6 +109,7 @@ public abstract class OpponentParticleCreatorHardcoded {
             listOfOpponents.add(new BoulwareOpponentPolicy(domain));
             listOfOpponents.add(new LinearOpponentPolicy(domain));
             listOfOpponents.add(new ConcederOpponentPolicy(domain));
+            System.out.println("Particle Group Done");
         }
 
 

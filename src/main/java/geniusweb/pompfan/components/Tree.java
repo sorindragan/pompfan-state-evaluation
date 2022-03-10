@@ -21,6 +21,7 @@ import geniusweb.deadline.DeadlineTime;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
 import geniusweb.pompfan.beliefs.AbstractBelief;
+import geniusweb.pompfan.explorers.AbstractOwnExplorationPolicy;
 import geniusweb.pompfan.opponents.AbstractPolicy;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.HistoryState;
@@ -67,6 +68,10 @@ public class Tree {
         this.realHistory = new ArrayList<Action>();
         this.setProgress(progress);
 
+    }
+
+    public AbstractOwnExplorationPolicy getExpandingPolicyFromWidener() {
+        return widener.getExpandingPolicy();
     }
 
     public BeliefNode getRoot() {

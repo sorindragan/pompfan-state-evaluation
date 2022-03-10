@@ -23,5 +23,9 @@ public abstract class AbstractWidener {
         return this;
     }
 
+    public AbstractOwnExplorationPolicy getExpandingPolicy() {
+        return ownExplorationStrategy;
+    }
+
     public abstract void widen(Progress simulatedProgress, Long shiftSimTime, Node currRoot) throws StateRepresentationException;
 }
