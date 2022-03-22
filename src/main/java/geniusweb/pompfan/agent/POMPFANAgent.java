@@ -71,7 +71,7 @@ public class POMPFANAgent extends DefaultParty {
     private static final boolean DEBUG_PERSIST = false;
     private static final boolean DEBUG_SAVE_TREE = false;
     // turn on for state estimation experiments
-    private static final boolean DEBUG_BELIEF = true;
+    private static final boolean DEBUG_BELIEF = false;
     private static final boolean DEBUG_TIME = false;
     private Bid lastReceivedBid = null;
     private PartyId me;

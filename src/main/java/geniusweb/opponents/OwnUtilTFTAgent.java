@@ -22,6 +22,7 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
    
     private Bid myLastbid = null;
     private boolean DEBUG_TFT = false;
+    private boolean DEBUG_BIDS = true;
 
     public OwnUtilTFTAgent(Reporter reporter) {
         super(reporter);
@@ -82,6 +83,10 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
         Bid selectedBid = computeNextBid(utilityGoal, extendedspace, bidutils);
         double time = this.getProgress().get(System.currentTimeMillis());
 
+        if (DEBUG_BIDS) {
+            System.out.println(time+","+utilityGoal+","+this.getUtilitySpace().getUtility(selectedBid));
+        }
+
         if (DEBUG_TFT) {
             System.out.println("============================");
             System.out.println("O: " + time);
@@ -111,6 +116,7 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
         }
         try {
             // this should hardly happen
+
             return options.get(options.size().intValue() - 1);
         } catch (Exception e) {
             System.out.println("OPP: No bid in that interval. " + utilityGoal.doubleValue());

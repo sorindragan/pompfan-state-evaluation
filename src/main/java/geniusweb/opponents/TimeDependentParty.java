@@ -21,7 +21,7 @@ public class TimeDependentParty extends AbstractOpponent {
 
     private ExtendedUtilSpace extendedspace;
     private double e = 1.2;
-    private final boolean DEBUG = false; 
+    private final boolean DEBUG = true; 
 
     public TimeDependentParty() {
         super();
@@ -36,7 +36,7 @@ public class TimeDependentParty extends AbstractOpponent {
     }
 
     protected ActionWithBid myTurn(Object param) {
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
+        // this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         Bid bid = makeBid();
         PartyId me = this.getMe();
         UtilitySpace utilspace = this.getUtilitySpace();
@@ -67,14 +67,16 @@ public class TimeDependentParty extends AbstractOpponent {
     private Bid makeBid() {
         double time = this.getProgress().get(System.currentTimeMillis());
         BigDecimal utilityGoal = utilityGoal(time, getE());
-        if (DEBUG) {
-            System.out.println("O: " + time);
-            System.out.println("TD-Utility-Goal: " + utilityGoal.doubleValue());
-        }
-        ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
+        ImmutableList<Bid> options = this.getExtendedspace().getBids(utilityGoal);
         if (options.size() == BigInteger.ZERO) {
             // if we can't find good bid, get max util bid....
-            options = this.extendedspace.getBids(this.extendedspace.getMax());
+            options = this.getExtendedspace().getBids(this.getExtendedspace().getMax());
+        }
+        if (DEBUG) {
+            // System.out.println("O: " + time);
+            // System.out.println("TD-Utility-Goal: " + utilityGoal.doubleValue());
+            // System.out.println("TD-Returned-Utility: " + this.getUtilitySpace().getUtility(options.get(options.size().intValue() - 1)));
+            System.out.println(time + "," +  utilityGoal.doubleValue() + "," + this.getUtilitySpace().getUtility(options.get(options.size().intValue() - 1)));
         }
         return options.get(options.size().intValue()-1);
 
@@ -88,8 +90,8 @@ public class TimeDependentParty extends AbstractOpponent {
      * @return the utility goal for this time and e value
      */
     private BigDecimal utilityGoal(double t, double e) {
-        BigDecimal minUtil = this.extendedspace.getMin();
-        BigDecimal maxUtil = this.extendedspace.getMax();
+        BigDecimal minUtil = this.getExtendedspace().getMin();
+        BigDecimal maxUtil = this.getExtendedspace().getMax();
         double ft = 0;
         if (e != 0)
             ft = Math.pow(t, 1 / e);

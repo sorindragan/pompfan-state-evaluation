@@ -273,7 +273,7 @@ public abstract class AbstractOpponent extends DefaultParty {
     protected void initializeVariables(Settings settings) throws DeploymentException, IOException {
         this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(), getReporter());
         this.setUtilitySpace((UtilitySpace) this.profileint.getProfile());
-        this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
+        this.setExtendedspace(new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace()));
         this.bidsWithUtility = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         this.protocol = settings.getProtocol().getURI().getPath();
         this.me = settings.getID();
