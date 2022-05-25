@@ -46,7 +46,7 @@ import geniusweb.pompfan.components.Configurator;
 import geniusweb.pompfan.components.OpponentParticleCreator;
 import geniusweb.pompfan.components.OpponentParticleCreatorHardcoded;
 import geniusweb.pompfan.components.Tree;
-import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.particles.AbstractPolicy;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.pompfan.state.StateRepresentationException;
 import geniusweb.profile.Profile;
@@ -67,7 +67,7 @@ public class POMPFANAgent extends DefaultParty {
      */
     private Long simulationTime = 500l;
     private static final boolean DEBUG_LEARN = false;
-    private static final boolean DEBUG_OFFER = false;
+    private static final boolean DEBUG_OFFER = true;
     private static final boolean DEBUG_PERSIST = false;
     private static final boolean DEBUG_SAVE_TREE = false;
     // turn on for state estimation experiments

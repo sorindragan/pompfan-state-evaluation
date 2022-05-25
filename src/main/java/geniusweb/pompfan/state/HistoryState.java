@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import geniusweb.actions.Action;
 import geniusweb.pompfan.evaluators.IEvalFunction;
-import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.particles.AbstractPolicy;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
 public class HistoryState extends AbstractState<ArrayList<Action>> {

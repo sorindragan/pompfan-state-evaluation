@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -69,6 +70,7 @@ public abstract class AbstractOpponent extends DefaultParty {
     protected ProfileInterface profileint = null;
     private Bid lastReceivedBid;
     private List<File> dataPaths = new ArrayList<>();
+    private TreeMap<BigDecimal, Bid> searchTree = new TreeMap<>();
     protected boolean DEBUG_OFFER = false;
     // private T param;
     private Parameters parameters;
@@ -325,6 +327,14 @@ public abstract class AbstractOpponent extends DefaultParty {
             this.setGoodBids(this.bidsWithUtility.getBids(new Interval(new BigDecimal(0.8), BigDecimal.ONE)));
         }
 
+    }
+
+    public TreeMap<BigDecimal, Bid> getSearchTree() {
+        return searchTree;
+    }
+
+    public void setSearchTree(TreeMap<BigDecimal, Bid> searchTree) {
+        this.searchTree = searchTree;
     }
 
     public ImmutableList<Bid> getGoodBids() {

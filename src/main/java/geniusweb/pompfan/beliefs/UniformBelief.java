@@ -4,7 +4,7 @@ import java.util.List;
 
 import geniusweb.actions.Offer;
 import geniusweb.pompfan.distances.AbstractBidDistance;
-import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.particles.AbstractPolicy;
 import geniusweb.pompfan.state.AbstractState;
 
 public class UniformBelief extends AbstractBelief {

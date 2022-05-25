@@ -1,4 +1,4 @@
-package geniusweb.pompfan.opponents;
+package geniusweb.pompfan.particles;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -89,8 +89,11 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
 
     private Entry<HashMap<String, ValueSetUtilities>, Map<String, BigDecimal>> initRandomUtilityProfile(Domain domain,
             String name) {
+        // ?? maybe choosing a different range (ex: 0 - 10) would fix the wirdely generated domains as it limits the choice
+        Integer randomNumberBound = 100;
+
         List<String> issues = new ArrayList<String>(domain.getIssues());
-        List<BigDecimal> allInts = this.getRandom().ints(issues.size(), 0, 100).boxed().map(String::valueOf)
+        List<BigDecimal> allInts = this.getRandom().ints(issues.size(), 0, randomNumberBound).boxed().map(String::valueOf)
                 .map(BigDecimal::new).collect(Collectors.toList());
         BigDecimal sumOfInts = allInts.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
         Map<String, BigDecimal> issueWeights = IntStream.range(0, issues.size()).boxed().collect(
@@ -106,12 +109,13 @@ public abstract class AbstractPolicy implements CommonOpponentInterface, Seriali
         for (String issueString : issues) {
 
             DiscreteValueSet values = (DiscreteValueSet) domain.getValues(issueString);
-            List<BigDecimal> randLongs = random.longs(values.size().longValue(), 1, 100).boxed().map(String::valueOf)
+            List<BigDecimal> randLongs = random.longs(values.size().longValue(), 1, 
+                    randomNumberBound).boxed().map(String::valueOf)
                     .map(BigDecimal::new).collect(Collectors.toList());
             // BigDecimal sumOfValueLongs = randLongs.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
             Map<DiscreteValue, BigDecimal> valueWeights = LongStream.range(0, values.size().longValue()).boxed()
                     .collect(Collectors.toMap(values::get,
-                            index -> randLongs.get(index.intValue()).divide(new BigDecimal("100.0"), 5, RoundingMode.HALF_UP)));
+                            index -> randLongs.get(index.intValue()).divide(new BigDecimal(randomNumberBound.toString()), 5, RoundingMode.HALF_UP)));
             
             // !! values don't need to add up to 1; if they do -> bidWithUtils returns intervals like [0.01, 0.2]
             // Map<DiscreteValue, BigDecimal> valueWeights = LongStream.range(0, values.size().longValue()).boxed()

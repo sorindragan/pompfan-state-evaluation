@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
-import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.particles.AbstractPolicy;
 import geniusweb.pompfan.state.AbstractState;
 
 /**

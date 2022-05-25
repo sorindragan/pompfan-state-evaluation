@@ -2,7 +2,11 @@ package geniusweb.opponents;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeMap;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
@@ -21,7 +25,7 @@ public class TimeDependentParty extends AbstractOpponent {
 
     private ExtendedUtilSpace extendedspace;
     private double e = 1.2;
-    private final boolean DEBUG = true; 
+    private final boolean DEBUG = true;
 
     public TimeDependentParty() {
         super();
@@ -69,6 +73,7 @@ public class TimeDependentParty extends AbstractOpponent {
         BigDecimal utilityGoal = utilityGoal(time, getE());
         ImmutableList<Bid> options = this.getExtendedspace().getBids(utilityGoal);
         if (options.size() == BigInteger.ZERO) {
+            // System.out.println("NADA");
             // if we can't find good bid, get max util bid....
             options = this.getExtendedspace().getBids(this.getExtendedspace().getMax());
         }
@@ -76,10 +81,41 @@ public class TimeDependentParty extends AbstractOpponent {
             // System.out.println("O: " + time);
             // System.out.println("TD-Utility-Goal: " + utilityGoal.doubleValue());
             // System.out.println("TD-Returned-Utility: " + this.getUtilitySpace().getUtility(options.get(options.size().intValue() - 1)));
-            System.out.println(time + "," +  utilityGoal.doubleValue() + "," + this.getUtilitySpace().getUtility(options.get(options.size().intValue() - 1)));
+            // System.out.println(time + "," +  utilityGoal.doubleValue() + "," + this.getUtilitySpace().getUtility(options.get(options.size().intValue() - 1)));
         }
-        return options.get(options.size().intValue()-1);
+        return this.parseOptions(options, utilityGoal);
+        // System.out.println("OR " + time + "T " + options.get(options.size().intValue() - 1) + " - " + this.getUtilitySpace().getUtility(options.get(options.size().intValue() - 1)));
+        
+        // return options.get(options.size().intValue()-1);
 
+    }
+
+    private Bid parseOptions(ImmutableList<Bid> options, BigDecimal targetUtil) {
+        System.out.println(options.size());
+        if (options.size().intValue() == 1) {
+            return options.get(0);
+        }
+
+        if (options.size().intValue() == 0) {
+            BigDecimal closestExistentKey = this.getSearchTree().lowerKey(targetUtil);
+            closestExistentKey = closestExistentKey == null ? this.getSearchTree().higherKey(targetUtil)
+                    : closestExistentKey;
+            return this.getSearchTree().get(closestExistentKey);
+        }
+        Iterator<Bid> optionIterator = options.iterator();
+
+        // options.forEach(this.getUtilitySpace()::getUtility);
+        while (optionIterator.hasNext()) {
+            Bid currBid = optionIterator.next();
+            this.getSearchTree().put(this.getUtilitySpace().getUtility(currBid), currBid);
+        }
+        BigDecimal closestKey = this.getSearchTree().lowerKey(targetUtil);
+        closestKey = closestKey == null ? this.getSearchTree().higherKey(targetUtil) : closestKey;
+        Bid chosenBid = this.getSearchTree().get(closestKey);
+
+        System.out.println("T:" + targetUtil.setScale(6, RoundingMode.DOWN) + " C:" +
+        this.getUtilitySpace().getUtility(chosenBid) + " " + chosenBid);
+        return chosenBid;
     }
 
     /**

@@ -13,7 +13,7 @@ import geniusweb.actions.Action;
 import geniusweb.pompfan.distances.ExactSame;
 import geniusweb.pompfan.distances.L2Distance;
 import geniusweb.pompfan.evaluators.IEvalFunction;
-import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.particles.AbstractPolicy;
 import geniusweb.profile.utilityspace.UtilitySpace;
 
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)

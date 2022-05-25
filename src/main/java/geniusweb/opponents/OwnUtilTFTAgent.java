@@ -3,7 +3,9 @@ package geniusweb.opponents;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeMap;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.ActionWithBid;
@@ -107,23 +109,42 @@ public class OwnUtilTFTAgent extends AbstractOpponent {
     }
 
     private Bid computeNextBid(BigDecimal utilityGoal, ExtendedUtilSpace extendedspace, BidsWithUtility bidutils) {
+        if (utilityGoal.doubleValue() < extendedspace.getMin().doubleValue()) {
+            utilityGoal = extendedspace.getMin();
+        }
+
+        if (utilityGoal.doubleValue() > extendedspace.getMax().doubleValue()) {
+            utilityGoal = extendedspace.getMax();
+        }
         ImmutableList<Bid> options = extendedspace.getBids(utilityGoal);
-        if (options.size() == BigInteger.ZERO) {
-            // System.out.println("WARNING: TOLERANCE TOO LOW");
+        return this.parseOptions(options, utilityGoal);
+    }
 
-            options = bidutils.getBids(
-	                new Interval(utilityGoal.subtract(new BigDecimal("0.1")), utilityGoal));
+    private Bid parseOptions(ImmutableList<Bid> options, BigDecimal targetUtil) {
+        System.out.println(options.size());
+        if (options.size().intValue() == 1) {
+            return options.get(0);
         }
-        try {
-            // this should hardly happen
 
-            return options.get(options.size().intValue() - 1);
-        } catch (Exception e) {
-            System.out.println("OPP: No bid in that interval. " + utilityGoal.doubleValue());
-            options = bidutils.getBids(
-                    new Interval(utilityGoal.subtract(new BigDecimal("0.2")), utilityGoal.add(new BigDecimal("0.1"))));
-            return options.get(options.size().intValue() - 1);
+        if (options.size().intValue() == 0) {
+            BigDecimal closestExistentKey = this.getSearchTree().lowerKey(targetUtil);
+            closestExistentKey = closestExistentKey == null ? this.getSearchTree().higherKey(targetUtil) : closestExistentKey; 
+            return this.getSearchTree().get(closestExistentKey);
         }
+        Iterator<Bid> optionIterator = options.iterator();
+        
+        // options.forEach(this.getUtilitySpace()::getUtility);
+        while (optionIterator.hasNext()) {
+            Bid currBid = optionIterator.next();
+            this.getSearchTree().put(this.getUtilitySpace().getUtility(currBid), currBid);
+        }
+        BigDecimal closestKey = this.getSearchTree().lowerKey(targetUtil);
+        closestKey = closestKey == null ? this.getSearchTree().higherKey(targetUtil) : closestKey;
+        Bid chosenBid = this.getSearchTree().get(closestKey);
+
+        // System.out.println("T:" + targetUtil.setScale(6, RoundingMode.DOWN) + " C:" +
+        // this.getUtilitySpace().getUtility(chosenBid) + " " + chosenBid);
+        return chosenBid;
     }
 
     @Override

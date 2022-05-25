@@ -1,9 +1,12 @@
-package geniusweb.pompfan.opponents;
+package geniusweb.pompfan.particles;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -18,14 +21,15 @@ import geniusweb.actions.Offer;
 import geniusweb.bidspace.AllBidsList;
 import geniusweb.bidspace.BidsWithUtility;
 import geniusweb.bidspace.Interval;
-import geniusweb.boa.biddingstrategy.ExtendedUtilSpace;
 import geniusweb.issuevalue.Bid;
 import geniusweb.issuevalue.Domain;
+import geniusweb.pompfan.helper.ExtendedUtilSpace;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.profile.utilityspace.LinearAdditive;
 import geniusweb.profile.utilityspace.LinearAdditiveUtilitySpace;
 import geniusweb.profile.utilityspace.UtilitySpace;
+import javafx.collections.transformation.SortedList;
 import tudelft.utilities.immutablelist.ImmutableList;
 
 public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
@@ -34,23 +38,22 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
     private ExtendedUtilSpace extendedspace;
     private Bid myLastbid = null;
     private Bid maxBid;
-    private BidsWithUtility bidutils;
     private final boolean DEBUG = false;
+    private TreeMap<BigDecimal, Bid> searchTree = new TreeMap<>();
+    private HashSet<Double> noAssociatedBidsSet = new HashSet<>();
 
     @JsonCreator
     public OwnUtilityTFTOpponentPolicy(@JsonProperty("utilitySpace") UtilitySpace uSpace, 
             @JsonProperty("name") String name) {
         super(uSpace, name);
-        this.bidutils = new BidsWithUtility((LinearAdditiveUtilitySpace) uSpace);
-        this.maxBid = this.bidutils.getExtremeBid(true);
         this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
+        this.maxBid = this.extendedspace.getBidutils().getExtremeBid(true);
     }
     
     public OwnUtilityTFTOpponentPolicy(Domain domain) {
         super(domain, "OwnUtilTFT");
-        this.bidutils = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace());
-        this.maxBid = this.bidutils.getExtremeBid(true);
         this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
+        this.maxBid = this.extendedspace.getBidutils().getExtremeBid(true);
     }
     
     // the ractive agents should have this method implemented
@@ -84,6 +87,9 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
 
         // long t = System.nanoTime();
         Bid selectedBid = computeNextBid(utilityGoal);
+        if (selectedBid == null) {
+            return new Accept(this.getPartyId(), justLastOpponentBid);
+        }
         // if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t) > 2000) {
         //     System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         //     System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t));
@@ -138,7 +144,9 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
                         .min(this.extendedspace.getMax());
 
         Bid selectedBid = computeNextBid(utilityGoal);
-        
+        if (selectedBid == null) {
+            return new Accept(this.getPartyId(), justLastOpponentBid);
+        }        
         double time = state.getTime();
 
         if (DEBUG) {
@@ -169,32 +177,78 @@ public class OwnUtilityTFTOpponentPolicy extends AbstractPolicy {
     }
 
     private Bid computeNextBid(BigDecimal utilityGoal) {
-        if (utilityGoal.doubleValue() < this.bidutils.getRange().getMin().doubleValue()) {
-            utilityGoal = this.bidutils.getRange().getMin();
+
+        if (this.getNoAssociatedBidsSet().contains(utilityGoal.doubleValue())) {
+            this.extendedspace.setTolerance(this.extendedspace.getTolerance().multiply(BigDecimal.valueOf(2.0)));
+            System.out.println("TOLERANCE: " + this.extendedspace.getTolerance());
         }
 
-        if (utilityGoal.doubleValue() > this.bidutils.getRange().getMax().doubleValue()) {
-            utilityGoal = this.bidutils.getRange().getMax();
+
+        if (utilityGoal.doubleValue() < this.extendedspace.getBidutils().getRange().getMin().doubleValue()) {
+            utilityGoal = this.extendedspace.getBidutils().getRange().getMin();
         }
 
+        if (utilityGoal.doubleValue() > this.extendedspace.getBidutils().getRange().getMax().doubleValue()) {
+            utilityGoal = this.extendedspace.getBidutils().getRange().getMax();
+        }
 
         ImmutableList<Bid> options = this.extendedspace.getBids(utilityGoal);
-        if (options.size() == BigInteger.ZERO) {
-            // System.out.println("WARNING: PARTICLE TOLERANCE TOO LOW");
-
-            options = this.bidutils.getBids(
-                    new Interval(utilityGoal.subtract(new BigDecimal("0.1")), utilityGoal));
-            // System.out.println(options.size() + " " + utilityGoal.doubleValue());
-        }
+        
         try {
-            // this should hardly happen
-            return options.get(options.size().intValue() - 1);
+            return this.parseOptions(options, utilityGoal);      
         } catch (Exception e) {
-            System.out.println("PARTICLE: No bid in that interval. " + utilityGoal.doubleValue());
-            options = this.bidutils.getBids(
-                    new Interval(utilityGoal.subtract(new BigDecimal("0.2")), utilityGoal.add(new BigDecimal("0.1"))));
-            System.out.println(this.bidutils.getRange());
-            return options.get(options.size().intValue() - 1);
+            // System.out.println("WARNING: A profile was genereated weirdly and resulted in option size:"
+            //         + options.size().intValue());
+            // System.out.println("The seearch tree has:" + this.getSearchTree().size());
+            // System.out.println("The utility goals was:" + utilityGoal);
+            this.getNoAssociatedBidsSet().add(utilityGoal.doubleValue());
+            System.out.println("NO BIDS FOR");
+            System.out.println(this.getNoAssociatedBidsSet());
+            return null;
         }
+    }
+
+    private Bid parseOptions(ImmutableList<Bid> options, BigDecimal targetUtil) {
+        // System.out.println(options.size());
+        if (options.size().intValue() == 1) {
+            return options.get(0);
+        }
+
+        if (options.size().intValue() == 0) {
+            BigDecimal closestExistentKey = this.getSearchTree().lowerKey(targetUtil);
+            closestExistentKey = closestExistentKey == null ? this.getSearchTree().higherKey(targetUtil)
+                    : closestExistentKey;
+            return this.getSearchTree().get(closestExistentKey);
+        }
+        Iterator<Bid> optionIterator = options.iterator();
+
+        // options.forEach(this.getUtilitySpace()::getUtility);
+        while (optionIterator.hasNext()) {
+            Bid currBid = optionIterator.next();
+            this.getSearchTree().put(this.getUtilitySpace().getUtility(currBid), currBid);
+        }
+        BigDecimal closestKey = this.getSearchTree().lowerKey(targetUtil);
+        closestKey = closestKey == null ? this.getSearchTree().higherKey(targetUtil) : closestKey;
+        Bid chosenBid = this.getSearchTree().get(closestKey);
+
+        // System.out.println("T:" + targetUtil.setScale(6, RoundingMode.DOWN) + " C:" +
+        // this.getUtilitySpace().getUtility(chosenBid) + " " + chosenBid);
+        return chosenBid;
+    }
+
+    public TreeMap<BigDecimal, Bid> getSearchTree() {
+        return searchTree;
+    }
+
+    public void setSearchTree(TreeMap<BigDecimal, Bid> searchTree) {
+        this.searchTree = searchTree;
+    }
+
+    public HashSet<Double> getNoAssociatedBidsSet() {
+        return noAssociatedBidsSet;
+    }
+
+    public void setNoAssociatedBidsSet(HashSet<Double> noAssociatedBidsSet) {
+        this.noAssociatedBidsSet = noAssociatedBidsSet;
     }
 }

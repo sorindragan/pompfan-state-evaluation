@@ -1,4 +1,4 @@
-package geniusweb.pompfan.opponents;
+package geniusweb.pompfan.particles;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
