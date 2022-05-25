@@ -11,17 +11,17 @@ import javax.websocket.DeploymentException;
 
 import geniusweb.bidspace.AllBidsList;
 import geniusweb.issuevalue.Domain;
-import geniusweb.pompfan.opponents.AbstractPolicy;
-import geniusweb.pompfan.opponents.AntagonisticOpponentPolicy;
-import geniusweb.pompfan.opponents.BoulwareOpponentPolicy;
-import geniusweb.pompfan.opponents.ConcederOpponentPolicy;
-import geniusweb.pompfan.opponents.HardLinerOpponentPolicy;
-import geniusweb.pompfan.opponents.LinearOpponentPolicy;
-import geniusweb.pompfan.opponents.OppUtilityTFTOpponentPolicy;
-import geniusweb.pompfan.opponents.OwnUtilityTFTOpponentPolicy;
-import geniusweb.pompfan.opponents.RandomOpponentPolicy;
-import geniusweb.pompfan.opponents.SelfishOpponentPolicy;
-import geniusweb.pompfan.opponents.TimeDependentOpponentPolicy;
+import geniusweb.pompfan.particles.AbstractPolicy;
+import geniusweb.pompfan.particles.AntagonisticOpponentPolicy;
+import geniusweb.pompfan.particles.BoulwareOpponentPolicy;
+import geniusweb.pompfan.particles.ConcederOpponentPolicy;
+import geniusweb.pompfan.particles.HardLinerOpponentPolicy;
+import geniusweb.pompfan.particles.LinearOpponentPolicy;
+import geniusweb.pompfan.particles.OppUtilityTFTOpponentPolicy;
+import geniusweb.pompfan.particles.OwnUtilityTFTOpponentPolicy;
+import geniusweb.pompfan.particles.RandomOpponentPolicy;
+import geniusweb.pompfan.particles.SelfishOpponentPolicy;
+import geniusweb.pompfan.particles.TimeDependentOpponentPolicy;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.profileconnection.ProfileConnectionFactory;
 import geniusweb.profileconnection.ProfileInterface;
@@ -38,8 +38,8 @@ public abstract class OpponentParticleCreatorHardcoded {
 
         // hardcoded profile/utility
         ReportToLogger reporter = new ReportToLogger("HardcodedProfile");
-        String profileString = "file:src/test/resources/party2.json";
-        // String profileString = "file:src/test/resources/abstract2.json";
+        // String profileString = "file:src/test/resources/party2.json";
+        String profileString = "file:src/test/resources/abstract2.json";
         // String profileString = "file:src/test/resources/flightbooking2.json";
         URI profile = new URI(profileString);
         ProfileInterface profileint = ProfileConnectionFactory.create(
@@ -105,11 +105,10 @@ public abstract class OpponentParticleCreatorHardcoded {
             // listOfOpponents.add(new OppUtilityTFTOpponentPolicy(domain, progress));
             listOfOpponents.add(new OwnUtilityTFTOpponentPolicy(domain));
             
-            listOfOpponents.add(new HardLinerOpponentPolicy(domain));
-            listOfOpponents.add(new BoulwareOpponentPolicy(domain));
-            listOfOpponents.add(new LinearOpponentPolicy(domain));
-            listOfOpponents.add(new ConcederOpponentPolicy(domain));
-            System.out.println("Particle Group Done");
+            // listOfOpponents.add(new HardLinerOpponentPolicy(domain));
+            // listOfOpponents.add(new BoulwareOpponentPolicy(domain));
+            // listOfOpponents.add(new LinearOpponentPolicy(domain));
+            // listOfOpponents.add(new ConcederOpponentPolicy(domain));
         }
 
 

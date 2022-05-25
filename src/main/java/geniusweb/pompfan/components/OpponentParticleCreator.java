@@ -6,16 +6,16 @@ import java.util.stream.Collectors;
 
 import geniusweb.bidspace.AllBidsList;
 import geniusweb.issuevalue.Domain;
-import geniusweb.pompfan.opponents.AbstractPolicy;
-import geniusweb.pompfan.opponents.AntagonisticOpponentPolicy;
-import geniusweb.pompfan.opponents.BoulwareOpponentPolicy;
-import geniusweb.pompfan.opponents.ConcederOpponentPolicy;
-import geniusweb.pompfan.opponents.HardLinerOpponentPolicy;
-import geniusweb.pompfan.opponents.LinearOpponentPolicy;
-import geniusweb.pompfan.opponents.OppUtilityTFTOpponentPolicy;
-import geniusweb.pompfan.opponents.OwnUtilityTFTOpponentPolicy;
-import geniusweb.pompfan.opponents.SelfishOpponentPolicy;
-import geniusweb.pompfan.opponents.TimeDependentOpponentPolicy;
+import geniusweb.pompfan.particles.AbstractPolicy;
+import geniusweb.pompfan.particles.AntagonisticOpponentPolicy;
+import geniusweb.pompfan.particles.BoulwareOpponentPolicy;
+import geniusweb.pompfan.particles.ConcederOpponentPolicy;
+import geniusweb.pompfan.particles.HardLinerOpponentPolicy;
+import geniusweb.pompfan.particles.LinearOpponentPolicy;
+import geniusweb.pompfan.particles.OppUtilityTFTOpponentPolicy;
+import geniusweb.pompfan.particles.OwnUtilityTFTOpponentPolicy;
+import geniusweb.pompfan.particles.SelfishOpponentPolicy;
+import geniusweb.pompfan.particles.TimeDependentOpponentPolicy;
 import geniusweb.profile.utilityspace.UtilitySpace;
 import geniusweb.progress.Progress;
 

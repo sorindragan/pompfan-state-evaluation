@@ -40,7 +40,7 @@ import geniusweb.pompfan.explorers.SelfishNeverAcceptOwnExplorerPolicy;
 import geniusweb.pompfan.explorers.SelfishOwnExplorerPolicy;
 import geniusweb.pompfan.explorers.SelfishReluctantOwnExplorerPolicy;
 import geniusweb.pompfan.explorers.TimeConcedingExplorationPolicy;
-import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.particles.AbstractPolicy;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.pompfan.wideners.AbstractWidener;

@@ -178,8 +178,11 @@
 			"classPaths": [
 				"$Auto"
 			],
-			"args": "src/test/resources/settingsBoulware.json",
+			// "args": ["src/test/resources/settingsBoulware.json", ">", "eval/boulware_bids.csv"],
+			// "console": "integratedTerminal"
 			"console": "internalConsole",
+			"args": "src/test/resources/settingsBoulware.json"
+
 		},
 		{
 			"type": "java",
@@ -189,8 +192,10 @@
 			"classPaths": [
 				"$Auto"
 			],
-			"args": "src/test/resources/settingsConceder.json",
-			"console": "internalConsole"
+			"args": ["src/test/resources/settingsConceder.json", ">", "eval/conceder_bids.csv"],
+			"console": "integratedTerminal"
+			// "args": "src/test/resources/settingsConceder.json",
+			// "console": "internalConsole"
 		},
 		{
 			"type": "java",
@@ -213,6 +218,8 @@
 			],
 			"args": "src/test/resources/settingsLinear.json",
 			"console": "internalConsole"
+			// "args": ["src/test/resources/settingsLinear.json", ">", "eval/linear_bids.csv"],
+			// "console": "integratedTerminal"
 		},
 		{
 			"type": "java",
@@ -235,6 +242,8 @@
 			],
 			"args": "src/test/resources/settingsOTFT.json",
 			"console": "internalConsole"
+			// "args": ["src/test/resources/settingsOTFT.json", ">", "eval/tft_bids.csv"],
+			// "console": "integratedTerminal"
 		},
 		{
 			"type": "java",
@@ -245,8 +254,9 @@
 				"$Auto"
 			],
 			"args": "src/test/resources/settingsHardliner.json",
-			"console": "internalConsole",
-			"vmArgs": "-Xmx4g"
+			"console": "internalConsole"
+			// "args": ["src/test/resources/settingsHardliner.json", ">", "eval/hardliner_bids.csv"],
+			// "console": "integratedTerminal"
 		},
 		{
 			"type": "java",

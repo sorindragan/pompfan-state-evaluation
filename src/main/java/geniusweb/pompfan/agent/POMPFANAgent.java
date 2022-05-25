@@ -46,7 +46,7 @@ import geniusweb.pompfan.components.Configurator;
 import geniusweb.pompfan.components.OpponentParticleCreator;
 import geniusweb.pompfan.components.OpponentParticleCreatorHardcoded;
 import geniusweb.pompfan.components.Tree;
-import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.particles.AbstractPolicy;
 import geniusweb.pompfan.state.HistoryState;
 import geniusweb.pompfan.state.StateRepresentationException;
 import geniusweb.profile.Profile;

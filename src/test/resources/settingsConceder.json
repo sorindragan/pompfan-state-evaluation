@@ -10,7 +10,7 @@
 								"parameters": {
 									"persistentstate": "59853b79-f3f8-4179-8b57-7b5b2e9eb2f7",
 									"isLearn": false,
-									"numParticlesPerOpponent": "1",
+									"numParticlesPerOpponent": "5",
 									"simulationTime": "200",
 									"dataCollectionTime": "0.05",
 									"config": {
@@ -57,7 +57,7 @@
 			}
 		],
 		"deadline": {
-			"deadlinetime": {"durationms": 25000 }
+			"deadlinetime": {"durationms": 20000 }
 		}
 	}
 }

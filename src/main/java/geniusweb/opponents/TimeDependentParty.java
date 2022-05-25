@@ -1,7 +1,12 @@
 package geniusweb.opponents;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeMap;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;
@@ -15,7 +20,7 @@ import geniusweb.profile.utilityspace.UtilitySpace;
 public class TimeDependentParty extends AbstractOpponent {
 
     private double e = 1.2;
-    private final boolean DEBUG = false; 
+    private final boolean DEBUG = true;
 
     public TimeDependentParty() {
         super();
@@ -30,6 +35,7 @@ public class TimeDependentParty extends AbstractOpponent {
     }
 
     protected ActionWithBid myTurn(Object param) {
+        // this.extendedspace = new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         Bid bid = makeBid();
         PartyId me = this.getMe();
         UtilitySpace utilspace = this.getUtilitySpace();
@@ -60,13 +66,52 @@ public class TimeDependentParty extends AbstractOpponent {
      */
     private Bid makeBid() {
         double time = this.getProgress().get(System.currentTimeMillis());
-        BigDecimal utilityGoal = this.utilityGoal(time, getE());
-        if (DEBUG) {
-            System.out.println("O: " + time);
-            System.out.println("TD-Utility-Goal: " + utilityGoal.doubleValue());
+        BigDecimal utilityGoal = utilityGoal(time, getE());
+        ImmutableList<Bid> options = this.getExtendedspace().getBids(utilityGoal);
+        if (options.size() == BigInteger.ZERO) {
+            // System.out.println("NADA");
+            // if we can't find good bid, get max util bid....
+            options = this.getExtendedspace().getBids(this.getExtendedspace().getMax());
         }
-        return this.getBidWithUtility(utilityGoal);
+        if (DEBUG) {
+            // System.out.println("O: " + time);
+            // System.out.println("TD-Utility-Goal: " + utilityGoal.doubleValue());
+            // System.out.println("TD-Returned-Utility: " + this.getUtilitySpace().getUtility(options.get(options.size().intValue() - 1)));
+            // System.out.println(time + "," +  utilityGoal.doubleValue() + "," + this.getUtilitySpace().getUtility(options.get(options.size().intValue() - 1)));
+        }
+        return this.parseOptions(options, utilityGoal);
+        // System.out.println("OR " + time + "T " + options.get(options.size().intValue() - 1) + " - " + this.getUtilitySpace().getUtility(options.get(options.size().intValue() - 1)));
+        
+        // return options.get(options.size().intValue()-1);
 
+    }
+
+    private Bid parseOptions(ImmutableList<Bid> options, BigDecimal targetUtil) {
+        System.out.println(options.size());
+        if (options.size().intValue() == 1) {
+            return options.get(0);
+        }
+
+        if (options.size().intValue() == 0) {
+            BigDecimal closestExistentKey = this.getSearchTree().lowerKey(targetUtil);
+            closestExistentKey = closestExistentKey == null ? this.getSearchTree().higherKey(targetUtil)
+                    : closestExistentKey;
+            return this.getSearchTree().get(closestExistentKey);
+        }
+        Iterator<Bid> optionIterator = options.iterator();
+
+        // options.forEach(this.getUtilitySpace()::getUtility);
+        while (optionIterator.hasNext()) {
+            Bid currBid = optionIterator.next();
+            this.getSearchTree().put(this.getUtilitySpace().getUtility(currBid), currBid);
+        }
+        BigDecimal closestKey = this.getSearchTree().lowerKey(targetUtil);
+        closestKey = closestKey == null ? this.getSearchTree().higherKey(targetUtil) : closestKey;
+        Bid chosenBid = this.getSearchTree().get(closestKey);
+
+        System.out.println("T:" + targetUtil.setScale(6, RoundingMode.DOWN) + " C:" +
+        this.getUtilitySpace().getUtility(chosenBid) + " " + chosenBid);
+        return chosenBid;
     }
 
     /**
@@ -77,8 +122,8 @@ public class TimeDependentParty extends AbstractOpponent {
      * @return the utility goal for this time and e value
      */
     private BigDecimal utilityGoal(double t, double e) {
-        BigDecimal minUtil = this.minBidWithUtil.getValue();
-        BigDecimal maxUtil = this.maxBidWithUtil.getValue();
+        BigDecimal minUtil = this.getExtendedspace().getMin();
+        BigDecimal maxUtil = this.getExtendedspace().getMax();
         double ft = 0;
         if (e != 0)
             ft = Math.pow(t, 1 / e);

@@ -8,7 +8,7 @@ import geniusweb.pompfan.components.BeliefNode;
 import geniusweb.pompfan.components.Node;
 import geniusweb.pompfan.components.Tree;
 import geniusweb.pompfan.explorers.AbstractOwnExplorationPolicy;
-import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.particles.AbstractPolicy;
 import geniusweb.pompfan.state.StateRepresentationException;
 import geniusweb.progress.Progress;
 

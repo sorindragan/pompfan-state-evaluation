@@ -17,7 +17,7 @@ import geniusweb.pompfan.distances.AbstractBidDistance;
 import geniusweb.pompfan.distances.BothUtilityBidDistance;
 import geniusweb.pompfan.distances.OppUtilityBidDistance;
 import geniusweb.pompfan.distances.UtilityBidDistance;
-import geniusweb.pompfan.opponents.AbstractPolicy;
+import geniusweb.pompfan.particles.AbstractPolicy;
 import geniusweb.pompfan.state.AbstractState;
 import geniusweb.profile.utilityspace.UtilitySpace;
 

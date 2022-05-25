@@ -1,4 +1,4 @@
-package geniusweb.pompfan.opponents;
+package geniusweb.pompfan.particles;
 
 import geniusweb.actions.Accept;
 import geniusweb.actions.Action;

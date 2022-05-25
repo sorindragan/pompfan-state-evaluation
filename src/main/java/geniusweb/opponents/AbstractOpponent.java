@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -73,6 +74,7 @@ public abstract class AbstractOpponent extends DefaultParty {
     public Pair<Bid, BigDecimal> minBidWithUtil;
     public Pair<Bid, BigDecimal> maxBidWithUtil;
     private List<File> dataPaths = new ArrayList<>();
+    private TreeMap<BigDecimal, Bid> searchTree = new TreeMap<>();
     protected boolean DEBUG_OFFER = false;
     // private T param;
     private Parameters parameters;
@@ -277,6 +279,7 @@ public abstract class AbstractOpponent extends DefaultParty {
     protected void initializeVariables(Settings settings) throws DeploymentException, IOException {
         this.profileint = ProfileConnectionFactory.create(settings.getProfile().getURI(), getReporter());
         this.setUtilitySpace((UtilitySpace) this.profileint.getProfile());
+        this.setExtendedspace(new ExtendedUtilSpace((LinearAdditiveUtilitySpace) this.getUtilitySpace()));
         this.bidsWithUtility = new BidsWithUtility((LinearAdditiveUtilitySpace) this.getUtilitySpace());
         // create utils to bids hashmap
         BigDecimal currUtility = BigDecimal.ZERO;
@@ -362,42 +365,12 @@ public abstract class AbstractOpponent extends DefaultParty {
 
     }
 
-    // logN complexity; where N is the number of bids in the Domain
-    public BigDecimal bidBinarySearch(BigDecimal value, ArrayList<BigDecimal> bidSearchSpace, int lowerBound, int upperBound, Pair<BigDecimal, BigDecimal> closestValue) {
-        if (upperBound <= lowerBound) {
-            return bidSearchSpace.get(lowerBound).subtract(value).abs().compareTo(closestValue.getValue()) == -1 ? bidSearchSpace.get(lowerBound): closestValue.getKey();
-        }
-
-        int midPoint = (lowerBound + upperBound) / 2;
-        BigDecimal middleUtil = bidSearchSpace.get(midPoint);
-        closestValue = middleUtil.subtract(value).abs().compareTo(closestValue.getValue()) == -1
-                        ? new Pair<BigDecimal,BigDecimal>(middleUtil, middleUtil.subtract(value).abs())
-                        : closestValue;
-        
-        if (value.compareTo(middleUtil) == 0) {
-            return middleUtil;
-        } 
-
-        if (value.compareTo(middleUtil) < 0) {
-            return bidBinarySearch(value, bidSearchSpace, lowerBound, midPoint-1, closestValue);
-        }
-        
-        if (value.compareTo(middleUtil) > 0) {
-            return bidBinarySearch(value, bidSearchSpace, midPoint+1, upperBound, closestValue);
-        }
-
-        // should not be reached
-        return BigDecimal.ZERO.subtract(BigDecimal.ONE);
-        
+    public TreeMap<BigDecimal, Bid> getSearchTree() {
+        return searchTree;
     }
 
-    public Bid getBidWithUtility(BigDecimal util) {
-        Pair<BigDecimal, BigDecimal> closestValue = new Pair<BigDecimal,BigDecimal>(BigDecimal.ONE, BigDecimal.TEN);
-        BigDecimal closestUtil = this.bidBinarySearch(util, 
-                this.sortedUtilKeys, 0, this.sortedUtilKeys.size()-1, closestValue);
-        // System.out.println("CLOSEST UTILITY");
-        // System.out.println(closestUtil);
-        return this.bidsHash.get(closestUtil).get(0);
+    public void setSearchTree(TreeMap<BigDecimal, Bid> searchTree) {
+        this.searchTree = searchTree;
     }
 
     public ImmutableList<Bid> getGoodBids() {
